@@ -7,924 +7,620 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
-
 <style>
-  :root {
-    --bg: #0d0f14;
-    --card: #161923;
-    --card2: #1e2433;
-    --border: #2a3147;
-    --accent: #3b82f6;
-    --accent2: #6366f1;
-    --green: #10b981;
-    --yellow: #f59e0b;
-    --red: #ef4444;
-    --orange: #f97316;
-    --text: #f1f5f9;
-    --muted: #8892a4;
-    --gold: #fbbf24;
-  }
+:root {
+  --bg: #080b12;
+  --surface: #10141f;
+  --surface2: #171d2e;
+  --border: #1e2840;
+  --accent: #3d7fff;
+  --accent2: #5b5ef4;
+  --green: #0fba73;
+  --yellow: #f5a623;
+  --red: #f04040;
+  --text: #eaf0ff;
+  --sub: #5e6e8a;
+  --gold: #f7c948;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; }
+body {
+  font-family:'Cairo',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+/* ── LOADER ─────────────────────────────── */
+#loader {
+  position:fixed; inset:0; z-index:999;
+  background:var(--bg);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:18px; transition:opacity .4s ease;
+}
+#loader.out { opacity:0; pointer-events:none; }
+.loader-logo {
+  width:76px; height:76px; border-radius:22px;
+  background:linear-gradient(135deg,#3d7fff,#5b5ef4);
+  display:flex; align-items:center; justify-content:center;
+  font-size:32px;
+  box-shadow:0 0 50px rgba(61,127,255,.45);
+  animation:logopulse 1.8s ease-in-out infinite;
+}
+@keyframes logopulse {
+  0%,100%{box-shadow:0 0 30px rgba(61,127,255,.4)}
+  50%{box-shadow:0 0 70px rgba(61,127,255,.75)}
+}
+.loader-title { font-size:22px; font-weight:900; letter-spacing:-.5px; }
+.loader-sub { font-size:12px; color:var(--sub); }
+.loader-bar {
+  width:100px; height:2px;
+  background:var(--border); border-radius:2px; overflow:hidden;
+}
+.loader-fill {
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  animation:fillbar 1.4s ease forwards;
+}
+@keyframes fillbar { to { width:100%; } }
 
-  body {
-    font-family: 'Cairo', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+/* ── TOP BAR ──────────────────────────── */
+.topbar {
+  position:sticky; top:0; z-index:50;
+  background:rgba(8,11,18,.88); backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--border);
+  padding:12px 16px;
+  display:flex; align-items:center; gap:10px;
+}
+.topbar-icon {
+  width:34px; height:34px; border-radius:10px; flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+}
+.topbar-info { flex:1; min-width:0; }
+.topbar-name {
+  font-size:14px; font-weight:800;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.topbar-type { font-size:11px; color:var(--sub); }
+.topbar-badge {
+  font-size:10px; font-weight:700; padding:3px 9px;
+  border-radius:20px; flex-shrink:0;
+}
+.badge-cust { background:rgba(15,186,115,.12); color:var(--green); border:1px solid rgba(15,186,115,.25); }
+.badge-rep { background:rgba(61,127,255,.12); color:var(--accent); border:1px solid rgba(61,127,255,.25); }
 
-  /* ========== SPLASH ========== */
-  #splash {
-    position: fixed; inset: 0; z-index: 999;
-    background: linear-gradient(135deg, #0d0f14 0%, #111827 50%, #0d0f14 100%);
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    transition: opacity .5s ease, transform .5s ease;
-  }
-  #splash.hide { opacity: 0; transform: scale(1.05); pointer-events: none; }
-  .splash-logo {
-    width: 90px; height: 90px; border-radius: 24px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 38px; margin-bottom: 20px;
-    box-shadow: 0 0 60px rgba(99,102,241,.4);
-    animation: pulse-logo 2s ease-in-out infinite;
-  }
-  @keyframes pulse-logo {
-    0%,100% { box-shadow: 0 0 40px rgba(99,102,241,.4); }
-    50% { box-shadow: 0 0 80px rgba(99,102,241,.7); }
-  }
-  .splash-title { font-size: 28px; font-weight: 900; letter-spacing: -1px; }
-  .splash-sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
-  .splash-bar {
-    width: 120px; height: 3px; background: var(--border);
-    border-radius: 2px; margin-top: 40px; overflow: hidden;
-  }
-  .splash-bar-fill {
-    height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent2));
-    border-radius: 2px; transition: width .1s linear;
-    animation: load-bar 1.8s ease forwards;
-  }
-  @keyframes load-bar { to { width: 100%; } }
+/* ── RING HERO ────────────────────────── */
+.ring-section {
+  padding:20px 16px 12px;
+  display:flex; align-items:center; gap:18px;
+  background:linear-gradient(180deg,rgba(61,127,255,.06) 0%, transparent 100%);
+  border-bottom:1px solid var(--border);
+}
+.ring-wrap { position:relative; display:inline-flex; flex-shrink:0; }
+.ring-svg { transform:rotate(-90deg); }
+.ring-track { fill:none; stroke:var(--border); stroke-width:9; }
+.ring-fill { fill:none; stroke-width:9; stroke-linecap:round; transition:stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1); }
+.ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.ring-pct { font-size:26px; font-weight:900; line-height:1; }
+.ring-lbl { font-size:9px; color:var(--sub); margin-top:1px; }
+.ring-stats { flex:1; display:flex; flex-direction:column; gap:9px; }
+.rstat { }
+.rstat-row { display:flex; justify-content:space-between; margin-bottom:5px; }
+.rstat-label { font-size:11px; color:var(--sub); }
+.rstat-val { font-size:11px; font-weight:700; }
+.rstat-bar { height:5px; background:var(--border); border-radius:3px; overflow:hidden; }
+.rstat-fill { height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(.4,0,.2,1); }
 
-  /* ========== HEADER ========== */
-  .header {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(13,15,20,.85); backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
-    padding: 14px 18px; display: flex; align-items: center; gap: 12px;
-  }
-  .back-btn {
-    width: 36px; height: 36px; border-radius: 10px;
-    background: var(--card2); border: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 16px; transition: all .2s;
-    flex-shrink: 0;
-  }
-  .back-btn:active { transform: scale(.92); }
-  .header-title { font-size: 16px; font-weight: 700; flex: 1; }
-  .header-badge {
-    font-size: 11px; background: rgba(59,130,246,.15);
-    border: 1px solid rgba(59,130,246,.3);
-    color: var(--accent); padding: 3px 10px; border-radius: 20px;
-  }
+/* ── NUMBERS GRID ────────────────────── */
+.nums-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:8px; padding:14px 16px 10px;
+}
+.num-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:14px; padding:13px 12px;
+}
+.num-card-lbl { font-size:10px; color:var(--sub); }
+.num-card-val { font-size:19px; font-weight:900; margin-top:3px; line-height:1; }
+.num-card-sub { font-size:9px; color:var(--sub); margin-top:3px; }
 
-  /* ========== SCREENS ========== */
-  .screen { display: none; animation: slide-in .3s ease; }
-  .screen.active { display: block; }
-  @keyframes slide-in {
-    from { opacity: 0; transform: translateX(-20px); }
-    to { opacity: 1; transform: translateX(0); }
-  }
+/* ── TABS ────────────────────────────── */
+.tabs-wrap {
+  display:flex; gap:6px; padding:6px 16px 10px;
+  overflow-x:auto; -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.tabs-wrap::-webkit-scrollbar { display:none; }
+.tab {
+  flex-shrink:0; font-size:12px; font-weight:700;
+  padding:7px 14px; border-radius:20px;
+  background:var(--surface); border:1px solid var(--border);
+  cursor:pointer; transition:all .2s; color:var(--sub);
+}
+.tab.active {
+  background:rgba(61,127,255,.12);
+  border-color:var(--accent); color:var(--accent);
+}
+.tab:active { transform:scale(.95); }
 
-  /* ========== HOME ========== */
-  .welcome-section {
-    padding: 28px 18px 20px;
-    background: linear-gradient(180deg, rgba(59,130,246,.08) 0%, transparent 100%);
-    border-bottom: 1px solid var(--border);
-  }
-  .welcome-greeting { font-size: 13px; color: var(--muted); }
-  .welcome-name { font-size: 24px; font-weight: 900; margin-top: 4px; }
-  .welcome-name span { color: var(--accent); }
+/* ── TAB PANELS ──────────────────────── */
+.panel { display:none; padding:0 16px 90px; }
+.panel.active { display:block; }
 
-  .quick-stats {
-    display: grid; grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px; padding: 16px 18px;
-  }
-  .qs-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 14px; padding: 14px 10px; text-align: center;
-  }
-  .qs-icon { font-size: 22px; margin-bottom: 4px; }
-  .qs-val { font-size: 17px; font-weight: 800; }
-  .qs-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
+/* Offer cards */
+.offer-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:14px; padding:14px; margin-bottom:8px;
+  position:relative; overflow:hidden;
+}
+.offer-live {
+  position:absolute; top:12px; left:12px;
+  font-size:9px; font-weight:800; padding:3px 8px;
+  border-radius:20px;
+  background:rgba(247,201,72,.12); color:var(--gold);
+  border:1px solid rgba(247,201,72,.3);
+}
+.offer-name { font-size:14px; font-weight:800; margin:20px 0 10px 0; }
+.offer-chips { display:flex; gap:6px; flex-wrap:wrap; }
+.chip {
+  font-size:10px; padding:4px 9px; border-radius:20px;
+  background:var(--surface2); border:1px solid var(--border);
+}
+.chip-red { background:rgba(240,64,64,.08); border-color:rgba(240,64,64,.2); color:#f87171; }
+.chip-blue { background:rgba(61,127,255,.08); border-color:rgba(61,127,255,.2); color:#7eb4ff; }
 
-  .section-title {
-    font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
-    color: var(--muted); text-transform: uppercase;
-    padding: 14px 18px 8px;
-  }
+/* History */
+.hist-section-title {
+  font-size:10px; font-weight:800; letter-spacing:1.5px;
+  color:var(--sub); text-transform:uppercase;
+  padding:14px 0 8px;
+}
+.hist-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; padding:12px 14px; margin-bottom:7px;
+  display:flex; align-items:center; gap:10px;
+}
+.hist-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.hist-dot.hot { background:var(--green); box-shadow:0 0 8px rgba(15,186,115,.5); }
+.hist-dot.warn { background:var(--yellow); box-shadow:0 0 8px rgba(245,166,35,.5); }
+.hist-name { font-size:13px; font-weight:700; }
+.hist-meta { font-size:10px; color:var(--sub); margin-top:3px; }
 
-  /* ========== CHOICE CARDS ========== */
-  .choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 18px 20px; }
-  .choice-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 18px; padding: 22px 16px;
-    cursor: pointer; text-align: center; transition: all .25s;
-    position: relative; overflow: hidden;
-  }
-  .choice-card::before {
-    content: ''; position: absolute; inset: 0;
-    background: linear-gradient(135deg, transparent, rgba(255,255,255,.03));
-    opacity: 0; transition: opacity .3s;
-  }
-  .choice-card:active { transform: scale(.96); }
-  .choice-card:active::before { opacity: 1; }
-  .choice-card.rep { border-color: rgba(99,102,241,.3); }
-  .choice-card.cust { border-color: rgba(16,185,129,.3); }
-  .choice-icon { font-size: 34px; margin-bottom: 10px; display: block; }
-  .choice-label { font-size: 15px; font-weight: 700; }
-  .choice-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .choice-glow-rep {
-    position: absolute; width: 80px; height: 80px;
-    background: radial-gradient(circle, rgba(99,102,241,.3), transparent);
-    top: -20px; left: -20px; border-radius: 50%;
-  }
-  .choice-glow-cust {
-    position: absolute; width: 80px; height: 80px;
-    background: radial-gradient(circle, rgba(16,185,129,.25), transparent);
-    top: -20px; left: -20px; border-radius: 50%;
-  }
+/* Notes */
+.note-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:14px; padding:14px; margin-bottom:8px;
+}
+.note-top { display:flex; align-items:center; gap:8px; margin-bottom:9px; }
+.note-idx {
+  width:22px; height:22px; border-radius:7px; flex-shrink:0;
+  background:rgba(91,94,244,.18); color:var(--accent2);
+  font-size:11px; font-weight:800;
+  display:flex; align-items:center; justify-content:center;
+}
+.note-meta { font-size:10px; color:var(--sub); }
+.note-text { font-size:13px; line-height:1.8; }
 
-  /* ========== LIST ITEMS ========== */
-  .list-wrap { padding: 0 18px 20px; }
-  .list-item {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 14px; padding: 15px 16px;
-    margin-bottom: 8px; cursor: pointer;
-    display: flex; align-items: center; gap: 12px;
-    transition: all .2s;
-  }
-  .list-item:active { transform: scale(.98); border-color: var(--accent); }
-  .list-item-icon {
-    width: 40px; height: 40px; border-radius: 12px;
-    background: var(--card2); display: flex; align-items: center;
-    justify-content: center; font-size: 18px; flex-shrink: 0;
-  }
-  .list-item-text { flex: 1; }
-  .list-item-name { font-size: 14px; font-weight: 700; }
-  .list-item-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
-  .list-arrow { color: var(--muted); font-size: 14px; }
+/* Customers list (rep view) */
+.cust-row {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; padding:12px 14px; margin-bottom:7px;
+}
+.cust-row-name { font-size:13px; font-weight:700; }
+.cust-row-pct { font-size:11px; margin-top:5px; }
+.cust-prog { height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:6px; }
+.cust-fill { height:100%; border-radius:2px; transition:width 1.2s cubic-bezier(.4,0,.2,1); }
 
-  /* ========== DASHBOARD ========== */
-  .dash-hero {
-    margin: 16px 18px;
-    background: linear-gradient(135deg, var(--card), var(--card2));
-    border: 1px solid var(--border); border-radius: 20px;
-    padding: 20px; position: relative; overflow: hidden;
-  }
-  .dash-hero::after {
-    content: ''; position: absolute;
-    width: 200px; height: 200px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(99,102,241,.12), transparent);
-    top: -60px; left: -60px;
-  }
-  .dash-hero-name { font-size: 13px; color: var(--muted); }
-  .dash-hero-val { font-size: 22px; font-weight: 900; margin-top: 4px; }
-  .dash-hero-type {
-    display: inline-block; font-size: 11px;
-    background: rgba(99,102,241,.15); color: var(--accent2);
-    border: 1px solid rgba(99,102,241,.3);
-    padding: 3px 10px; border-radius: 20px; margin-top: 6px;
-  }
+/* Empty */
+.empty { text-align:center; padding:50px 20px; color:var(--sub); }
+.empty-ico { font-size:44px; margin-bottom:12px; }
+.empty-txt { font-size:13px; }
 
-  /* Achievement Ring */
-  .ring-wrap { display: flex; justify-content: center; margin: 20px 18px; }
-  .ring-container { position: relative; display: inline-flex; align-items: center; justify-content: center; }
-  .ring-svg { transform: rotate(-90deg); }
-  .ring-track { fill: none; stroke: var(--border); stroke-width: 10; }
-  .ring-fill { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1); }
-  .ring-inner { position: absolute; text-align: center; }
-  .ring-pct { font-size: 36px; font-weight: 900; line-height: 1; }
-  .ring-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+/* Scroll padding */
+.pb { height:80px; }
 
-  /* Stat Cards */
-  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 18px 12px; }
-  .stat-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 16px;
-  }
-  .stat-card-label { font-size: 11px; color: var(--muted); }
-  .stat-card-val { font-size: 20px; font-weight: 800; margin-top: 4px; }
-  .stat-card-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+/* Color helpers */
+.c-g { color:var(--green); }
+.c-y { color:var(--yellow); }
+.c-r { color:var(--red); }
+.c-a { color:var(--accent); }
 
-  /* Progress Bar */
-  .prog-section { padding: 0 18px 16px; }
-  .prog-item { margin-bottom: 14px; }
-  .prog-header { display: flex; justify-content: space-between; margin-bottom: 7px; }
-  .prog-label { font-size: 13px; font-weight: 600; }
-  .prog-pct { font-size: 13px; font-weight: 800; }
-  .prog-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
-  .prog-fill {
-    height: 100%; border-radius: 4px;
-    transition: width 1.2s cubic-bezier(.4,0,.2,1);
-  }
-
-  /* Offers */
-  .offer-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 16px; margin-bottom: 10px;
-    position: relative; overflow: hidden;
-  }
-  .offer-badge {
-    position: absolute; top: 12px; left: 12px;
-    background: rgba(251,191,36,.15); color: var(--gold);
-    border: 1px solid rgba(251,191,36,.3);
-    font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 20px;
-  }
-  .offer-name { font-size: 15px; font-weight: 700; margin-bottom: 10px; margin-top: 4px; }
-  .offer-row { display: flex; gap: 8px; flex-wrap: wrap; }
-  .offer-pill {
-    font-size: 11px; padding: 4px 10px; border-radius: 20px;
-    background: var(--card2); border: 1px solid var(--border);
-  }
-  .offer-pill.discount { background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.3); color: #f87171; }
-  .offer-pill.date { background: rgba(99,102,241,.1); border-color: rgba(99,102,241,.2); color: #a5b4fc; }
-
-  /* Notes */
-  .note-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 16px; margin-bottom: 10px;
-  }
-  .note-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .note-num {
-    width: 24px; height: 24px; border-radius: 8px;
-    background: rgba(99,102,241,.2); color: var(--accent2);
-    font-size: 12px; font-weight: 800;
-    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  }
-  .note-date { font-size: 11px; color: var(--muted); }
-  .note-by { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
-  .note-text { font-size: 13px; line-height: 1.7; }
-
-  /* History Items */
-  .hist-item {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 14px; padding: 14px 16px; margin-bottom: 8px;
-  }
-  .hist-name { font-size: 14px; font-weight: 700; }
-  .hist-meta { display: flex; gap: 10px; margin-top: 6px; flex-wrap: wrap; }
-  .hist-pill { font-size: 11px; color: var(--muted); background: var(--card2); padding: 3px 9px; border-radius: 20px; }
-  .hist-pill.hot { background: rgba(239,68,68,.1); color: #f87171; }
-  .hist-pill.warn { background: rgba(245,158,11,.1); color: #fbbf24; }
-
-  /* Tab Bar */
-  .tab-bar {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: rgba(13,15,20,.95); backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border);
-    display: flex; padding: 8px 4px 12px;
-    z-index: 200;
-  }
-  .tab-item {
-    flex: 1; display: flex; flex-direction: column; align-items: center;
-    gap: 4px; padding: 6px; cursor: pointer; border-radius: 12px;
-    transition: all .2s; color: var(--muted); font-size: 10px;
-  }
-  .tab-item.active { color: var(--accent); }
-  .tab-item:active { transform: scale(.92); }
-  .tab-icon { font-size: 20px; }
-
-  /* Loading */
-  .loading-wrap {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; padding: 60px 0;
-  }
-  .spinner {
-    width: 44px; height: 44px; border-radius: 50%;
-    border: 3px solid var(--border);
-    border-top-color: var(--accent); animation: spin .7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-text { font-size: 13px; color: var(--muted); margin-top: 16px; }
-
-  /* Chips */
-  .chips { display: flex; gap: 8px; padding: 0 18px 14px; flex-wrap: wrap; }
-  .chip {
-    font-size: 12px; padding: 6px 14px; border-radius: 20px;
-    background: var(--card); border: 1px solid var(--border);
-    cursor: pointer; transition: all .2s;
-  }
-  .chip.active { background: rgba(59,130,246,.15); border-color: var(--accent); color: var(--accent); }
-  .chip:active { transform: scale(.95); }
-
-  /* Color helpers */
-  .c-green { color: var(--green); }
-  .c-yellow { color: var(--yellow); }
-  .c-red { color: var(--red); }
-  .c-accent { color: var(--accent); }
-
-  .pb-tab { padding-bottom: 80px; }
-
-  /* Empty state */
-  .empty { text-align: center; padding: 50px 30px; color: var(--muted); }
-  .empty-icon { font-size: 48px; margin-bottom: 12px; }
-  .empty-text { font-size: 14px; }
+/* Anim on load */
+.fade-up { opacity:0; transform:translateY(16px); animation:fadeup .4s ease forwards; }
+@keyframes fadeup { to { opacity:1; transform:translateY(0); } }
+.d1{animation-delay:.05s} .d2{animation-delay:.1s}
+.d3{animation-delay:.15s} .d4{animation-delay:.2s}
+.d5{animation-delay:.25s}
 </style>
 </head>
 <body>
 
-<!-- SPLASH -->
-<div id="splash">
-  <div class="splash-logo">🍽️</div>
-  <div class="splash-title">Mighty Foods</div>
-  <div class="splash-sub">لوحة أداء المبيعات</div>
-  <div class="splash-bar"><div class="splash-bar-fill"></div></div>
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">🍽️</div>
+  <div class="loader-title">Mighty Foods</div>
+  <div class="loader-sub">جاري تحميل البيانات...</div>
+  <div class="loader-bar"><div class="loader-fill"></div></div>
 </div>
 
-<!-- HEADER -->
-<div class="header" id="mainHeader">
-  <div class="back-btn" id="backBtn" onclick="goBack()" style="display:none">←</div>
-  <div class="header-title" id="headerTitle">🍽️ Mighty Foods</div>
-  <div class="header-badge" id="headerBadge">Live</div>
-</div>
-
-<!-- ======================== HOME SCREEN ======================== -->
-<div class="screen active" id="screen-home">
-  <div class="welcome-section">
-    <div class="welcome-greeting">أهلاً وسهلاً،</div>
-    <div class="welcome-name">يا <span id="userName">...</span> 👋</div>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-icon" id="tbIcon">🏢</div>
+  <div class="topbar-info">
+    <div class="topbar-name" id="tbName">–</div>
+    <div class="topbar-type" id="tbType">–</div>
   </div>
-
-  <!-- Quick stats -->
-  <div class="quick-stats">
-    <div class="qs-card">
-      <div class="qs-icon">👥</div>
-      <div class="qs-val" id="statReps">–</div>
-      <div class="qs-label">مندوب</div>
-    </div>
-    <div class="qs-card">
-      <div class="qs-icon">🏢</div>
-      <div class="qs-val" id="statCusts">–</div>
-      <div class="qs-label">عميل</div>
-    </div>
-    <div class="qs-card">
-      <div class="qs-icon">📊</div>
-      <div class="qs-val" id="statChannels">–</div>
-      <div class="qs-label">قناة</div>
-    </div>
-  </div>
-
-  <div class="section-title">اختر نوع التقرير</div>
-  <div class="choice-grid">
-    <div class="choice-card rep" onclick="selectType('rep')">
-      <div class="choice-glow-rep"></div>
-      <span class="choice-icon">👤</span>
-      <div class="choice-label">مندوب</div>
-      <div class="choice-sub">أداء فريق المبيعات</div>
-    </div>
-    <div class="choice-card cust" onclick="selectType('cust')">
-      <div class="choice-glow-cust"></div>
-      <span class="choice-icon">🏢</span>
-      <div class="choice-label">عميل</div>
-      <div class="choice-sub">بيانات الفروع</div>
-    </div>
-  </div>
+  <div class="topbar-badge" id="tbBadge">–</div>
 </div>
 
-<!-- ======================== CHANNELS SCREEN ======================== -->
-<div class="screen" id="screen-channels">
-  <div class="section-title" style="padding-top:18px">اختر الـ Channel</div>
-  <div class="list-wrap" id="channelList"></div>
-</div>
-
-<!-- ======================== REPS SCREEN ======================== -->
-<div class="screen" id="screen-reps">
-  <div class="section-title" style="padding-top:18px">اختر المندوب</div>
-  <div class="list-wrap" id="repList"></div>
-</div>
-
-<!-- ======================== ACCOUNTS SCREEN ======================== -->
-<div class="screen" id="screen-accounts">
-  <div class="section-title" style="padding-top:18px">اختر الـ Account</div>
-  <div class="list-wrap" id="accountList"></div>
-</div>
-
-<!-- ======================== CUSTOMERS SCREEN ======================== -->
-<div class="screen" id="screen-customers">
-  <div class="section-title" style="padding-top:18px">اختر العميل</div>
-  <div class="list-wrap" id="customerList"></div>
-</div>
-
-<!-- ======================== DASHBOARD SCREEN ======================== -->
-<div class="screen pb-tab" id="screen-dashboard">
-
-  <!-- Hero -->
-  <div class="dash-hero">
-    <div class="dash-hero-name" id="dashType">مندوب</div>
-    <div class="dash-hero-val" id="dashName">–</div>
-    <div class="dash-hero-type" id="dashChannel">–</div>
-  </div>
-
-  <!-- Achievement Ring -->
+<!-- RING HERO -->
+<div class="ring-section fade-up d1">
   <div class="ring-wrap">
-    <div class="ring-container">
-      <svg class="ring-svg" width="160" height="160" viewBox="0 0 160 160">
-        <circle class="ring-track" cx="80" cy="80" r="70"/>
-        <circle class="ring-fill" id="ringFill" cx="80" cy="80" r="70"
-          stroke-dasharray="440" stroke-dashoffset="440"/>
-      </svg>
-      <div class="ring-inner">
-        <div class="ring-pct" id="ringPct">0%</div>
-        <div class="ring-label">إنجاز التارجت</div>
-      </div>
+    <svg class="ring-svg" width="120" height="120" viewBox="0 0 120 120">
+      <circle class="ring-track" cx="60" cy="60" r="52"/>
+      <circle class="ring-fill" id="ringEl" cx="60" cy="60" r="52"
+        stroke-dasharray="327" stroke-dashoffset="327"/>
+    </svg>
+    <div class="ring-center">
+      <div class="ring-pct" id="ringPct">0%</div>
+      <div class="ring-lbl">إنجاز</div>
     </div>
   </div>
-
-  <!-- Tabs inside dashboard -->
-  <div class="chips">
-    <div class="chip active" onclick="switchTab('perf', this)">📊 الأداء</div>
-    <div class="chip" onclick="switchTab('offers', this)">🔥 العروض</div>
-    <div class="chip" onclick="switchTab('history', this)">📦 التاريخ</div>
-    <div class="chip" onclick="switchTab('notes', this)">📝 الملاحظات</div>
-  </div>
-
-  <!-- PERF TAB -->
-  <div id="tab-perf">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-card-label">🎯 التارجت الشهري</div>
-        <div class="stat-card-val c-accent" id="dsMonthly">–</div>
+  <div class="ring-stats">
+    <div class="rstat">
+      <div class="rstat-row">
+        <span class="rstat-label">التارجت الشهري</span>
+        <span class="rstat-val c-a" id="rsMonthly">–</span>
       </div>
-      <div class="stat-card">
-        <div class="stat-card-label">💰 المحقق (MTD)</div>
-        <div class="stat-card-val" id="dsMTD">–</div>
+      <div class="rstat-bar"><div class="rstat-fill" id="rsBarMonthly" style="width:0%"></div></div>
+    </div>
+    <div class="rstat">
+      <div class="rstat-row">
+        <span class="rstat-label">تارجت الفترة</span>
+        <span class="rstat-val c-y" id="rsTimegone">–</span>
       </div>
-      <div class="stat-card">
-        <div class="stat-card-label">⏳ تارجت الفترة</div>
-        <div class="stat-card-val c-yellow" id="dsTimeGone">–</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-card-label">🚀 إنجاز الفترة</div>
-        <div class="stat-card-val" id="dsTimePct">–</div>
+      <div class="rstat-bar"><div class="rstat-fill" id="rsBarTime" style="width:0%"></div></div>
+    </div>
+    <div class="rstat">
+      <div class="rstat-row">
+        <span class="rstat-label">المحقق (MTD)</span>
+        <span class="rstat-val" id="rsMTD">–</span>
       </div>
     </div>
-    <div class="prog-section">
-      <div class="prog-item">
-        <div class="prog-header">
-          <span class="prog-label">إنجاز التارجت الشهري</span>
-          <span class="prog-pct" id="progMonthlyPct">0%</span>
-        </div>
-        <div class="prog-bar">
-          <div class="prog-fill" id="progMonthlyBar" style="width:0%"></div>
-        </div>
-      </div>
-      <div class="prog-item">
-        <div class="prog-header">
-          <span class="prog-label">إنجاز تارجت الفترة</span>
-          <span class="prog-pct" id="progTimePct">0%</span>
-        </div>
-        <div class="prog-bar">
-          <div class="prog-fill" id="progTimeBar" style="width:0%"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- OFFERS TAB -->
-  <div id="tab-offers" style="display:none; padding: 0 18px 16px;">
-    <div id="offersList"></div>
-  </div>
-
-  <!-- HISTORY TAB -->
-  <div id="tab-history" style="display:none; padding: 0 18px 16px;">
-    <div id="histList"></div>
-  </div>
-
-  <!-- NOTES TAB -->
-  <div id="tab-notes" style="display:none; padding: 0 18px 16px;">
-    <div id="notesList"></div>
   </div>
 </div>
 
-<!-- TAB BAR -->
-<div class="tab-bar" id="tabBar" style="display:none">
-  <div class="tab-item active" onclick="navTab('home')">
-    <span class="tab-icon">🏠</span><span>الرئيسية</span>
+<!-- NUMBERS -->
+<div class="nums-grid fade-up d2">
+  <div class="num-card">
+    <div class="num-card-lbl">📈 إنجاز الشهر</div>
+    <div class="num-card-val" id="ncMonthPct">–</div>
   </div>
-  <div class="tab-item" onclick="navTab('dashboard')">
-    <span class="tab-icon">📊</span><span>التقرير</span>
+  <div class="num-card">
+    <div class="num-card-lbl">🚀 إنجاز الفترة</div>
+    <div class="num-card-val" id="ncTimePct">–</div>
   </div>
+  <div class="num-card">
+    <div class="num-card-lbl">🔥 الأصناف المتوقفة</div>
+    <div class="num-card-val c-y" id="ncStopped">–</div>
+  </div>
+  <div class="num-card">
+    <div class="num-card-lbl">🎁 عروض شغالة</div>
+    <div class="num-card-val c-g" id="ncOffers">–</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrap fade-up d3">
+  <div class="tab active" onclick="openTab('perf',this)">📊 الأداء</div>
+  <div class="tab" onclick="openTab('offers',this)">🎁 العروض</div>
+  <div class="tab" onclick="openTab('history',this)">📦 الأصناف</div>
+  <div class="tab" onclick="openTab('notes',this)">📝 الملاحظات</div>
+</div>
+
+<!-- PANEL: PERF -->
+<div class="panel active fade-up d4" id="panel-perf">
+  <div id="perfContent"></div>
+</div>
+
+<!-- PANEL: OFFERS -->
+<div class="panel" id="panel-offers">
+  <div id="offersContent"></div>
+</div>
+
+<!-- PANEL: HISTORY -->
+<div class="panel" id="panel-history">
+  <div id="histContent"></div>
+</div>
+
+<!-- PANEL: NOTES -->
+<div class="panel" id="panel-notes">
+  <div id="notesContent"></div>
 </div>
 
 <script>
-// ================================================================
-// CONFIG — عدّل الـ URL ده على n8n webhook بتاعك
-// ================================================================
-const N8N_BASE = 'https://YOUR_N8N_HOST/webhook/mightyfoods';
-// Endpoints:
-//   GET  /data      → يرجع كل البيانات من Google Sheet DmCust
-//   GET  /target?id=XXX  → target data للعميل/مندوب
-//   GET  /offers?account=XXX → العروض
-//   GET  /history?id=XXX → history
-//   GET  /notes?id=XXX → notes
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+const fmt = n => Number(n||0).toLocaleString('en-US',{maximumFractionDigits:0});
+const pct = (a,b) => b > 0 ? Math.round((a/b)*100) : 0;
 
-// ================================================================
-// MOCK DATA (للتجربة — استبدل بـ fetch حقيقي)
-// ================================================================
-const MOCK = {
-  channels: ['Modern Trade', 'Traditional Trade', 'Pharmacy', 'Hotel & Restaurant'],
-  reps: {
-    'Modern Trade': ['Ahmed Samy', 'Mohamed Ali', 'Kareem Hassan'],
-    'Traditional Trade': ['Omar Fathy', 'Youssef Tarek'],
-    'Pharmacy': ['Sara Ahmed', 'Nour Ibrahim'],
-    'Hotel & Restaurant': ['Mostafa Kamel']
-  },
-  accounts: {
-    'Modern Trade': ['Carrefour', 'Spinneys', 'Hyper One'],
-    'Traditional Trade': ['فودكو', 'ميني ماركت الأمل', 'سوبر ماركت النيل'],
-    'Pharmacy': ['صيدليات النهدي', 'صيدليات سيف'],
-    'Hotel & Restaurant': ['ماريوت', 'هيلتون']
-  },
-  customers: {
-    'Carrefour': ['فرع المعادي', 'فرع مدينة نصر', 'فرع الشيخ زايد'],
-    'Spinneys': ['فرع الزمالك', 'فرع التجمع'],
-    'Hyper One': ['فرع الشيخ زايد'],
-    'فودكو': ['فرع وسط البلد', 'فرع المهندسين'],
-    'ميني ماركت الأمل': ['الفرع الرئيسي'],
-    'سوبر ماركت النيل': ['فرع الجيزة'],
-    'صيدليات النهدي': ['فرع مصر الجديدة', 'فرع الدقي'],
-    'صيدليات سيف': ['فرع المدينة'],
-    'ماريوت': ['الفرع الرئيسي'],
-    'هيلتون': ['هيلتون النيل']
-  },
-  repData: (rep) => ({
-    name: rep, type: 'مندوب',
-    monthly: Math.round(500000 + Math.random() * 300000),
-    timeGone: Math.round(400000 + Math.random() * 200000),
-    mtd: Math.round(250000 + Math.random() * 400000),
-    channel: Object.keys(MOCK.reps).find(ch => MOCK.reps[ch].includes(rep)) || 'General'
-  }),
-  custData: (cust) => ({
-    name: cust, type: 'عميل',
-    monthly: Math.round(80000 + Math.random() * 60000),
-    timeGone: Math.round(60000 + Math.random() * 40000),
-    mtd: Math.round(40000 + Math.random() * 80000),
-    channel: 'Modern Trade'
-  }),
-  offers: [
-    { name: 'شيبس ليز 100جم', barcode: '6221024000015', discount: '15%', before: 12500, after: 10625, until: '31/03/2026' },
-    { name: 'عصير بيبسي 330مل', barcode: '6221024000022', discount: '10%', before: 9800, after: 8820, until: '15/04/2026' },
-    { name: 'شوكولاتة كيت كات', barcode: '6221024000039', discount: '20%', before: 18000, after: 14400, until: '28/03/2026' }
-  ],
-  history: [
-    { name: 'شيبس ليز 100جم', qty: 48, avg: 52, days: 5, type: 'top' },
-    { name: 'عصير بيبسي 330مل', qty: 120, avg: 130, days: 8, type: 'top' },
-    { name: 'كيتو كريمة', qty: 24, avg: 28, days: 45, type: 'stopped' },
-    { name: 'بسكويت ماريا', qty: 36, avg: 40, days: 60, type: 'stopped' }
-  ],
-  notes: [
-    { date: '05/03/2026', by: 'Ahmed Samy', text: 'العميل طلب زيادة تشكيلة المشروبات الغازية في الشهر القادم' },
-    { date: '20/02/2026', by: 'Mohamed Ali', text: 'عندهم مخزن مكتمل من الشيبس — يفضل المتابعة بعد أسبوعين' }
-  ]
-};
-
-// ================================================================
-// STATE
-// ================================================================
-let state = {
-  type: null, // 'rep' | 'cust'
-  channel: null,
-  account: null,
-  currentData: null,
-  history: [],
-  screenHistory: ['home']
-};
-
-let tg = window.Telegram?.WebApp;
-
-// ================================================================
-// INIT
-// ================================================================
-window.addEventListener('load', () => {
-  if (tg) { tg.expand(); tg.ready(); }
-
-  // Splash
-  setTimeout(() => {
-    document.getElementById('splash').classList.add('hide');
-    setTimeout(() => document.getElementById('splash').remove(), 500);
-    loadHome();
-  }, 1900);
-});
-
-function loadHome() {
-  const firstName = tg?.initDataUnsafe?.user?.first_name || 'بطل';
-  document.getElementById('userName').textContent = firstName;
-
-  // Quick stats
-  const allReps = Object.values(MOCK.reps).flat();
-  const allCusts = Object.values(MOCK.customers).flat();
-  document.getElementById('statReps').textContent = allReps.length;
-  document.getElementById('statCusts').textContent = allCusts.length;
-  document.getElementById('statChannels').textContent = MOCK.channels.length;
+function pctColor(p) {
+  if (p >= 90) return 'var(--green)';
+  if (p >= 70) return 'var(--yellow)';
+  return 'var(--red)';
+}
+function pctClass(p) {
+  if (p >= 90) return 'c-g';
+  if (p >= 70) return 'c-y';
+  return 'c-r';
 }
 
-// ================================================================
-// NAVIGATION
-// ================================================================
-function showScreen(id, title, showBack = true) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + id).classList.add('active');
-  document.getElementById('headerTitle').textContent = title;
-  document.getElementById('backBtn').style.display = showBack ? 'flex' : 'none';
-  document.getElementById('tabBar').style.display = id === 'dashboard' ? 'flex' : 'none';
-  if (!showBack) state.screenHistory = ['home'];
-  window.scrollTo(0, 0);
+// ─────────────────────────────────────────────
+// LOAD DATA FROM URL HASH  (#base64json)
+// n8n will build:  index.html#BASE64_JSON
+// ─────────────────────────────────────────────
+function loadData() {
+  let data = null;
+
+  // 1. Try URL hash
+  const hash = location.hash.slice(1);
+  if (hash) {
+    try { data = JSON.parse(atob(hash)); } catch(e){}
+  }
+
+  // 2. Try URL param ?d=
+  if (!data) {
+    const param = new URLSearchParams(location.search).get('d');
+    if (param) {
+      try { data = JSON.parse(atob(param)); } catch(e){}
+    }
+  }
+
+  // 3. Demo/fallback data if nothing passed
+  if (!data) data = getDemoData();
+
+  return data;
 }
 
-function goBack() {
-  state.screenHistory.pop();
-  const prev = state.screenHistory[state.screenHistory.length - 1];
-  const titles = {
-    home: '🍽️ Mighty Foods',
-    channels: 'اختر القناة',
-    reps: 'اختر المندوب',
-    accounts: 'اختر الـ Account',
-    customers: 'اختر العميل'
-  };
-  showScreen(prev, titles[prev] || '🍽️ Mighty Foods', prev !== 'home');
-}
+// ─────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────
+function render(d) {
+  const isRep = d.type === 'rep';
+  const monthlyPct = pct(d.mtd, d.monthly);
+  const timePct    = pct(d.mtd, d.timeGone);
 
-function push(id, title) {
-  state.screenHistory.push(id);
-  showScreen(id, title);
-}
-
-// ================================================================
-// FLOW
-// ================================================================
-function selectType(type) {
-  state.type = type;
-  renderChannels();
-  push('channels', 'اختر القناة');
-}
-
-function renderChannels() {
-  const wrap = document.getElementById('channelList');
-  const icons = ['🛒','🏪','💊','🏨','🏭','📦'];
-  wrap.innerHTML = MOCK.channels.map((ch, i) => `
-    <div class="list-item" onclick="selectChannel('${ch}')">
-      <div class="list-item-icon">${icons[i % icons.length]}</div>
-      <div class="list-item-text">
-        <div class="list-item-name">${ch}</div>
-        <div class="list-item-sub">${countInChannel(ch)} ${state.type === 'rep' ? 'مندوب' : 'حساب'}</div>
-      </div>
-      <div class="list-arrow">←</div>
-    </div>
-  `).join('');
-}
-
-function countInChannel(ch) {
-  return state.type === 'rep'
-    ? (MOCK.reps[ch] || []).length
-    : (MOCK.accounts[ch] || []).length;
-}
-
-function selectChannel(ch) {
-  state.channel = ch;
-  if (state.type === 'rep') renderReps(ch);
-  else renderAccounts(ch);
-}
-
-function renderReps(ch) {
-  push('reps', 'اختر المندوب');
-  const wrap = document.getElementById('repList');
-  const reps = MOCK.reps[ch] || [];
-  wrap.innerHTML = reps.map(r => `
-    <div class="list-item" onclick="selectRep('${r}')">
-      <div class="list-item-icon">👤</div>
-      <div class="list-item-text">
-        <div class="list-item-name">${r}</div>
-        <div class="list-item-sub">مندوب — ${ch}</div>
-      </div>
-      <div class="list-arrow">←</div>
-    </div>
-  `).join('');
-}
-
-function renderAccounts(ch) {
-  push('accounts', 'اختر الـ Account');
-  const wrap = document.getElementById('accountList');
-  const accounts = MOCK.accounts[ch] || [];
-  wrap.innerHTML = accounts.map(a => `
-    <div class="list-item" onclick="selectAccount('${a}')">
-      <div class="list-item-icon">🏢</div>
-      <div class="list-item-text">
-        <div class="list-item-name">${a}</div>
-        <div class="list-item-sub">${(MOCK.customers[a] || []).length} فرع</div>
-      </div>
-      <div class="list-arrow">←</div>
-    </div>
-  `).join('');
-}
-
-function selectAccount(account) {
-  state.account = account;
-  renderCustomers(account);
-}
-
-function renderCustomers(account) {
-  push('customers', 'اختر العميل');
-  const wrap = document.getElementById('customerList');
-  const custs = MOCK.customers[account] || [];
-  wrap.innerHTML = custs.map(c => `
-    <div class="list-item" onclick="selectCustomer('${c}')">
-      <div class="list-item-icon">🏪</div>
-      <div class="list-item-text">
-        <div class="list-item-name">${c}</div>
-        <div class="list-item-sub">${account}</div>
-      </div>
-      <div class="list-arrow">←</div>
-    </div>
-  `).join('');
-}
-
-function selectRep(rep) {
-  state.currentData = MOCK.repData(rep);
-  renderDashboard();
-}
-
-function selectCustomer(cust) {
-  state.currentData = MOCK.custData(cust);
-  renderDashboard();
-}
-
-// ================================================================
-// DASHBOARD
-// ================================================================
-function renderDashboard() {
-  const d = state.currentData;
-  const monthlyPct = Math.round((d.mtd / d.monthly) * 100);
-  const timePct = Math.round((d.mtd / d.timeGone) * 100);
-
-  document.getElementById('dashType').textContent = d.type;
-  document.getElementById('dashName').textContent = d.name;
-  document.getElementById('dashChannel').textContent = '📡 ' + (d.channel || state.channel || '–');
-
-  // Format numbers
-  const fmt = n => n.toLocaleString('en-US');
-  document.getElementById('dsMonthly').textContent = fmt(d.monthly);
-  document.getElementById('dsMTD').textContent = fmt(d.mtd);
-  document.getElementById('dsTimeGone').textContent = fmt(d.timeGone);
-  document.getElementById('dsTimePct').textContent = timePct + '%';
-
-  // Color for MTD
-  const mtdEl = document.getElementById('dsMTD');
-  mtdEl.className = 'stat-card-val ' + pctColor(monthlyPct);
+  // Top bar
+  document.getElementById('tbIcon').textContent = isRep ? '👤' : '🏢';
+  document.getElementById('tbName').textContent = d.name;
+  document.getElementById('tbType').textContent = (isRep ? 'مندوب' : 'عميل') + ' — ' + (d.channel||'');
+  const badge = document.getElementById('tbBadge');
+  badge.textContent = isRep ? 'مندوب' : 'عميل';
+  badge.className = 'topbar-badge ' + (isRep ? 'badge-rep' : 'badge-cust');
 
   // Ring
-  const ringPct = Math.min(monthlyPct, 100);
-  const circumference = 2 * Math.PI * 70; // 440
-  const offset = circumference - (ringPct / 100) * circumference;
-  const ring = document.getElementById('ringFill');
-  ring.style.stroke = pctColorHex(monthlyPct);
-  ring.style.strokeDashoffset = offset;
-  ring.style.filter = `drop-shadow(0 0 6px ${pctColorHex(monthlyPct)}60)`;
+  const circumference = 2 * Math.PI * 52; // ≈ 327
+  const offset = circumference - (Math.min(monthlyPct,100) / 100) * circumference;
+  const ringEl = document.getElementById('ringEl');
+  ringEl.style.stroke = pctColor(monthlyPct);
+  ringEl.style.filter = `drop-shadow(0 0 5px ${pctColor(monthlyPct)}80)`;
+  setTimeout(() => { ringEl.style.strokeDashoffset = offset; }, 200);
 
-  const pctEl = document.getElementById('ringPct');
-  pctEl.textContent = monthlyPct + '%';
-  pctEl.className = 'ring-pct ' + pctColor(monthlyPct);
+  const rpEl = document.getElementById('ringPct');
+  rpEl.textContent = monthlyPct + '%';
+  rpEl.className = 'ring-pct ' + pctClass(monthlyPct);
 
-  // Progress bars
-  renderProgBar('progMonthly', monthlyPct);
-  renderProgBar('progTime', timePct);
+  // Ring stats
+  document.getElementById('rsMonthly').textContent = fmt(d.monthly);
+  document.getElementById('rsTimegone').textContent = fmt(d.timeGone);
+  document.getElementById('rsMTD').className = 'rstat-val ' + pctClass(monthlyPct);
+  document.getElementById('rsMTD').textContent = fmt(d.mtd);
 
-  // Tabs content
-  renderOffers();
-  renderHistory();
-  renderNotes();
+  const barM = document.getElementById('rsBarMonthly');
+  barM.style.background = pctColor(monthlyPct);
+  setTimeout(() => { barM.style.width = Math.min(monthlyPct,100) + '%'; }, 250);
 
-  push('dashboard', '📊 تقرير الأداء');
+  const barT = document.getElementById('rsBarTime');
+  barT.style.background = pctColor(timePct);
+  setTimeout(() => { barT.style.width = Math.min(timePct,100) + '%'; }, 300);
+
+  // Numbers grid
+  const mpEl = document.getElementById('ncMonthPct');
+  mpEl.textContent = monthlyPct + '%';
+  mpEl.className = 'num-card-val ' + pctClass(monthlyPct);
+
+  const tpEl = document.getElementById('ncTimePct');
+  tpEl.textContent = timePct + '%';
+  tpEl.className = 'num-card-val ' + pctClass(timePct);
+
+  const stopped = (d.history||[]).filter(h=>h.type==='stopped').length;
+  document.getElementById('ncStopped').textContent = stopped;
+  document.getElementById('ncOffers').textContent = (d.offers||[]).length;
+
+  // Panels
+  renderPerf(d, isRep, monthlyPct, timePct);
+  renderOffers(d.offers || []);
+  renderHistory(d.history || []);
+  renderNotes(d.notes || []);
 }
 
-function renderProgBar(id, pct) {
-  const capped = Math.min(pct, 100);
-  document.getElementById(id + 'Pct').textContent = pct + '%';
-  document.getElementById(id + 'Pct').className = 'prog-pct ' + pctColor(pct);
-  const bar = document.getElementById(id + 'Bar');
-  bar.style.width = '0%';
-  bar.style.background = pctColorHex(pct);
-  setTimeout(() => { bar.style.width = capped + '%'; }, 100);
+// ── PERF PANEL ──
+function renderPerf(d, isRep, monthlyPct, timePct) {
+  let html = '';
+
+  if (isRep && d.customers && d.customers.length) {
+    // Rep: show per-customer breakdown
+    html += `<div class="hist-section-title">تفاصيل العملاء</div>`;
+    d.customers.forEach(c => {
+      const cp = pct(c.mtd, c.target);
+      html += `
+      <div class="cust-row">
+        <div class="cust-row-name">${c.name}</div>
+        <div class="cust-row-pct ${pctClass(cp)}">
+          هدف: ${fmt(c.target)} &nbsp;|&nbsp; محقق: ${fmt(c.mtd)} &nbsp;|&nbsp; <strong>${cp}%</strong>
+        </div>
+        <div class="cust-prog">
+          <div class="cust-fill" style="width:${Math.min(cp,100)}%;background:${pctColor(cp)}"></div>
+        </div>
+      </div>`;
+    });
+  } else {
+    // Customer: detailed numbers
+    const rows = [
+      ['🎯 التارجت الشهري', fmt(d.monthly), 'c-a'],
+      ['⏳ تارجت الفترة', fmt(d.timeGone), 'c-y'],
+      ['💰 المحقق (MTD)', fmt(d.mtd), pctClass(monthlyPct)],
+      ['📈 إنجاز الشهر', monthlyPct + '%', pctClass(monthlyPct)],
+      ['🚀 إنجاز الفترة', timePct + '%', pctClass(timePct)],
+    ];
+    html += `<div class="hist-section-title" style="padding-top:14px">ملخص الأداء</div>`;
+    rows.forEach(([lbl,val,cls]) => {
+      html += `
+      <div class="cust-row" style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:13px;color:var(--sub)">${lbl}</span>
+        <span style="font-size:15px;font-weight:800" class="${cls}">${val}</span>
+      </div>`;
+    });
+  }
+
+  document.getElementById('perfContent').innerHTML = html;
 }
 
-function pctColor(pct) {
-  if (pct >= 90) return 'c-green';
-  if (pct >= 70) return 'c-yellow';
-  return 'c-red';
-}
-function pctColorHex(pct) {
-  if (pct >= 90) return '#10b981';
-  if (pct >= 70) return '#f59e0b';
-  return '#ef4444';
-}
-
-function renderOffers() {
-  const wrap = document.getElementById('offersList');
-  if (!MOCK.offers.length) {
-    wrap.innerHTML = '<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">لا توجد عروض شغالة حالياً</div></div>';
+// ── OFFERS PANEL ──
+function renderOffers(offers) {
+  if (!offers.length) {
+    document.getElementById('offersContent').innerHTML =
+      `<div class="empty"><div class="empty-ico">📭</div><div class="empty-txt">لا توجد عروض شغالة حالياً</div></div>`;
     return;
   }
-  wrap.innerHTML = MOCK.offers.map(o => `
+  let html = '';
+  offers.forEach(o => {
+    html += `
     <div class="offer-card">
-      <div class="offer-badge">🔥 عرض ساري</div>
-      <div style="height:24px"></div>
+      <div class="offer-live">🔥 ساري</div>
       <div class="offer-name">${o.name}</div>
-      <div class="offer-row">
-        <span class="offer-pill discount">خصم ${o.discount}</span>
-        <span class="offer-pill">قبل: ${o.before.toLocaleString()}</span>
-        <span class="offer-pill">بعد: ${o.after.toLocaleString()}</span>
-        <span class="offer-pill date">⏳ حتى ${o.until}</span>
+      <div class="offer-chips">
+        <span class="chip">${o.barcode}</span>
+        <span class="chip chip-red">خصم ${o.discount}</span>
+        <span class="chip">قبل: ${fmt(o.before)}</span>
+        <span class="chip">بعد: ${fmt(o.after)}</span>
+        <span class="chip chip-blue">⏳ حتى ${o.until}</span>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  });
+  document.getElementById('offersContent').innerHTML = html;
 }
 
-function renderHistory() {
-  const wrap = document.getElementById('histList');
-  const top = MOCK.history.filter(h => h.type === 'top');
-  const stopped = MOCK.history.filter(h => h.type === 'stopped');
-
+// ── HISTORY PANEL ──
+function renderHistory(history) {
+  const top     = history.filter(h => h.type === 'top');
+  const stopped = history.filter(h => h.type === 'stopped');
   let html = '';
+
   if (top.length) {
-    html += '<div class="section-title" style="padding:0 0 8px">🔥 أصناف أساسية</div>';
-    html += top.map(h => `
-      <div class="hist-item">
-        <div class="hist-name">${h.name}</div>
-        <div class="hist-meta">
-          <span class="hist-pill hot">آخر طلب: ${h.qty} وحدة</span>
-          <span class="hist-pill">متوسط: ${h.avg}</span>
-          <span class="hist-pill">منذ ${h.days} يوم</span>
+    html += `<div class="hist-section-title">🔥 أصناف أساسية</div>`;
+    top.forEach(h => {
+      html += `
+      <div class="hist-card">
+        <div class="hist-dot hot"></div>
+        <div style="flex:1">
+          <div class="hist-name">${h.name}</div>
+          <div class="hist-meta">آخر كمية: ${h.qty} | متوسط: ${h.avg} | منذ ${h.days} يوم</div>
         </div>
-      </div>`).join('');
+      </div>`;
+    });
   }
   if (stopped.length) {
-    html += '<div class="section-title" style="padding:14px 0 8px">⚠️ أصناف غائبة (فرص بيع)</div>';
-    html += stopped.map(h => `
-      <div class="hist-item">
-        <div class="hist-name">${h.name}</div>
-        <div class="hist-meta">
-          <span class="hist-pill warn">متوقف منذ ${h.days} يوم</span>
-          <span class="hist-pill">كان: ${h.qty} وحدة</span>
+    html += `<div class="hist-section-title">⚠️ أصناف غائبة — فرص بيع</div>`;
+    stopped.forEach(h => {
+      html += `
+      <div class="hist-card">
+        <div class="hist-dot warn"></div>
+        <div style="flex:1">
+          <div class="hist-name">${h.name}</div>
+          <div class="hist-meta">متوقف منذ ${h.days} يوم | كانت كميته: ${h.qty}</div>
         </div>
-      </div>`).join('');
+      </div>`;
+    });
   }
-  wrap.innerHTML = html || '<div class="empty"><div class="empty-icon">📦</div><div class="empty-text">لا توجد بيانات</div></div>';
+  if (!html) html = `<div class="empty"><div class="empty-ico">📦</div><div class="empty-txt">لا توجد بيانات تاريخية</div></div>`;
+  document.getElementById('histContent').innerHTML = html;
 }
 
-function renderNotes() {
-  const wrap = document.getElementById('notesList');
-  if (!MOCK.notes.length) {
-    wrap.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><div class="empty-text">لا توجد ملاحظات</div></div>';
+// ── NOTES PANEL ──
+function renderNotes(notes) {
+  if (!notes.length) {
+    document.getElementById('notesContent').innerHTML =
+      `<div class="empty"><div class="empty-ico">📝</div><div class="empty-txt">لا توجد ملاحظات مسجلة</div></div>`;
     return;
   }
-  wrap.innerHTML = MOCK.notes.map((n, i) => `
+  let html = '';
+  notes.forEach((n, i) => {
+    html += `
     <div class="note-card">
-      <div class="note-header">
-        <div class="note-num">${i + 1}</div>
-        <div class="note-date">${n.date}</div>
+      <div class="note-top">
+        <div class="note-idx">${i+1}</div>
+        <div class="note-meta">${n.date} — ${n.by}</div>
       </div>
-      <div class="note-by">👤 بواسطة: ${n.by}</div>
       <div class="note-text">${n.text}</div>
-    </div>
-  `).join('');
-}
-
-// ================================================================
-// TABS (inside dashboard)
-// ================================================================
-function switchTab(tab, el) {
-  ['perf','offers','history','notes'].forEach(t => {
-    document.getElementById('tab-' + t).style.display = t === tab ? '' : 'none';
+    </div>`;
   });
-  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
+  document.getElementById('notesContent').innerHTML = html;
 }
 
-// ================================================================
-// BOTTOM NAV
-// ================================================================
-function navTab(tab) {
-  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-  if (tab === 'home') {
-    state.screenHistory = ['home'];
-    showScreen('home', '🍽️ Mighty Foods', false);
-    document.getElementById('tabBar').style.display = 'none';
-  } else if (tab === 'dashboard' && state.currentData) {
-    showScreen('dashboard', '📊 تقرير الأداء');
-  }
+// ─────────────────────────────────────────────
+// TABS
+// ─────────────────────────────────────────────
+function openTab(id, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-' + id).classList.add('active');
 }
+
+// ─────────────────────────────────────────────
+// DEMO DATA (يظهر لو فُتح بدون بيانات)
+// ─────────────────────────────────────────────
+function getDemoData() {
+  return {
+    type: 'cust',
+    name: 'فرع المعادي - Carrefour',
+    channel: 'Modern Trade',
+    monthly: 150000, timeGone: 120000, mtd: 103000,
+    offers: [
+      { name:'شيبس ليز 100جم', barcode:'6221024000015', discount:'15%', before:12500, after:10625, until:'31/03/2026' },
+      { name:'عصير بيبسي 330مل', barcode:'6221024000022', discount:'10%', before:9800, after:8820, until:'15/04/2026' }
+    ],
+    history: [
+      { name:'شيبس ليز 100جم', qty:48, avg:52, days:5, type:'top' },
+      { name:'بيبسي 330مل', qty:120, avg:130, days:3, type:'top' },
+      { name:'كيتو كريمة', qty:24, avg:28, days:52, type:'stopped' },
+      { name:'بسكويت ماريا', qty:36, avg:40, days:67, type:'stopped' }
+    ],
+    notes: [
+      { date:'05/03/2026', by:'Ahmed Samy', text:'العميل طلب زيادة تشكيلة المشروبات في الشهر القادم' },
+      { date:'20/02/2026', by:'Mohamed Ali', text:'مخزن مكتمل من الشيبس — متابعة بعد أسبوعين' }
+    ]
+  };
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+window.addEventListener('load', () => {
+  const tg = window.Telegram?.WebApp;
+  if (tg) { tg.expand(); tg.ready(); }
+
+  setTimeout(() => {
+    const data = loadData();
+    render(data);
+    document.getElementById('loader').classList.add('out');
+    setTimeout(() => document.getElementById('loader').remove(), 500);
+  }, 1200);
+});
 </script>
 </body>
 </html>
