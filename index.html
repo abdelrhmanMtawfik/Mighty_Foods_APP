@@ -368,14 +368,22 @@ function loadData() {
   // 1. Try URL hash
   const hash = location.hash.slice(1);
   if (hash) {
-    try { data = JSON.parse(decodeURIComponent(escape(atob(hash)))); } catch(e){}
+    try {
+      // Buffer.from().toString('base64') in n8n = UTF-8 bytes encoded as base64
+      // Decode: base64 -> Uint8Array -> TextDecoder('utf-8') -> JSON
+      const bytes = Uint8Array.from(atob(hash), c => c.charCodeAt(0));
+      data = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+    } catch(e){}
   }
 
   // 2. Try URL param ?d=
   if (!data) {
     const param = new URLSearchParams(location.search).get('d');
     if (param) {
-      try { data = JSON.parse(decodeURIComponent(escape(atob(param)))); } catch(e){}
+      try {
+        const bytes = Uint8Array.from(atob(param), c => c.charCodeAt(0));
+        data = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+      } catch(e){}
     }
   }
 
