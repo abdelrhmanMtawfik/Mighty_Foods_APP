@@ -362,28 +362,26 @@ function pctClass(p) {
 // LOAD DATA FROM URL HASH  (#base64json)
 // n8n will build:  index.html#BASE64_JSON
 // ─────────────────────────────────────────────
+function decodeB64(str) {
+  // Handles UTF-8 Arabic correctly
+  const bytes = Uint8Array.from(atob(str), c => c.charCodeAt(0));
+  return JSON.parse(new TextDecoder('utf-8').decode(bytes));
+}
+
 function loadData() {
   let data = null;
 
-  // 1. Try URL hash
-  const hash = location.hash.slice(1);
-  if (hash) {
-    try {
-      // Buffer.from().toString('base64') in n8n = UTF-8 bytes encoded as base64
-      // Decode: base64 -> Uint8Array -> TextDecoder('utf-8') -> JSON
-      const bytes = Uint8Array.from(atob(hash), c => c.charCodeAt(0));
-      data = JSON.parse(new TextDecoder('utf-8').decode(bytes));
-    } catch(e){}
+  // 1. Try ?d= param (Telegram strips # but keeps query params)
+  const param = new URLSearchParams(location.search).get('d');
+  if (param) {
+    try { data = decodeB64(param); } catch(e){}
   }
 
-  // 2. Try URL param ?d=
+  // 2. Try URL hash fallback (browser direct)
   if (!data) {
-    const param = new URLSearchParams(location.search).get('d');
-    if (param) {
-      try {
-        const bytes = Uint8Array.from(atob(param), c => c.charCodeAt(0));
-        data = JSON.parse(new TextDecoder('utf-8').decode(bytes));
-      } catch(e){}
+    const hash = location.hash.slice(1);
+    if (hash) {
+      try { data = decodeB64(hash); } catch(e){}
     }
   }
 
