@@ -368,14 +368,14 @@ function loadData() {
   // 1. Try URL hash
   const hash = location.hash.slice(1);
   if (hash) {
-    try { data = JSON.parse(atob(hash)); } catch(e){}
+    try { data = JSON.parse(decodeURIComponent(escape(atob(hash)))); } catch(e){}
   }
 
   // 2. Try URL param ?d=
   if (!data) {
     const param = new URLSearchParams(location.search).get('d');
     if (param) {
-      try { data = JSON.parse(atob(param)); } catch(e){}
+      try { data = JSON.parse(decodeURIComponent(escape(atob(param)))); } catch(e){}
     }
   }
 
