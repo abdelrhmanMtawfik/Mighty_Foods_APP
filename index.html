@@ -215,28 +215,19 @@ body {
 
 /* Zero Sales */
 .zero-card {
-  background:var(--surface); border:1px solid rgba(240,64,64,.25);
-  border-radius:14px; padding:14px; margin-bottom:8px;
-  position:relative; overflow:hidden;
-}
-.zero-card::before {
-  content:''; position:absolute; top:0; right:0;
-  width:3px; height:100%;
-  background:var(--red);
+  background:var(--surface); border:1px solid rgba(240,64,64,.2);
+  border-radius:14px; padding:13px 14px 13px 17px; margin-bottom:8px;
+  border-right:3px solid var(--red);
 }
 .zero-badge {
-  display:inline-block; font-size:9px; font-weight:800;
-  padding:2px 8px; border-radius:20px; margin-bottom:8px;
-  background:rgba(240,64,64,.12); color:var(--red);
-  border:1px solid rgba(240,64,64,.25);
+  font-size:9px; font-weight:800; padding:2px 8px; border-radius:20px;
+  background:rgba(240,64,64,.1); color:var(--red);
+  border:1px solid rgba(240,64,64,.2); display:inline-block; margin-bottom:7px;
 }
-.zero-name { font-size:13px; font-weight:800; margin-bottom:8px; line-height:1.5; }
+.zero-name { font-size:13px; font-weight:800; line-height:1.5; margin-bottom:7px; }
 .zero-chips { display:flex; gap:5px; flex-wrap:wrap; }
-.zero-count {
-  font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;
-  background:rgba(240,64,64,.08); color:#f87171;
-  border:1px solid rgba(240,64,64,.15);
-}
+
+/* Empty */
 .empty { text-align:center; padding:50px 20px; color:var(--sub); }
 .empty-ico { font-size:44px; margin-bottom:12px; }
 .empty-txt { font-size:13px; }
@@ -392,9 +383,25 @@ function pctClass(p) {
 // n8n will build:  index.html#BASE64_JSON
 // ─────────────────────────────────────────────
 function decodeB64(str) {
-  // Handles UTF-8 Arabic correctly
   const bytes = Uint8Array.from(atob(str), c => c.charCodeAt(0));
-  return JSON.parse(new TextDecoder('utf-8').decode(bytes));
+  const raw = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+  // Support compressed keys (t/n/ch/m/tg/mtd/o/h/z/nt/cu)
+  if (raw.t) {
+    return {
+      type:     raw.t,
+      name:     raw.n,
+      channel:  raw.ch || '',
+      monthly:  raw.m,
+      timeGone: raw.tg,
+      mtd:      raw.mtd,
+      offers:   (raw.o||[]).map(x=>({name:x.n,barcode:x.b,discount:x.d,before:x.bf,after:x.af,until:x.u})),
+      history:  (raw.h||[]).map(x=>({name:x.n,qty:x.q,avg:x.a,days:x.d,type:x.t})),
+      zeroSales:(raw.z||[]).map(x=>({skuName:x.n,barcode:x.b,brand:x.br,category:x.c,skuClass:x.cl,stock:x.s})),
+      notes:    (raw.nt||[]).map(x=>({date:x.d,by:x.by,text:x.tx})),
+      customers:(raw.cu||[]).map(x=>({name:x.n,target:x.t,mtd:x.m}))
+    };
+  }
+  return raw;
 }
 
 function loadData() {
@@ -403,14 +410,14 @@ function loadData() {
   // 1. Try ?d= param (Telegram strips # but keeps query params)
   const param = new URLSearchParams(location.search).get('d');
   if (param) {
-    try { data = decodeB64(param); } catch(e){}
+    try { data = decodeB64(param); } catch(e){ console.error('?d= decode failed', e); }
   }
 
   // 2. Try URL hash fallback (browser direct)
   if (!data) {
     const hash = location.hash.slice(1);
     if (hash) {
-      try { data = decodeB64(hash); } catch(e){}
+      try { data = decodeB64(hash); } catch(e){ console.error('# decode failed', e); }
     }
   }
 
@@ -588,24 +595,20 @@ function renderHistory(history) {
 
 // ── ZERO SALES PANEL ──
 function renderZero(items) {
-  if (!items.length) {
+  if (!items || !items.length) {
     document.getElementById('zeroContent').innerHTML =
       `<div class="empty"><div class="empty-ico">✅</div><div class="empty-txt">لا توجد أصناف Zero Sales</div></div>`;
     return;
   }
-
-  // Group by category
   const byCat = {};
   items.forEach(item => {
     const cat = item.category || 'أخرى';
     if (!byCat[cat]) byCat[cat] = [];
     byCat[cat].push(item);
   });
-
-  let html = `<div style="padding:10px 0 6px;font-size:11px;color:var(--sub)">
+  let html = `<div style="padding:12px 0 6px;font-size:11px;color:var(--sub)">
     إجمالي الأصناف الغائبة: <strong style="color:var(--red)">${items.length} صنف</strong>
   </div>`;
-
   Object.entries(byCat).forEach(([cat, skus]) => {
     html += `<div class="hist-section-title">📂 ${cat} — ${skus.length} صنف</div>`;
     skus.forEach(s => {
@@ -622,7 +625,6 @@ function renderZero(items) {
       </div>`;
     });
   });
-
   document.getElementById('zeroContent').innerHTML = html;
 }
 
@@ -700,4 +702,3 @@ window.addEventListener('load', () => {
 </script>
 </body>
 </html>
-
