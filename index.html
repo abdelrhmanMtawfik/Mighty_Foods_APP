@@ -213,22 +213,31 @@ body {
 .cust-prog { height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:6px; }
 .cust-fill { height:100%; border-radius:2px; transition:width 1.2s cubic-bezier(.4,0,.2,1); }
 
-/* Zero Sales */
-.zero-card {
-  background:var(--surface); border:1px solid rgba(240,64,64,.2);
-  border-radius:14px; padding:13px 14px 13px 17px; margin-bottom:8px;
-  border-right:3px solid var(--red);
-}
-.zero-badge {
-  font-size:9px; font-weight:800; padding:2px 8px; border-radius:20px;
-  background:rgba(240,64,64,.1); color:var(--red);
-  border:1px solid rgba(240,64,64,.2); display:inline-block; margin-bottom:7px;
-}
-.zero-name { font-size:13px; font-weight:800; line-height:1.5; margin-bottom:7px; }
-.zero-chips { display:flex; gap:5px; flex-wrap:wrap; }
-
 /* Empty */
 .empty { text-align:center; padding:50px 20px; color:var(--sub); }
+
+/* ── ZERO SALES ─────────────────────────────── */
+.zero-group-title {
+  font-size:11px; font-weight:800; color:var(--sub);
+  letter-spacing:.06em; text-transform:uppercase;
+  padding:18px 0 8px; border-bottom:1px solid var(--border);
+  margin-bottom:8px;
+}
+.zero-card {
+  background:var(--surface);
+  border:1px solid rgba(240,64,64,.18);
+  border-right:3px solid var(--red);
+  border-radius:12px; padding:11px 14px; margin-bottom:7px;
+}
+.zero-name { font-size:12.5px; font-weight:700; line-height:1.5; margin-bottom:6px; }
+.zero-chips { display:flex; gap:4px; flex-wrap:wrap; }
+.chip-red { background:rgba(240,64,64,.12)!important; color:var(--red)!important; border-color:rgba(240,64,64,.25)!important; }
+.zero-summary {
+  background:rgba(240,64,64,.07); border:1px solid rgba(240,64,64,.15);
+  border-radius:10px; padding:10px 14px; margin-bottom:14px;
+  font-size:12px; color:var(--sub); display:flex; align-items:center; gap:8px;
+}
+.zero-summary strong { color:var(--red); font-size:16px; }
 .empty-ico { font-size:44px; margin-bottom:12px; }
 .empty-txt { font-size:13px; }
 
@@ -352,7 +361,9 @@ body {
 
 <!-- PANEL: ZERO SALES -->
 <div class="panel" id="panel-zero">
-  <div id="zeroContent"></div>
+  <div id="zeroContent">
+    <div class="empty"><div class="empty-ico">⏳</div><div class="empty-txt">اضغط التاب لتحميل البيانات</div></div>
+  </div>
 </div>
 
 <!-- PANEL: NOTES -->
@@ -385,20 +396,21 @@ function pctClass(p) {
 function decodeB64(str) {
   const bytes = Uint8Array.from(atob(str), c => c.charCodeAt(0));
   const raw = JSON.parse(new TextDecoder('utf-8').decode(bytes));
-  // Support compressed keys (t/n/ch/m/tg/mtd/o/h/z/nt/cu)
-  if (raw.t) {
+  // Support compressed keys
+  if (raw.t !== undefined) {
     return {
-      type:     raw.t,
-      name:     raw.n,
-      channel:  raw.ch || '',
-      monthly:  raw.m,
-      timeGone: raw.tg,
-      mtd:      raw.mtd,
-      offers:   (raw.o||[]).map(x=>({name:x.n,barcode:x.b,discount:x.d,before:x.bf,after:x.af,until:x.u})),
-      history:  (raw.h||[]).map(x=>({name:x.n,qty:x.q,avg:x.a,days:x.d,type:x.t})),
-      zeroSales:(raw.z||[]).map(x=>({skuName:x.n,barcode:x.b,brand:x.br,category:x.c,skuClass:x.cl,stock:x.s})),
+      type:      raw.t,
+      name:      raw.n  || '',
+      channel:   raw.ch || '',
+      monthly:   raw.m  || 0,
+      timeGone:  raw.tg || 0,
+      mtd:       raw.mtd|| 0,
+      webhookUrl:raw.wh || '',
+      offers:   (raw.o ||[]).map(x=>({name:x.n,barcode:x.b,discount:x.d,before:x.bf,after:x.af,until:x.u})),
+      history:  (raw.h ||[]).map(x=>({name:x.n,qty:x.q,avg:x.a,days:x.d,type:x.t})),
+      zeroSales:(raw.z ||[]).map(x=>({skuName:x.n,barcode:x.b,brand:x.br,category:x.c,skuClass:x.cl,stock:x.s})),
       notes:    (raw.nt||[]).map(x=>({date:x.d,by:x.by,text:x.tx})),
-      customers:(raw.cu||[]).map(x=>({name:x.n,target:x.t,mtd:x.m}))
+      customers:(raw.cu||[]).map(x=>({name:x.n,target:x.tg,mtd:x.m}))
     };
   }
   return raw;
@@ -406,30 +418,21 @@ function decodeB64(str) {
 
 function loadData() {
   let data = null;
-
-  // 1. Try ?d= param (Telegram strips # but keeps query params)
   const param = new URLSearchParams(location.search).get('d');
-  if (param) {
-    try { data = decodeB64(param); } catch(e){ console.error('?d= decode failed', e); }
-  }
-
-  // 2. Try URL hash fallback (browser direct)
+  if (param) { try { data = decodeB64(param); } catch(e){ console.error('?d= fail', e); } }
   if (!data) {
     const hash = location.hash.slice(1);
-    if (hash) {
-      try { data = decodeB64(hash); } catch(e){ console.error('# decode failed', e); }
-    }
+    if (hash) { try { data = decodeB64(hash); } catch(e){ console.error('# fail', e); } }
   }
-
-  // 3. Demo/fallback data if nothing passed
   if (!data) data = getDemoData();
-
   return data;
 }
 
 // ─────────────────────────────────────────────
 // RENDER
 // ─────────────────────────────────────────────
+let appData = null; // global — used by openTab for lazy loading
+
 function render(d) {
   const isRep = d.type === 'rep';
   const monthlyPct = pct(d.mtd, d.monthly);
@@ -486,8 +489,11 @@ function render(d) {
   renderPerf(d, isRep, monthlyPct, timePct);
   renderOffers(d.offers || []);
   renderHistory(d.history || []);
-  renderZero(d.zeroSales || []);
   renderNotes(d.notes || []);
+  // Zero Sales: if already in payload render now, otherwise lazy-load via webhook
+  if (d.zeroSales && d.zeroSales.length > 0) {
+    renderZero(d.zeroSales);
+  }
 }
 
 // ── PERF PANEL ──
@@ -593,41 +599,6 @@ function renderHistory(history) {
   document.getElementById('histContent').innerHTML = html;
 }
 
-// ── ZERO SALES PANEL ──
-function renderZero(items) {
-  if (!items || !items.length) {
-    document.getElementById('zeroContent').innerHTML =
-      `<div class="empty"><div class="empty-ico">✅</div><div class="empty-txt">لا توجد أصناف Zero Sales</div></div>`;
-    return;
-  }
-  const byCat = {};
-  items.forEach(item => {
-    const cat = item.category || 'أخرى';
-    if (!byCat[cat]) byCat[cat] = [];
-    byCat[cat].push(item);
-  });
-  let html = `<div style="padding:12px 0 6px;font-size:11px;color:var(--sub)">
-    إجمالي الأصناف الغائبة: <strong style="color:var(--red)">${items.length} صنف</strong>
-  </div>`;
-  Object.entries(byCat).forEach(([cat, skus]) => {
-    html += `<div class="hist-section-title">📂 ${cat} — ${skus.length} صنف</div>`;
-    skus.forEach(s => {
-      html += `
-      <div class="zero-card">
-        <div class="zero-badge">🚨 Zero Sales</div>
-        <div class="zero-name">${s.skuName}</div>
-        <div class="zero-chips">
-          <span class="chip">${s.barcode}</span>
-          <span class="chip" style="color:var(--sub)">${s.brand}</span>
-          <span class="chip" style="color:var(--sub)">${s.skuClass}</span>
-          ${s.stock > 0 ? `<span class="chip chip-red">مخزون: ${s.stock}</span>` : ''}
-        </div>
-      </div>`;
-    });
-  });
-  document.getElementById('zeroContent').innerHTML = html;
-}
-
 // ── NOTES PANEL ──
 function renderNotes(notes) {
   if (!notes.length) {
@@ -649,6 +620,73 @@ function renderNotes(notes) {
   document.getElementById('notesContent').innerHTML = html;
 }
 
+// ── ZERO SALES PANEL ──
+let zeroLoaded = false;
+
+function renderZero(items) {
+  zeroLoaded = true;
+  if (!items || !items.length) {
+    document.getElementById('zeroContent').innerHTML =
+      `<div class="empty"><div class="empty-ico">✅</div><div class="empty-txt">لا توجد أصناف Zero Sales لهذا العميل</div></div>`;
+    return;
+  }
+  const byCat = {};
+  items.forEach(item => {
+    const cat = item.category || item.c || 'أخرى';
+    if (!byCat[cat]) byCat[cat] = [];
+    byCat[cat].push(item);
+  });
+  let html = `<div class="zero-summary">🚨 <strong>${items.length}</strong> صنف غائب عن هذا العميل</div>`;
+  Object.entries(byCat).forEach(([cat, skus]) => {
+    html += `<div class="zero-group-title">📂 ${cat} — ${skus.length} صنف</div>`;
+    skus.forEach(s => {
+      const name     = s.skuName || s.n || '';
+      const barcode  = s.barcode || s.b || '';
+      const brand    = s.brand   || s.br|| '';
+      const skuClass = s.skuClass|| s.cl|| '';
+      const stock    = s.stock   || s.s || 0;
+      html += `
+      <div class="zero-card">
+        <div class="zero-name">${name}</div>
+        <div class="zero-chips">
+          ${barcode  ? `<span class="chip">${barcode}</span>` : ''}
+          ${brand    ? `<span class="chip" style="color:var(--sub)">${brand}</span>` : ''}
+          ${skuClass ? `<span class="chip" style="color:var(--sub)">${skuClass}</span>` : ''}
+          ${stock > 0? `<span class="chip chip-red">مخزون: ${stock}</span>` : ''}
+        </div>
+      </div>`;
+    });
+  });
+  document.getElementById('zeroContent').innerHTML = html;
+}
+
+async function fetchZeroSales() {
+  if (!appData) return;
+  const webhookUrl = appData.webhookUrl || '';
+  const custName   = appData.name || '';
+
+  if (!webhookUrl) {
+    document.getElementById('zeroContent').innerHTML =
+      `<div class="empty"><div class="empty-ico">⚙️</div><div class="empty-txt">لم يتم ضبط رابط الـ Webhook بعد</div></div>`;
+    return;
+  }
+
+  document.getElementById('zeroContent').innerHTML =
+    `<div class="empty"><div class="empty-ico" style="animation:logopulse 1.2s infinite">⏳</div><div class="empty-txt">جاري تحميل Zero Sales...</div></div>`;
+
+  try {
+    const url = webhookUrl + '?cust=' + encodeURIComponent(custName);
+    const res  = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    const items = Array.isArray(json) ? json : (json.zeroSales || json.data || []);
+    renderZero(items);
+  } catch(e) {
+    document.getElementById('zeroContent').innerHTML =
+      `<div class="empty"><div class="empty-ico">❌</div><div class="empty-txt">فشل التحميل — تأكد من اتصال الـ Webhook<br><small style="font-size:10px;opacity:.5">${e.message}</small></div></div>`;
+  }
+}
+
 // ─────────────────────────────────────────────
 // TABS
 // ─────────────────────────────────────────────
@@ -657,6 +695,10 @@ function openTab(id, el) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('panel-' + id).classList.add('active');
+  // Lazy-load zero sales when tab first opened
+  if (id === 'zero' && !zeroLoaded) {
+    fetchZeroSales();
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -693,8 +735,8 @@ window.addEventListener('load', () => {
   if (tg) { tg.expand(); tg.ready(); }
 
   setTimeout(() => {
-    const data = loadData();
-    render(data);
+    appData = loadData();
+    render(appData);
     document.getElementById('loader').classList.add('out');
     setTimeout(() => document.getElementById('loader').remove(), 500);
   }, 1200);
