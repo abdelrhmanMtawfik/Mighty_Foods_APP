@@ -213,7 +213,30 @@ body {
 .cust-prog { height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:6px; }
 .cust-fill { height:100%; border-radius:2px; transition:width 1.2s cubic-bezier(.4,0,.2,1); }
 
-/* Empty */
+/* Zero Sales */
+.zero-card {
+  background:var(--surface); border:1px solid rgba(240,64,64,.25);
+  border-radius:14px; padding:14px; margin-bottom:8px;
+  position:relative; overflow:hidden;
+}
+.zero-card::before {
+  content:''; position:absolute; top:0; right:0;
+  width:3px; height:100%;
+  background:var(--red);
+}
+.zero-badge {
+  display:inline-block; font-size:9px; font-weight:800;
+  padding:2px 8px; border-radius:20px; margin-bottom:8px;
+  background:rgba(240,64,64,.12); color:var(--red);
+  border:1px solid rgba(240,64,64,.25);
+}
+.zero-name { font-size:13px; font-weight:800; margin-bottom:8px; line-height:1.5; }
+.zero-chips { display:flex; gap:5px; flex-wrap:wrap; }
+.zero-count {
+  font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;
+  background:rgba(240,64,64,.08); color:#f87171;
+  border:1px solid rgba(240,64,64,.15);
+}
 .empty { text-align:center; padding:50px 20px; color:var(--sub); }
 .empty-ico { font-size:44px; margin-bottom:12px; }
 .empty-txt { font-size:13px; }
@@ -317,6 +340,7 @@ body {
   <div class="tab active" onclick="openTab('perf',this)">📊 الأداء</div>
   <div class="tab" onclick="openTab('offers',this)">🎁 العروض</div>
   <div class="tab" onclick="openTab('history',this)">📦 الأصناف</div>
+  <div class="tab" onclick="openTab('zero',this)">🚨 Zero Sales</div>
   <div class="tab" onclick="openTab('notes',this)">📝 الملاحظات</div>
 </div>
 
@@ -333,6 +357,11 @@ body {
 <!-- PANEL: HISTORY -->
 <div class="panel" id="panel-history">
   <div id="histContent"></div>
+</div>
+
+<!-- PANEL: ZERO SALES -->
+<div class="panel" id="panel-zero">
+  <div id="zeroContent"></div>
 </div>
 
 <!-- PANEL: NOTES -->
@@ -450,6 +479,7 @@ function render(d) {
   renderPerf(d, isRep, monthlyPct, timePct);
   renderOffers(d.offers || []);
   renderHistory(d.history || []);
+  renderZero(d.zeroSales || []);
   renderNotes(d.notes || []);
 }
 
@@ -556,6 +586,46 @@ function renderHistory(history) {
   document.getElementById('histContent').innerHTML = html;
 }
 
+// ── ZERO SALES PANEL ──
+function renderZero(items) {
+  if (!items.length) {
+    document.getElementById('zeroContent').innerHTML =
+      `<div class="empty"><div class="empty-ico">✅</div><div class="empty-txt">لا توجد أصناف Zero Sales</div></div>`;
+    return;
+  }
+
+  // Group by category
+  const byCat = {};
+  items.forEach(item => {
+    const cat = item.category || 'أخرى';
+    if (!byCat[cat]) byCat[cat] = [];
+    byCat[cat].push(item);
+  });
+
+  let html = `<div style="padding:10px 0 6px;font-size:11px;color:var(--sub)">
+    إجمالي الأصناف الغائبة: <strong style="color:var(--red)">${items.length} صنف</strong>
+  </div>`;
+
+  Object.entries(byCat).forEach(([cat, skus]) => {
+    html += `<div class="hist-section-title">📂 ${cat} — ${skus.length} صنف</div>`;
+    skus.forEach(s => {
+      html += `
+      <div class="zero-card">
+        <div class="zero-badge">🚨 Zero Sales</div>
+        <div class="zero-name">${s.skuName}</div>
+        <div class="zero-chips">
+          <span class="chip">${s.barcode}</span>
+          <span class="chip" style="color:var(--sub)">${s.brand}</span>
+          <span class="chip" style="color:var(--sub)">${s.skuClass}</span>
+          ${s.stock > 0 ? `<span class="chip chip-red">مخزون: ${s.stock}</span>` : ''}
+        </div>
+      </div>`;
+    });
+  });
+
+  document.getElementById('zeroContent').innerHTML = html;
+}
+
 // ── NOTES PANEL ──
 function renderNotes(notes) {
   if (!notes.length) {
@@ -630,3 +700,4 @@ window.addEventListener('load', () => {
 </script>
 </body>
 </html>
+
