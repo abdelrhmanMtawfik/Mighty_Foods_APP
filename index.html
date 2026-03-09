@@ -244,108 +244,100 @@ body {
 /* Scroll padding */
 .pb { height:80px; }
 
-/* ── SHELF AUDIT ────────────────────────────── */
-.audit-hero {
-  background:linear-gradient(135deg,rgba(61,127,255,.1),rgba(91,94,244,.08));
-  border:1px solid rgba(61,127,255,.2); border-radius:16px;
-  padding:18px; margin-bottom:14px; text-align:center;
+/* ── MSL ORDER TAB ──────────────────────────── */
+.msl-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 0 10px;
 }
-.audit-hero-title { font-size:15px; font-weight:900; margin-bottom:5px; }
-.audit-hero-sub { font-size:11px; color:var(--sub); line-height:1.7; }
-
-.audit-upload-zone {
-  border:2px dashed rgba(61,127,255,.35); border-radius:16px;
-  padding:30px 20px; text-align:center; cursor:pointer; transition:all .2s;
-  background:rgba(61,127,255,.04); margin-bottom:12px; overflow:hidden;
-}
-.audit-upload-zone:active { transform:scale(.98); }
-.audit-upload-zone.has-image { border-style:solid; border-color:rgba(61,127,255,.5); padding:0; }
-.audit-upload-zone img { width:100%; border-radius:14px; display:block; max-height:240px; object-fit:cover; }
-.audit-upload-icon { font-size:40px; margin-bottom:8px; }
-.audit-upload-label { font-size:14px; font-weight:800; color:var(--accent); }
-.audit-upload-hint { font-size:11px; color:var(--sub); margin-top:4px; }
-#auditFileInput { display:none; }
-
-.audit-webhook-row {
-  display:flex; gap:8px; align-items:center; margin-bottom:12px;
+.msl-header-title { font-size:13px; font-weight:900; }
+.msl-header-count {
+  font-size:10px; color:var(--sub);
   background:var(--surface); border:1px solid var(--border);
-  border-radius:12px; padding:10px 12px;
+  border-radius:20px; padding:3px 10px;
 }
-.audit-webhook-label { font-size:10px; color:var(--sub); white-space:nowrap; }
-.audit-webhook-input {
-  flex:1; background:transparent; border:none; outline:none;
-  font-family:'Cairo',sans-serif; font-size:11px; color:var(--text);
-  direction:ltr; text-align:left;
+.msl-search-wrap {
+  position:relative; margin-bottom:12px;
 }
-.audit-webhook-save {
-  font-size:10px; font-weight:800; color:var(--green);
-  background:none; border:none; cursor:pointer; padding:2px 6px;
-  font-family:'Cairo',sans-serif;
+.msl-search {
+  width:100%; background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; padding:10px 14px 10px 36px;
+  font-family:'Cairo',sans-serif; font-size:12px; color:var(--text);
+  outline:none; transition:border-color .2s;
 }
+.msl-search:focus { border-color:var(--accent); }
+.msl-search-icon {
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  font-size:14px; pointer-events:none;
+}
+.msl-filter-row {
+  display:flex; gap:6px; margin-bottom:12px;
+  overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+}
+.msl-filter-row::-webkit-scrollbar { display:none; }
+.msl-chip {
+  flex-shrink:0; font-size:11px; font-weight:700; padding:5px 12px;
+  border-radius:20px; cursor:pointer; transition:all .2s;
+  background:var(--surface); border:1px solid var(--border); color:var(--sub);
+}
+.msl-chip.active {
+  background:rgba(61,127,255,.12); border-color:var(--accent); color:var(--accent);
+}
+.msl-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; margin-bottom:12px; }
+.msl-table {
+  width:100%; border-collapse:collapse; min-width:460px;
+}
+.msl-table thead th {
+  font-size:9px; font-weight:800; color:var(--sub); text-transform:uppercase;
+  letter-spacing:.8px; padding:8px 10px; text-align:right;
+  border-bottom:2px solid var(--border); background:var(--surface); position:sticky; top:0;
+}
+.msl-table thead th.num-col { text-align:center; }
+.msl-table tbody tr {
+  border-bottom:1px solid rgba(30,40,64,.6); transition:background .15s;
+}
+.msl-table tbody tr:active { background:rgba(61,127,255,.05); }
+.msl-table tbody tr.has-qty { background:rgba(15,186,115,.04); border-bottom-color:rgba(15,186,115,.15); }
+.msl-table td {
+  padding:9px 10px; font-size:11.5px; vertical-align:middle;
+}
+.msl-td-name { font-weight:700; line-height:1.35; max-width:160px; }
+.msl-td-bar { font-size:10px; color:var(--sub); font-family:monospace; direction:ltr; }
+.msl-td-stock { text-align:center; font-weight:700; font-size:12px; }
+.msl-td-stock.ok  { color:var(--green); }
+.msl-td-stock.low { color:var(--yellow); }
+.msl-td-stock.out { color:var(--red); }
+.msl-td-case { text-align:center; font-size:11px; color:var(--sub); }
+.msl-qty-input {
+  width:60px; background:var(--surface2); border:1.5px solid var(--border);
+  border-radius:8px; padding:5px 4px; text-align:center;
+  font-family:'Cairo',sans-serif; font-size:13px; font-weight:800; color:var(--text);
+  outline:none; -moz-appearance:textfield;
+}
+.msl-qty-input::-webkit-inner-spin-button,
+.msl-qty-input::-webkit-outer-spin-button { -webkit-appearance:none; }
+.msl-qty-input:focus { border-color:var(--accent); background:rgba(61,127,255,.06); }
+.msl-qty-input.filled { border-color:var(--green); background:rgba(15,186,115,.08); color:var(--green); }
 
-.audit-btn {
-  width:100%; padding:14px; border:none; border-radius:14px; cursor:pointer;
-  font-family:'Cairo',sans-serif; font-size:15px; font-weight:800;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  color:#fff; transition:all .2s; margin-bottom:14px;
-  box-shadow:0 4px 24px rgba(61,127,255,.35);
+.msl-summary-bar {
+  position:sticky; bottom:80px; z-index:10;
+  background:rgba(8,11,18,.92); backdrop-filter:blur(12px);
+  border:1px solid var(--border); border-radius:14px;
+  padding:12px 14px; margin-bottom:10px;
+  display:flex; align-items:center; gap:10px;
 }
-.audit-btn:disabled { opacity:.4; cursor:not-allowed; box-shadow:none; }
-.audit-btn:not(:disabled):active { transform:scale(.97); }
-
-.audit-thinking { display:none; text-align:center; padding:28px 20px; }
-.audit-thinking.show { display:block; }
-.audit-thinking-ring {
-  width:50px; height:50px; border-radius:50%;
-  border:3px solid var(--border); border-top-color:var(--accent);
-  animation:auditSpin 1s linear infinite; margin:0 auto 12px;
+.msl-summary-info { flex:1; }
+.msl-summary-label { font-size:10px; color:var(--sub); }
+.msl-summary-val { font-size:16px; font-weight:900; color:var(--green); }
+.msl-export-btn {
+  flex-shrink:0; padding:10px 16px; border:none; border-radius:10px;
+  background:linear-gradient(135deg,var(--green),#0d9e62);
+  color:#fff; font-family:'Cairo',sans-serif; font-size:12px; font-weight:800;
+  cursor:pointer; transition:all .2s; box-shadow:0 3px 14px rgba(15,186,115,.3);
 }
-@keyframes auditSpin { to { transform:rotate(360deg); } }
-.audit-thinking-txt { font-size:12px; color:var(--sub); line-height:1.8; }
-
-.audit-results { display:none; }
-.audit-results.show { display:block; }
-
-.audit-counts-row { display:flex; gap:10px; margin-bottom:12px; }
-.audit-count-card {
-  flex:1; border-radius:12px; padding:12px 10px; text-align:center;
-}
-.audit-count-card.red { background:rgba(240,64,64,.08); border:1px solid rgba(240,64,64,.2); }
-.audit-count-card.green { background:rgba(15,186,115,.08); border:1px solid rgba(15,186,115,.2); }
-.audit-count-num { font-size:26px; font-weight:900; line-height:1; }
-.audit-count-num.red { color:var(--red); }
-.audit-count-num.green { color:var(--green); }
-.audit-count-lbl { font-size:10px; color:var(--sub); margin-top:3px; }
-
-.audit-section-title {
-  font-size:10px; font-weight:800; color:var(--sub);
-  letter-spacing:1.2px; text-transform:uppercase;
-  padding:14px 0 8px; border-bottom:1px solid var(--border); margin-bottom:8px;
-}
-.audit-sku-card {
-  background:var(--surface); border-radius:12px;
-  padding:10px 13px; margin-bottom:7px; display:flex; align-items:center; gap:10px;
-}
-.audit-sku-card.missing-card { border:1px solid rgba(240,64,64,.22); border-right:3px solid var(--red); }
-.audit-sku-card.found-card   { border:1px solid rgba(15,186,115,.18); border-right:3px solid var(--green); }
-.audit-sku-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-.audit-sku-dot.red   { background:var(--red);   box-shadow:0 0 7px rgba(240,64,64,.5); }
-.audit-sku-dot.green { background:var(--green); box-shadow:0 0 7px rgba(15,186,115,.5); }
-.audit-sku-name { font-size:12.5px; font-weight:700; line-height:1.4; }
-.audit-sku-meta { font-size:10px; color:var(--sub); margin-top:2px; }
-
-.audit-note-box {
-  background:rgba(247,201,72,.06); border:1px solid rgba(247,201,72,.2);
-  border-radius:12px; padding:11px 13px; margin-top:12px;
-  font-size:12px; color:var(--gold); line-height:1.8;
-}
-.audit-reset-btn {
-  width:100%; padding:12px; border-radius:12px; cursor:pointer;
-  font-family:'Cairo',sans-serif; font-size:13px; font-weight:700;
-  background:var(--surface); border:1px solid var(--border);
-  color:var(--sub); margin-top:12px; transition:all .2s;
-}
-.audit-reset-btn:active { transform:scale(.97); }
+.msl-export-btn:active { transform:scale(.96); }
+.msl-export-btn:disabled { opacity:.4; cursor:not-allowed; box-shadow:none; }
+.msl-empty { text-align:center; padding:40px 20px; color:var(--sub); }
+.msl-empty-ico { font-size:40px; margin-bottom:10px; }
 
 /* Color helpers */
 .c-g { color:var(--green); }
@@ -444,7 +436,7 @@ body {
   <div class="tab" onclick="openTab('offers',this)">🎁 العروض</div>
   <div class="tab" onclick="openTab('history',this)">📦 الأصناف</div>
   <div class="tab" onclick="openTab('zero',this)">🚨 Zero Sales</div>
-  <div class="tab" onclick="openTab('audit',this)">📸 مراجعة الرف</div>
+  <div class="tab" onclick="openTab('msl',this)">🛒 طلب MSL</div>
   <div class="tab" onclick="openTab('notes',this)">📝 الملاحظات</div>
 </div>
 
@@ -470,67 +462,56 @@ body {
   </div>
 </div>
 
-<!-- PANEL: SHELF AUDIT -->
-<div class="panel" id="panel-audit">
-  <div style="padding-top:14px">
-
-    <div class="audit-hero">
-      <div class="audit-hero-title">📸 مراجعة الرف بالذكاء الاصطناعي</div>
-      <div class="audit-hero-sub">صوّر الرف — Claude هيحدد أي SKU غايب من اللي المفروض يكون موجود</div>
-    </div>
-
-    <!-- API Key input (stored locally, never in code) -->
-    <div class="audit-webhook-row" id="auditKeyRow">
-      <span class="audit-webhook-label">🔑 API Key</span>
-      <input class="audit-webhook-input" id="auditApiKeyInput" type="password"
-        placeholder="sk-ant-api03-..." dir="ltr" autocomplete="off"/>
-      <button class="audit-webhook-save" onclick="saveApiKey()">حفظ ✓</button>
-    </div>
-    <div id="auditKeyStatus" style="font-size:10px;color:var(--sub);margin-bottom:10px;padding:0 4px;display:none">
-      ✅ API Key محفوظ — <span style="cursor:pointer;color:var(--red)" onclick="clearApiKey()">مسح</span>
-    </div>
-
-    <!-- Upload Zone -->
-    <div class="audit-upload-zone" id="auditUploadZone"
-         onclick="document.getElementById('auditFileInput').click()">
-      <div id="auditUploadPlaceholder">
-        <div class="audit-upload-icon">📷</div>
-        <div class="audit-upload-label">اضغط لالتقاط صورة أو رفعها</div>
-        <div class="audit-upload-hint">الصورة بتتبعت لـ n8n → Claude Vision</div>
-      </div>
-      <img id="auditPreview" style="display:none" alt="shelf"/>
-    </div>
-    <input type="file" id="auditFileInput" accept="image/*" capture="environment"/>
-
-    <button class="audit-btn" id="auditScanBtn" disabled onclick="runShelfAudit()">
-      🔍 افحص الرف دلوقتي
-    </button>
-
-    <!-- Thinking -->
-    <div class="audit-thinking" id="auditThinking">
-      <div class="audit-thinking-ring"></div>
-      <div class="audit-thinking-txt">الصورة بتتبعت لـ n8n...<br>Claude Vision بيحلل الأصناف</div>
-    </div>
-
-    <!-- Results -->
-    <div class="audit-results" id="auditResults">
-      <div class="audit-counts-row">
-        <div class="audit-count-card red">
-          <div class="audit-count-num red" id="auditMissingCount">0</div>
-          <div class="audit-count-lbl">🚨 غايب من الرف</div>
-        </div>
-        <div class="audit-count-card green">
-          <div class="audit-count-num green" id="auditFoundCount">0</div>
-          <div class="audit-count-lbl">✅ موجود على الرف</div>
-        </div>
-      </div>
-      <div id="auditMissingList"></div>
-      <div id="auditFoundList"></div>
-      <div class="audit-note-box" id="auditNoteBox" style="display:none"></div>
-      <button class="audit-reset-btn" onclick="resetAudit()">🔄 صوّر رف تاني</button>
-    </div>
-
+<!-- PANEL: MSL ORDER -->
+<div class="panel" id="panel-msl">
+  <div class="msl-header">
+    <div class="msl-header-title">🛒 قائمة MSL — طلب الأصناف المؤهلة</div>
+    <div class="msl-header-count" id="mslCount">0 صنف</div>
   </div>
+
+  <!-- Search -->
+  <div class="msl-search-wrap">
+    <span class="msl-search-icon">🔍</span>
+    <input class="msl-search" id="mslSearch" type="text"
+      placeholder="ابحث عن صنف أو باركود..." oninput="renderMslTable()"/>
+  </div>
+
+  <!-- Category filters -->
+  <div class="msl-filter-row" id="mslFilters"></div>
+
+  <!-- Table -->
+  <div class="msl-table-wrap">
+    <table class="msl-table">
+      <thead>
+        <tr>
+          <th>اسم الصنف</th>
+          <th>باركود</th>
+          <th class="num-col">مخزون</th>
+          <th class="num-col">كارتون</th>
+          <th class="num-col">الكمية</th>
+        </tr>
+      </thead>
+      <tbody id="mslTbody"></tbody>
+    </table>
+  </div>
+
+  <!-- Empty state -->
+  <div class="msl-empty" id="mslEmpty" style="display:none">
+    <div class="msl-empty-ico">📦</div>
+    <div>لا توجد أصناف MSL لهذا العميل</div>
+  </div>
+
+  <!-- Summary + Export -->
+  <div class="msl-summary-bar" id="mslSummaryBar">
+    <div class="msl-summary-info">
+      <div class="msl-summary-label">إجمالي الأصناف المطلوبة</div>
+      <div class="msl-summary-val"><span id="mslOrderedCount">0</span> صنف</div>
+    </div>
+    <button class="msl-export-btn" id="mslExportBtn" onclick="exportMslOrder()" disabled>
+      ⬇️ تصدير الطلب
+    </button>
+  </div>
+
   <div class="pb"></div>
 </div>
 
@@ -577,6 +558,7 @@ function decodeB64(str) {
       offers:   (raw.o ||[]).map(x=>({name:x.n,barcode:x.b,discount:x.d,before:x.bf,after:x.af,until:x.u})),
       history:  (raw.h ||[]).map(x=>({name:x.n,qty:x.q,avg:x.a,days:x.d,type:x.t})),
       zeroSales:(raw.z ||[]).map(x=>({skuName:x.n,barcode:x.b,brand:x.br,category:x.c,skuClass:x.cl,stock:x.s})),
+      msl:      (raw.ms||[]).map(x=>({skuName:x.n,barcode:x.b,stockQty:x.s,caseQty:x.c,category:x.cat||''})),
       notes:    (raw.nt||[]).map(x=>({date:x.d,by:x.by,text:x.tx})),
       customers:(raw.cu||[]).map(x=>({name:x.n,target:x.tg,mtd:x.m}))
     };
@@ -856,257 +838,160 @@ async function fetchZeroSales() {
 }
 
 // ─────────────────────────────────────────────
-// SHELF AUDIT — Claude Vision (direct API, key in localStorage)
+// MSL ORDER TAB
 // ─────────────────────────────────────────────
-const AUDIT_KEY_STORAGE = 'mf_claude_api_key';
+let mslActiveCategory = 'الكل';
+let mslQtyMap = {}; // barcode → qty
 
-function getApiKey() {
-  return localStorage.getItem(AUDIT_KEY_STORAGE) || '';
+function initMslTab() {
+  const items = (appData && appData.msl) ? appData.msl : [];
+  document.getElementById('mslCount').textContent = items.length + ' صنف';
+
+  if (!items.length) {
+    document.getElementById('mslEmpty').style.display = 'block';
+    document.getElementById('mslTbody').innerHTML = '';
+    document.getElementById('mslSummaryBar').style.display = 'none';
+    return;
+  }
+  document.getElementById('mslEmpty').style.display = 'none';
+  document.getElementById('mslSummaryBar').style.display = 'flex';
+
+  // Build category filter chips
+  const cats = ['الكل', ...new Set(items.map(i => i.category).filter(Boolean))];
+  const filtersEl = document.getElementById('mslFilters');
+  filtersEl.innerHTML = cats.map(c =>
+    `<div class="msl-chip ${c===mslActiveCategory?'active':''}" onclick="setMslCategory('${c}')">${c}</div>`
+  ).join('');
+
+  renderMslTable();
 }
 
-function saveApiKey() {
-  const val = document.getElementById('auditApiKeyInput').value.trim();
-  if (!val.startsWith('sk-ant-')) { alert('مش شايف API key صحيح — لازم يبدأ بـ sk-ant-'); return; }
-  localStorage.setItem(AUDIT_KEY_STORAGE, val);
-  document.getElementById('auditApiKeyInput').value = '';
-  updateKeyUI();
-  const btn = document.querySelector('.audit-webhook-save');
-  btn.textContent = '✅ تم';
-  setTimeout(() => { btn.textContent = 'حفظ ✓'; }, 1800);
-}
-
-function clearApiKey() {
-  if (!confirm('هتمسح الـ API Key؟')) return;
-  localStorage.removeItem(AUDIT_KEY_STORAGE);
-  updateKeyUI();
-}
-
-function updateKeyUI() {
-  const has = !!getApiKey();
-  document.getElementById('auditKeyRow').style.display    = has ? 'none'  : 'flex';
-  document.getElementById('auditKeyStatus').style.display = has ? 'block' : 'none';
-}
-
-// Load key status on tab open
-function initAuditTab() {
-  updateKeyUI();
-}
-let auditImageMime   = 'image/jpeg';
-
-const AUDIT_WEBHOOK_KEY = 'mf_audit_webhook';
-
-function saveWebhookUrl() {
-  const url = document.getElementById('auditWebhookInput').value.trim();
-  if (!url) return;
-  localStorage.setItem(AUDIT_WEBHOOK_KEY, url);
-  const btn = document.querySelector('.audit-webhook-save');
-  btn.textContent = '✅ تم';
-  setTimeout(() => { btn.textContent = 'حفظ ✓'; }, 1800);
-}
-
-function loadWebhookUrl() {
-  const saved = localStorage.getItem(AUDIT_WEBHOOK_KEY);
-  if (saved) document.getElementById('auditWebhookInput').value = saved;
-}
-
-document.getElementById('auditFileInput').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  auditImageMime = file.type || 'image/jpeg';
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    auditImageBase64 = ev.target.result.split(',')[1];
-    const preview     = document.getElementById('auditPreview');
-    const placeholder = document.getElementById('auditUploadPlaceholder');
-    const zone        = document.getElementById('auditUploadZone');
-    preview.src = ev.target.result;
-    preview.style.display = 'block';
-    placeholder.style.display = 'none';
-    zone.classList.add('has-image');
-    document.getElementById('auditScanBtn').disabled = false;
-    document.getElementById('auditResults').classList.remove('show');
-    document.getElementById('auditThinking').classList.remove('show');
-  };
-  reader.readAsDataURL(file);
-});
-
-function getTargetSkus() {
-  if (!appData) return [];
-  const skus = [];
-  (appData.history || []).forEach(h => {
-    if (h.name) skus.push({ name: h.name, barcode: '', category: 'أصناف أساسية' });
+function setMslCategory(cat) {
+  mslActiveCategory = cat;
+  document.querySelectorAll('.msl-chip').forEach(el => {
+    el.classList.toggle('active', el.textContent === cat);
   });
-  (appData.zeroSales || []).forEach(s => {
-    const name = s.skuName || s.n || '';
-    if (name) skus.push({ name, barcode: s.barcode || s.b || '', category: s.category || s.c || 'أخرى' });
-  });
-  const seen = new Set();
-  return skus.filter(s => { if (seen.has(s.name)) return false; seen.add(s.name); return true; });
+  renderMslTable();
 }
 
-async function runShelfAudit() {
-  if (!auditImageBase64) return;
+function renderMslTable() {
+  const items  = (appData && appData.msl) ? appData.msl : [];
+  const query  = (document.getElementById('mslSearch').value || '').trim().toLowerCase();
 
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    alert('من فضلك ادخل الـ Claude API Key الأول وحفظه');
+  const filtered = items.filter(item => {
+    const catOk = mslActiveCategory === 'الكل' || item.category === mslActiveCategory;
+    const q     = query ? (
+      (item.skuName || '').toLowerCase().includes(query) ||
+      (item.barcode || '').toLowerCase().includes(query)
+    ) : true;
+    return catOk && q;
+  });
+
+  const tbody = document.getElementById('mslTbody');
+  if (!filtered.length) {
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--sub)">لا توجد نتائج</td></tr>`;
     return;
   }
 
-  const targetSkus = getTargetSkus();
-  if (!targetSkus.length) {
-    alert('لا توجد قائمة SKU. تأكد من وجود بيانات الأصناف في الـ payload.');
-    return;
-  }
+  tbody.innerHTML = filtered.map(item => {
+    const key   = item.barcode || item.skuName;
+    const qty   = mslQtyMap[key] || '';
+    const stock = Number(item.stockQty) || 0;
+    const stockCls = stock === 0 ? 'out' : stock < 10 ? 'low' : 'ok';
+    const stockTxt = stock === 0 ? 'نفذ' : stock;
+    const hasQty = qty > 0;
+    return `<tr class="${hasQty ? 'has-qty' : ''}" data-key="${key}">
+      <td class="msl-td-name">${item.skuName || '–'}</td>
+      <td class="msl-td-bar">${item.barcode || '–'}</td>
+      <td class="msl-td-stock ${stockCls}">${stockTxt}</td>
+      <td class="msl-td-case">${item.caseQty || '–'}</td>
+      <td style="text-align:center">
+        <input class="msl-qty-input ${hasQty ? 'filled' : ''}"
+          type="number" min="0" step="1"
+          value="${qty}"
+          data-key="${key}"
+          oninput="onMslQtyChange(this)"
+          placeholder="0"/>
+      </td>
+    </tr>`;
+  }).join('');
 
-  document.getElementById('auditScanBtn').disabled = true;
-  document.getElementById('auditResults').classList.remove('show');
-  document.getElementById('auditThinking').classList.add('show');
-
-  const skuListText = targetSkus.map((s, i) =>
-    `${i+1}. ${s.name}` +
-    (s.barcode  ? ` (باركود: ${s.barcode})` : '') +
-    (s.category ? ` [${s.category}]`        : '')
-  ).join('\n');
-
-  const systemPrompt = `أنت نظام مراجعة أرفف متخصص لشركة Mighty Foods.
-مهمتك تحليل صورة رف في نقطة بيع وتحديد أي منتجات من قائمة الـ SKU المستهدفة موجودة أو غائبة.
-
-قائمة الـ SKU المستهدفة للعميل "${appData ? appData.name || '' : ''}":
-${skuListText}
-
-قواعد التحليل:
-- راجع كل صنف وحدد إن كان مرئي بوضوح في الصورة أم لا
-- اعتمد على اسم المنتج وشكل العبوة والألوان المميزة
-- لو مش واثق 100% اعتبره غايب
-- ابحث عن الباركود لو ظاهر في الصورة
-
-رد بـ JSON فقط بدون أي نص إضافي أو backticks:
-{
-  "found": ["اسم صنف 1"],
-  "missing": ["اسم صنف 2"],
-  "note": "ملاحظة مختصرة بالعربي"
-}`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': getApiKey(),
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: auditImageMime, data: auditImageBase64 } },
-            { type: 'text', text: 'حلل الصورة وحدد الـ SKUs الموجودة والغايبة من القائمة.' }
-          ]
-        }]
-      })
-    });
-
-    const rawText = await res.text();
-    if (!res.ok) throw new Error(`API error ${res.status}: ${rawText.substring(0, 120)}`);
-
-    const data = JSON.parse(rawText);
-    const text = (data.content || []).map(c => c.text || '').join('');
-    const clean = text.replace(/```json/gi, '').replace(/```/g, '').trim();
-
-    let parsed;
-    try { parsed = JSON.parse(clean); }
-    catch(e) {
-      const match = clean.match(/\{[\s\S]*\}/);
-      if (match) parsed = JSON.parse(match[0]);
-      else throw new Error('Claude response not parseable: ' + clean.substring(0, 150));
-    }
-
-    renderAuditResults(parsed, targetSkus);
-
-  } catch(err) {
-    document.getElementById('auditThinking').classList.remove('show');
-    document.getElementById('auditScanBtn').disabled = false;
-    document.getElementById('auditResults').innerHTML =
-      `<div class="empty"><div class="empty-ico">❌</div>
-       <div class="empty-txt" style="white-space:pre-line">فشل التحليل\n<small style="font-size:10px;opacity:.6">${err.message}</small></div></div>`;
-    document.getElementById('auditResults').classList.add('show');
-  }
+  updateMslSummary();
 }
 
-function renderAuditResults(parsed, targetSkus) {
-  document.getElementById('auditThinking').classList.remove('show');
-
-  const foundNames   = new Set((parsed.found   || []).map(s => s.trim()));
-  const missingNames = new Set((parsed.missing  || []).map(s => s.trim()));
-
-  document.getElementById('auditMissingCount').textContent = missingNames.size;
-  document.getElementById('auditFoundCount').textContent   = foundNames.size;
-
-  // Missing
-  let missingHtml = '';
-  if (missingNames.size) {
-    missingHtml += `<div class="audit-section-title">🚨 غايب من الرف — ${missingNames.size} صنف</div>`;
-    missingNames.forEach(name => {
-      const s = targetSkus.find(x => x.name === name) || {};
-      missingHtml += `
-      <div class="audit-sku-card missing-card">
-        <div class="audit-sku-dot red"></div>
-        <div>
-          <div class="audit-sku-name">${name}</div>
-          ${s.barcode  ? `<div class="audit-sku-meta">باركود: ${s.barcode}</div>` : ''}
-          ${s.category ? `<div class="audit-sku-meta">📂 ${s.category}</div>` : ''}
-        </div>
-      </div>`;
-    });
+function onMslQtyChange(input) {
+  const key = input.dataset.key;
+  const val = parseInt(input.value) || 0;
+  if (val > 0) {
+    mslQtyMap[key] = val;
+    input.classList.add('filled');
+    input.closest('tr').classList.add('has-qty');
+  } else {
+    delete mslQtyMap[key];
+    input.classList.remove('filled');
+    input.closest('tr').classList.remove('has-qty');
   }
-  document.getElementById('auditMissingList').innerHTML = missingHtml;
-
-  // Found
-  let foundHtml = '';
-  if (foundNames.size) {
-    foundHtml += `<div class="audit-section-title">✅ موجود على الرف — ${foundNames.size} صنف</div>`;
-    foundNames.forEach(name => {
-      const s = targetSkus.find(x => x.name === name) || {};
-      foundHtml += `
-      <div class="audit-sku-card found-card">
-        <div class="audit-sku-dot green"></div>
-        <div>
-          <div class="audit-sku-name">${name}</div>
-          ${s.category ? `<div class="audit-sku-meta">📂 ${s.category}</div>` : ''}
-        </div>
-      </div>`;
-    });
-  }
-  document.getElementById('auditFoundList').innerHTML = foundHtml;
-
-  const noteBox = document.getElementById('auditNoteBox');
-  if (parsed.note) { noteBox.textContent = '💡 ' + parsed.note; noteBox.style.display = 'block'; }
-  else { noteBox.style.display = 'none'; }
-
-  document.getElementById('auditScanBtn').disabled = false;
-  document.getElementById('auditResults').classList.add('show');
+  updateMslSummary();
 }
 
-function resetAudit() {
-  auditImageBase64 = null;
-  const preview = document.getElementById('auditPreview');
-  preview.style.display = 'none';
-  preview.src = '';
-  document.getElementById('auditUploadPlaceholder').style.display = 'block';
-  document.getElementById('auditUploadZone').classList.remove('has-image');
-  document.getElementById('auditScanBtn').disabled = true;
-  document.getElementById('auditResults').classList.remove('show');
-  document.getElementById('auditThinking').classList.remove('show');
-  document.getElementById('auditFileInput').value = '';
+function updateMslSummary() {
+  const count = Object.keys(mslQtyMap).length;
+  document.getElementById('mslOrderedCount').textContent = count;
+  document.getElementById('mslExportBtn').disabled = count === 0;
 }
 
-// Load saved webhook on init
-window.addEventListener('load', () => { loadWebhookUrl(); });
+function exportMslOrder() {
+  const items = (appData && appData.msl) ? appData.msl : [];
+  const doorName = (appData && appData.name) ? appData.name : 'MSL_Order';
+
+  // Build rows for ordered items only
+  const ordered = items.filter(item => {
+    const key = item.barcode || item.skuName;
+    return mslQtyMap[key] > 0;
+  }).map(item => {
+    const key = item.barcode || item.skuName;
+    return {
+      'اسم الصنف':  item.skuName  || '',
+      'الباركود':   item.barcode  || '',
+      'المخزون':    item.stockQty || 0,
+      'الكارتون':   item.caseQty  || '',
+      'الكمية المطلوبة': mslQtyMap[key] || 0,
+      'الفئة':      item.category || ''
+    };
+  });
+
+  if (!ordered.length) return;
+
+  // Build CSV
+  const headers = Object.keys(ordered[0]);
+  const csvRows = [
+    // BOM for Excel Arabic support
+    '\uFEFF' + headers.join(','),
+    ...ordered.map(row =>
+      headers.map(h => {
+        const val = String(row[h] || '');
+        // Quote if contains comma or Arabic
+        return val.includes(',') ? `"${val}"` : val;
+      }).join(',')
+    )
+  ];
+
+  // Add summary row
+  csvRows.push('');
+  csvRows.push(`,,,إجمالي الأصناف,${ordered.length}`);
+  csvRows.push(`العميل:,${doorName}`);
+  csvRows.push(`التاريخ:,${new Date().toLocaleDateString('ar-EG')}`);
+
+  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = doorName.replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '_') + '_MSL_Order.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 // ─────────────────────────────────────────────
 // TABS
@@ -1120,7 +1005,7 @@ function openTab(id, el) {
   if (id === 'zero' && !zeroLoaded) {
     fetchZeroSales();
   }
-  if (id === 'audit') initAuditTab();
+  if (id === 'msl') initMslTab();
 }
 
 // ─────────────────────────────────────────────
@@ -1145,6 +1030,15 @@ function getDemoData() {
     notes: [
       { date:'05/03/2026', by:'Ahmed Samy', text:'العميل طلب زيادة تشكيلة المشروبات في الشهر القادم' },
       { date:'20/02/2026', by:'Mohamed Ali', text:'مخزن مكتمل من الشيبس — متابعة بعد أسبوعين' }
+    ],
+    msl: [
+      { skuName:'شيبس ليز 100جم',        barcode:'6221024000015', stockQty:48,  caseQty:24, category:'سناكس' },
+      { skuName:'شيبس ليز 50جم',         barcode:'6221024000016', stockQty:0,   caseQty:24, category:'سناكس' },
+      { skuName:'بيبسي 330مل',           barcode:'6221024000022', stockQty:120, caseQty:12, category:'مشروبات' },
+      { skuName:'بيبسي زيرو 330مل',      barcode:'6221024000023', stockQty:8,   caseQty:12, category:'مشروبات' },
+      { skuName:'شاي مثلج بالخوخ 330مل', barcode:'6221024000031', stockQty:36,  caseQty:12, category:'مشروبات' },
+      { skuName:'كيتو كريمة 200جم',      barcode:'6221024000041', stockQty:0,   caseQty:18, category:'ألبان' },
+      { skuName:'بسكويت ماريا 100جم',    barcode:'6221024000051', stockQty:60,  caseQty:30, category:'بسكويت' }
     ]
   };
 }
