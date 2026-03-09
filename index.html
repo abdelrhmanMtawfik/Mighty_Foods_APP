@@ -940,18 +940,33 @@ async function runShelfAudit() {
         customer: appData ? (appData.name || '') : ''
       })
     });
-    if (!res.ok) throw new Error('Webhook error: ' + res.status);
-    const json = await res.json();
-    // Support both direct response or wrapped
+
+    // Read raw text first — never call .json() blindly
+    const rawText = await res.text();
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status} — ${rawText.substring(0, 120)}`);
+    }
+    if (!rawText || !rawText.trim()) {
+      throw new Error('الـ Webhook رجّع response فاضية.\nتأكد إنك شغّال على /webhook/ مش /webhook-test/\nوإن الـ workflow activated.');
+    }
+
+    let json;
+    try {
+      json = JSON.parse(rawText);
+    } catch(e) {
+      throw new Error('الـ response مش JSON صحيح:\n' + rawText.substring(0, 150));
+    }
+
     const parsed = json.result || json;
     renderAuditResults(parsed, targetSkus);
+
   } catch(err) {
     document.getElementById('auditThinking').classList.remove('show');
     document.getElementById('auditScanBtn').disabled = false;
     document.getElementById('auditResults').innerHTML =
       `<div class="empty"><div class="empty-ico">❌</div>
-       <div class="empty-txt">فشل الاتصال بالـ Webhook<br>
-       <small style="font-size:10px;opacity:.5">${err.message}</small></div></div>`;
+       <div class="empty-txt" style="white-space:pre-line">فشل الاتصال بالـ Webhook\n<small style="font-size:10px;opacity:.6">${err.message}</small></div></div>`;
     document.getElementById('auditResults').classList.add('show');
   }
 }
