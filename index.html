@@ -958,6 +958,8 @@ async function runShelfAudit() {
       throw new Error('الـ response مش JSON صحيح:\n' + rawText.substring(0, 150));
     }
 
+    // n8n may return [{result:{...}}] or {result:{...}} or {found,missing,note}
+    if (Array.isArray(json)) json = json[0];
     const parsed = json.result || json;
     renderAuditResults(parsed, targetSkus);
 
@@ -1098,3 +1100,4 @@ window.addEventListener('load', () => {
 </script>
 </body>
 </html>
+
