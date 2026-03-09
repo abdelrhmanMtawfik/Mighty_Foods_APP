@@ -469,8 +469,14 @@ body {
     <div class="msl-header-count" id="mslCount">0 صنف</div>
   </div>
 
+  <!-- Loading / Error state -->
+  <div id="mslLoading" style="display:none;text-align:center;padding:40px 20px">
+    <div style="width:40px;height:40px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:auditSpin 1s linear infinite;margin:0 auto 12px"></div>
+    <div style="font-size:12px;color:var(--sub)">جاري تحميل قائمة MSL...</div>
+  </div>
+
   <!-- Search -->
-  <div class="msl-search-wrap">
+  <div class="msl-search-wrap" id="mslSearchWrap" style="display:none">
     <span class="msl-search-icon">🔍</span>
     <input class="msl-search" id="mslSearch" type="text"
       placeholder="ابحث عن صنف أو باركود..." oninput="renderMslTable()"/>
@@ -480,7 +486,7 @@ body {
   <div class="msl-filter-row" id="mslFilters"></div>
 
   <!-- Table -->
-  <div class="msl-table-wrap">
+  <div class="msl-table-wrap" id="mslTableWrap" style="display:none">
     <table class="msl-table">
       <thead>
         <tr>
@@ -502,7 +508,7 @@ body {
   </div>
 
   <!-- Summary + Export -->
-  <div class="msl-summary-bar" id="mslSummaryBar">
+  <div class="msl-summary-bar" id="mslSummaryBar" style="display:none">
     <div class="msl-summary-info">
       <div class="msl-summary-label">إجمالي الأصناف المطلوبة</div>
       <div class="msl-summary-val"><span id="mslOrderedCount">0</span> صنف</div>
@@ -841,26 +847,71 @@ async function fetchZeroSales() {
 // MSL ORDER TAB
 // ─────────────────────────────────────────────
 let mslActiveCategory = 'الكل';
-let mslQtyMap = {}; // barcode → qty
+let mslQtyMap  = {};
+let mslLoaded  = false;
 
-function initMslTab() {
-  const items = (appData && appData.msl) ? appData.msl : [];
+async function initMslTab() {
+  if (mslLoaded) return; // already loaded
+
+  // If data already in payload (future optimization), use it
+  if (appData && appData.msl && appData.msl.length > 0) {
+    mslLoaded = true;
+    renderMslData(appData.msl);
+    return;
+  }
+
+  // Fetch from webhook (same base URL as Zero Sales, different endpoint)
+  const webhookBase = (appData && appData.webhookUrl) ? appData.webhookUrl : '';
+  const mslWebhook  = webhookBase.replace('/webhook/zero-sales', '/webhook/msl-products');
+  const custName    = (appData && appData.name) ? appData.name : '';
+
+  if (!mslWebhook || !mslWebhook.startsWith('http')) {
+    showMslError('لم يتم ضبط رابط الـ Webhook بعد');
+    return;
+  }
+
+  document.getElementById('mslLoading').style.display = 'block';
+
+  try {
+    const url = mslWebhook + '?cust=' + encodeURIComponent(custName);
+    const res  = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    const items = Array.isArray(json) ? json : (json.msl || json.data || []);
+    mslLoaded = true;
+    if (appData) appData.msl = items; // cache
+    renderMslData(items);
+  } catch(e) {
+    showMslError('فشل تحميل MSL — ' + e.message);
+  } finally {
+    document.getElementById('mslLoading').style.display = 'none';
+  }
+}
+
+function showMslError(msg) {
+  document.getElementById('mslLoading').style.display = 'none';
+  document.getElementById('mslEmpty').style.display   = 'block';
+  document.getElementById('mslEmpty').innerHTML =
+    `<div class="msl-empty-ico">❌</div><div style="font-size:12px">${msg}</div>`;
+}
+
+function renderMslData(items) {
   document.getElementById('mslCount').textContent = items.length + ' صنف';
 
   if (!items.length) {
     document.getElementById('mslEmpty').style.display = 'block';
-    document.getElementById('mslTbody').innerHTML = '';
-    document.getElementById('mslSummaryBar').style.display = 'none';
     return;
   }
-  document.getElementById('mslEmpty').style.display = 'none';
-  document.getElementById('mslSummaryBar').style.display = 'flex';
 
-  // Build category filter chips
-  const cats = ['الكل', ...new Set(items.map(i => i.category).filter(Boolean))];
+  document.getElementById('mslSearchWrap').style.display  = 'block';
+  document.getElementById('mslTableWrap').style.display   = 'block';
+  document.getElementById('mslSummaryBar').style.display  = 'flex';
+
+  // Build category chips
+  const cats = ['الكل', ...new Set(items.map(i => i.category || i.cat || '').filter(Boolean))];
   const filtersEl = document.getElementById('mslFilters');
   filtersEl.innerHTML = cats.map(c =>
-    `<div class="msl-chip ${c===mslActiveCategory?'active':''}" onclick="setMslCategory('${c}')">${c}</div>`
+    `<div class="msl-chip ${c === mslActiveCategory ? 'active' : ''}" onclick="setMslCategory('${c}')">${c}</div>`
   ).join('');
 
   renderMslTable();
@@ -879,11 +930,11 @@ function renderMslTable() {
   const query  = (document.getElementById('mslSearch').value || '').trim().toLowerCase();
 
   const filtered = items.filter(item => {
-    const catOk = mslActiveCategory === 'الكل' || item.category === mslActiveCategory;
-    const q     = query ? (
-      (item.skuName || '').toLowerCase().includes(query) ||
-      (item.barcode || '').toLowerCase().includes(query)
-    ) : true;
+    const name = item.skuName || item.n || '';
+    const bar  = item.barcode || item.b || '';
+    const cat  = item.category || item.cat || '';
+    const catOk = mslActiveCategory === 'الكل' || cat === mslActiveCategory;
+    const q     = query ? (name.toLowerCase().includes(query) || bar.toLowerCase().includes(query)) : true;
     return catOk && q;
   });
 
@@ -894,24 +945,24 @@ function renderMslTable() {
   }
 
   tbody.innerHTML = filtered.map(item => {
-    const key   = item.barcode || item.skuName;
+    const name  = item.skuName  || item.n  || '';
+    const bar   = item.barcode  || item.b  || '';
+    const stock = Number(item.stockQty || item.s || 0);
+    const caseQ = item.caseQty  || item.c  || '–';
+    const key   = bar || name;
     const qty   = mslQtyMap[key] || '';
-    const stock = Number(item.stockQty) || 0;
     const stockCls = stock === 0 ? 'out' : stock < 10 ? 'low' : 'ok';
     const stockTxt = stock === 0 ? 'نفذ' : stock;
-    const hasQty = qty > 0;
+    const hasQty   = qty > 0;
     return `<tr class="${hasQty ? 'has-qty' : ''}" data-key="${key}">
-      <td class="msl-td-name">${item.skuName || '–'}</td>
-      <td class="msl-td-bar">${item.barcode || '–'}</td>
+      <td class="msl-td-name">${name || '–'}</td>
+      <td class="msl-td-bar">${bar || '–'}</td>
       <td class="msl-td-stock ${stockCls}">${stockTxt}</td>
-      <td class="msl-td-case">${item.caseQty || '–'}</td>
+      <td class="msl-td-case">${caseQ}</td>
       <td style="text-align:center">
         <input class="msl-qty-input ${hasQty ? 'filled' : ''}"
-          type="number" min="0" step="1"
-          value="${qty}"
-          data-key="${key}"
-          oninput="onMslQtyChange(this)"
-          placeholder="0"/>
+          type="number" min="0" step="1" value="${qty}"
+          data-key="${key}" oninput="onMslQtyChange(this)" placeholder="0"/>
       </td>
     </tr>`;
   }).join('');
@@ -946,17 +997,22 @@ function exportMslOrder() {
 
   // Build rows for ordered items only
   const ordered = items.filter(item => {
-    const key = item.barcode || item.skuName;
+    const key = item.barcode || item.b || item.skuName || item.n;
     return mslQtyMap[key] > 0;
   }).map(item => {
-    const key = item.barcode || item.skuName;
+    const name  = item.skuName  || item.n  || '';
+    const bar   = item.barcode  || item.b  || '';
+    const stock = item.stockQty || item.s  || 0;
+    const caseQ = item.caseQty  || item.c  || '';
+    const cat   = item.category || item.cat|| '';
+    const key   = bar || name;
     return {
-      'اسم الصنف':  item.skuName  || '',
-      'الباركود':   item.barcode  || '',
-      'المخزون':    item.stockQty || 0,
-      'الكارتون':   item.caseQty  || '',
+      'اسم الصنف':       name,
+      'الباركود':        bar,
+      'المخزون':         stock,
+      'الكارتون':        caseQ,
       'الكمية المطلوبة': mslQtyMap[key] || 0,
-      'الفئة':      item.category || ''
+      'الفئة':           cat
     };
   });
 
