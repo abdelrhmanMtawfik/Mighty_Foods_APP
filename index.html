@@ -479,12 +479,15 @@ body {
       <div class="audit-hero-sub">صوّر الرف — Claude هيحدد أي SKU غايب من اللي المفروض يكون موجود</div>
     </div>
 
-    <!-- Webhook URL input -->
-    <div class="audit-webhook-row">
-      <span class="audit-webhook-label">🔗 Webhook</span>
-      <input class="audit-webhook-input" id="auditWebhookInput" type="url"
-        placeholder="https://your-n8n.com/webhook/shelf-audit" dir="ltr"/>
-      <button class="audit-webhook-save" onclick="saveWebhookUrl()">حفظ ✓</button>
+    <!-- API Key input (stored locally, never in code) -->
+    <div class="audit-webhook-row" id="auditKeyRow">
+      <span class="audit-webhook-label">🔑 API Key</span>
+      <input class="audit-webhook-input" id="auditApiKeyInput" type="password"
+        placeholder="sk-ant-api03-..." dir="ltr" autocomplete="off"/>
+      <button class="audit-webhook-save" onclick="saveApiKey()">حفظ ✓</button>
+    </div>
+    <div id="auditKeyStatus" style="font-size:10px;color:var(--sub);margin-bottom:10px;padding:0 4px;display:none">
+      ✅ API Key محفوظ — <span style="cursor:pointer;color:var(--red)" onclick="clearApiKey()">مسح</span>
     </div>
 
     <!-- Upload Zone -->
@@ -853,9 +856,41 @@ async function fetchZeroSales() {
 }
 
 // ─────────────────────────────────────────────
-// SHELF AUDIT — via n8n Webhook (API key stays on server)
+// SHELF AUDIT — Claude Vision (direct API, key in localStorage)
 // ─────────────────────────────────────────────
-let auditImageBase64 = null;
+const AUDIT_KEY_STORAGE = 'mf_claude_api_key';
+
+function getApiKey() {
+  return localStorage.getItem(AUDIT_KEY_STORAGE) || '';
+}
+
+function saveApiKey() {
+  const val = document.getElementById('auditApiKeyInput').value.trim();
+  if (!val.startsWith('sk-ant-')) { alert('مش شايف API key صحيح — لازم يبدأ بـ sk-ant-'); return; }
+  localStorage.setItem(AUDIT_KEY_STORAGE, val);
+  document.getElementById('auditApiKeyInput').value = '';
+  updateKeyUI();
+  const btn = document.querySelector('.audit-webhook-save');
+  btn.textContent = '✅ تم';
+  setTimeout(() => { btn.textContent = 'حفظ ✓'; }, 1800);
+}
+
+function clearApiKey() {
+  if (!confirm('هتمسح الـ API Key؟')) return;
+  localStorage.removeItem(AUDIT_KEY_STORAGE);
+  updateKeyUI();
+}
+
+function updateKeyUI() {
+  const has = !!getApiKey();
+  document.getElementById('auditKeyRow').style.display    = has ? 'none'  : 'flex';
+  document.getElementById('auditKeyStatus').style.display = has ? 'block' : 'none';
+}
+
+// Load key status on tab open
+function initAuditTab() {
+  updateKeyUI();
+}
 let auditImageMime   = 'image/jpeg';
 
 const AUDIT_WEBHOOK_KEY = 'mf_audit_webhook';
@@ -912,10 +947,9 @@ function getTargetSkus() {
 async function runShelfAudit() {
   if (!auditImageBase64) return;
 
-  const webhookUrl = (document.getElementById('auditWebhookInput').value || '').trim()
-                  || localStorage.getItem(AUDIT_WEBHOOK_KEY) || '';
-  if (!webhookUrl) {
-    alert('من فضلك ادخل رابط الـ n8n Webhook الأول');
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    alert('من فضلك ادخل الـ Claude API Key الأول وحفظه');
     return;
   }
 
@@ -929,38 +963,69 @@ async function runShelfAudit() {
   document.getElementById('auditResults').classList.remove('show');
   document.getElementById('auditThinking').classList.add('show');
 
+  const skuListText = targetSkus.map((s, i) =>
+    `${i+1}. ${s.name}` +
+    (s.barcode  ? ` (باركود: ${s.barcode})` : '') +
+    (s.category ? ` [${s.category}]`        : '')
+  ).join('\n');
+
+  const systemPrompt = `أنت نظام مراجعة أرفف متخصص لشركة Mighty Foods.
+مهمتك تحليل صورة رف في نقطة بيع وتحديد أي منتجات من قائمة الـ SKU المستهدفة موجودة أو غائبة.
+
+قائمة الـ SKU المستهدفة للعميل "${appData ? appData.name || '' : ''}":
+${skuListText}
+
+قواعد التحليل:
+- راجع كل صنف وحدد إن كان مرئي بوضوح في الصورة أم لا
+- اعتمد على اسم المنتج وشكل العبوة والألوان المميزة
+- لو مش واثق 100% اعتبره غايب
+- ابحث عن الباركود لو ظاهر في الصورة
+
+رد بـ JSON فقط بدون أي نص إضافي أو backticks:
+{
+  "found": ["اسم صنف 1"],
+  "missing": ["اسم صنف 2"],
+  "note": "ملاحظة مختصرة بالعربي"
+}`;
+
   try {
-    const res = await fetch(webhookUrl, {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': getApiKey(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
-        image:    auditImageBase64,
-        mime:     auditImageMime,
-        skus:     targetSkus,
-        customer: appData ? (appData.name || '') : ''
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        system: systemPrompt,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: auditImageMime, data: auditImageBase64 } },
+            { type: 'text', text: 'حلل الصورة وحدد الـ SKUs الموجودة والغايبة من القائمة.' }
+          ]
+        }]
       })
     });
 
-    // Read raw text first — never call .json() blindly
     const rawText = await res.text();
+    if (!res.ok) throw new Error(`API error ${res.status}: ${rawText.substring(0, 120)}`);
 
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status} — ${rawText.substring(0, 120)}`);
-    }
-    if (!rawText || !rawText.trim()) {
-      throw new Error('الـ Webhook رجّع response فاضية.\nتأكد إنك شغّال على /webhook/ مش /webhook-test/\nوإن الـ workflow activated.');
+    const data = JSON.parse(rawText);
+    const text = (data.content || []).map(c => c.text || '').join('');
+    const clean = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+
+    let parsed;
+    try { parsed = JSON.parse(clean); }
+    catch(e) {
+      const match = clean.match(/\{[\s\S]*\}/);
+      if (match) parsed = JSON.parse(match[0]);
+      else throw new Error('Claude response not parseable: ' + clean.substring(0, 150));
     }
 
-    let json;
-    try {
-      json = JSON.parse(rawText);
-    } catch(e) {
-      throw new Error('الـ response مش JSON صحيح:\n' + rawText.substring(0, 150));
-    }
-
-    // n8n may return [{result:{...}}] or {result:{...}} or {found,missing,note}
-    if (Array.isArray(json)) json = json[0];
-    const parsed = json.result || json;
     renderAuditResults(parsed, targetSkus);
 
   } catch(err) {
@@ -968,7 +1033,7 @@ async function runShelfAudit() {
     document.getElementById('auditScanBtn').disabled = false;
     document.getElementById('auditResults').innerHTML =
       `<div class="empty"><div class="empty-ico">❌</div>
-       <div class="empty-txt" style="white-space:pre-line">فشل الاتصال بالـ Webhook\n<small style="font-size:10px;opacity:.6">${err.message}</small></div></div>`;
+       <div class="empty-txt" style="white-space:pre-line">فشل التحليل\n<small style="font-size:10px;opacity:.6">${err.message}</small></div></div>`;
     document.getElementById('auditResults').classList.add('show');
   }
 }
@@ -1055,6 +1120,7 @@ function openTab(id, el) {
   if (id === 'zero' && !zeroLoaded) {
     fetchZeroSales();
   }
+  if (id === 'audit') initAuditTab();
 }
 
 // ─────────────────────────────────────────────
