@@ -244,6 +244,107 @@ body {
 /* Scroll padding */
 .pb { height:80px; }
 
+/* ── SHELF AUDIT ──────────────────────────── */
+.audit-hero {
+  background: linear-gradient(135deg, rgba(61,127,255,.1), rgba(91,94,244,.08));
+  border: 1px solid rgba(61,127,255,.2);
+  border-radius: 16px; padding: 20px; margin-bottom: 14px; text-align: center;
+}
+.audit-hero-title { font-size: 16px; font-weight: 900; margin-bottom: 6px; }
+.audit-hero-sub { font-size: 11px; color: var(--sub); line-height: 1.7; }
+
+.audit-upload-zone {
+  border: 2px dashed rgba(61,127,255,.35);
+  border-radius: 16px; padding: 30px 20px;
+  text-align: center; cursor: pointer; transition: all .2s;
+  background: rgba(61,127,255,.04); margin-bottom: 14px;
+  position: relative; overflow: hidden;
+}
+.audit-upload-zone:active { transform: scale(.98); background: rgba(61,127,255,.09); }
+.audit-upload-zone.has-image { border-style: solid; border-color: rgba(61,127,255,.5); padding: 0; }
+.audit-upload-zone img {
+  width: 100%; border-radius: 14px; display: block; max-height: 260px; object-fit: cover;
+}
+.audit-upload-icon { font-size: 44px; margin-bottom: 10px; }
+.audit-upload-label { font-size: 14px; font-weight: 800; color: var(--accent); }
+.audit-upload-hint { font-size: 11px; color: var(--sub); margin-top: 5px; }
+#auditFileInput { display: none; }
+
+.audit-btn {
+  width: 100%; padding: 15px; border: none; border-radius: 14px; cursor: pointer;
+  font-family: 'Cairo', sans-serif; font-size: 15px; font-weight: 800;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; transition: all .2s; margin-bottom: 14px;
+  box-shadow: 0 4px 24px rgba(61,127,255,.35);
+}
+.audit-btn:disabled {
+  opacity: .45; cursor: not-allowed; box-shadow: none;
+}
+.audit-btn:not(:disabled):active { transform: scale(.97); }
+
+.audit-thinking {
+  display: none; text-align: center; padding: 30px 20px;
+}
+.audit-thinking.show { display: block; }
+.audit-thinking-ring {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 3px solid var(--border); border-top-color: var(--accent);
+  animation: auditSpin 1s linear infinite; margin: 0 auto 14px;
+}
+@keyframes auditSpin { to { transform: rotate(360deg); } }
+.audit-thinking-txt { font-size: 13px; color: var(--sub); }
+
+.audit-results { display: none; }
+.audit-results.show { display: block; }
+
+.audit-result-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: 12px; margin-bottom: 12px; font-size: 13px;
+}
+.audit-result-header.found {
+  background: rgba(15,186,115,.08); border: 1px solid rgba(15,186,115,.2); color: var(--green);
+}
+.audit-result-header.missing {
+  background: rgba(240,64,64,.08); border: 1px solid rgba(240,64,64,.18); color: var(--red);
+}
+.audit-result-header-count { font-size: 22px; font-weight: 900; }
+.audit-result-header-label { font-size: 11px; opacity: .8; }
+
+.audit-section-title {
+  font-size: 10px; font-weight: 800; color: var(--sub);
+  letter-spacing: 1.2px; text-transform: uppercase;
+  padding: 14px 0 8px; border-bottom: 1px solid var(--border); margin-bottom: 8px;
+}
+.audit-sku-card {
+  background: var(--surface); border-radius: 12px;
+  padding: 11px 14px; margin-bottom: 7px; display: flex; align-items: center; gap: 10px;
+}
+.audit-sku-card.missing-card {
+  border: 1px solid rgba(240,64,64,.22); border-right: 3px solid var(--red);
+}
+.audit-sku-card.found-card {
+  border: 1px solid rgba(15,186,115,.18); border-right: 3px solid var(--green);
+}
+.audit-sku-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.audit-sku-dot.red { background: var(--red); box-shadow: 0 0 8px rgba(240,64,64,.5); }
+.audit-sku-dot.green { background: var(--green); box-shadow: 0 0 8px rgba(15,186,115,.5); }
+.audit-sku-name { font-size: 12.5px; font-weight: 700; line-height: 1.4; }
+.audit-sku-meta { font-size: 10px; color: var(--sub); margin-top: 2px; }
+
+.audit-note-box {
+  background: rgba(247,201,72,.06); border: 1px solid rgba(247,201,72,.2);
+  border-radius: 12px; padding: 12px 14px; margin-top: 14px;
+  font-size: 12px; color: var(--gold); line-height: 1.8;
+}
+
+.audit-reset-btn {
+  width: 100%; padding: 12px; border-radius: 12px; cursor: pointer;
+  font-family: 'Cairo', sans-serif; font-size: 13px; font-weight: 700;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--sub); margin-top: 14px; transition: all .2s;
+}
+.audit-reset-btn:active { transform: scale(.97); }
+
 /* Color helpers */
 .c-g { color:var(--green); }
 .c-y { color:var(--yellow); }
@@ -341,6 +442,7 @@ body {
   <div class="tab" onclick="openTab('offers',this)">🎁 العروض</div>
   <div class="tab" onclick="openTab('history',this)">📦 الأصناف</div>
   <div class="tab" onclick="openTab('zero',this)">🚨 Zero Sales</div>
+  <div class="tab" onclick="openTab('audit',this)">📸 مراجعة الرف</div>
   <div class="tab" onclick="openTab('notes',this)">📝 الملاحظات</div>
 </div>
 
@@ -364,6 +466,62 @@ body {
   <div id="zeroContent">
     <div class="empty"><div class="empty-ico">⏳</div><div class="empty-txt">اضغط التاب لتحميل البيانات</div></div>
   </div>
+</div>
+
+<!-- PANEL: SHELF AUDIT -->
+<div class="panel" id="panel-audit">
+  <div style="padding-top:14px">
+
+    <div class="audit-hero">
+      <div class="audit-hero-title">📸 مراجعة الرف بالذكاء الاصطناعي</div>
+      <div class="audit-hero-sub">صوّر الرف — وهيتقالك على طول أي SKU مش موجود من اللي المفروض يكون</div>
+    </div>
+
+    <!-- Upload Zone -->
+    <div class="audit-upload-zone" id="auditUploadZone" onclick="document.getElementById('auditFileInput').click()">
+      <div id="auditUploadPlaceholder">
+        <div class="audit-upload-icon">📷</div>
+        <div class="audit-upload-label">اضغط لالتقاط صورة أو رفعها</div>
+        <div class="audit-upload-hint">الصورة هتتحلل بـ Claude Vision</div>
+      </div>
+      <img id="auditPreview" style="display:none" alt="shelf preview"/>
+    </div>
+    <input type="file" id="auditFileInput" accept="image/*" capture="environment"/>
+
+    <!-- Scan Button -->
+    <button class="audit-btn" id="auditScanBtn" disabled onclick="runShelfAudit()">
+      🔍 افحص الرف دلوقتي
+    </button>
+
+    <!-- Thinking State -->
+    <div class="audit-thinking" id="auditThinking">
+      <div class="audit-thinking-ring"></div>
+      <div class="audit-thinking-txt">Claude بيحلل الصورة...<br>بيحدد الـ SKUs الموجودة والغايبة</div>
+    </div>
+
+    <!-- Results -->
+    <div class="audit-results" id="auditResults">
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <div class="audit-result-header missing" style="flex:1;flex-direction:column">
+          <div class="audit-result-header-count" id="auditMissingCount">0</div>
+          <div class="audit-result-header-label">غايب من الرف</div>
+        </div>
+        <div class="audit-result-header found" style="flex:1;flex-direction:column">
+          <div class="audit-result-header-count" id="auditFoundCount">0</div>
+          <div class="audit-result-header-label">موجود على الرف</div>
+        </div>
+      </div>
+
+      <div id="auditMissingList"></div>
+      <div id="auditFoundList"></div>
+
+      <div class="audit-note-box" id="auditNoteBox" style="display:none"></div>
+
+      <button class="audit-reset-btn" onclick="resetAudit()">🔄 صوّر رف تاني</button>
+    </div>
+
+  </div>
+  <div class="pb"></div>
 </div>
 
 <!-- PANEL: NOTES -->
@@ -688,7 +846,200 @@ async function fetchZeroSales() {
 }
 
 // ─────────────────────────────────────────────
-// TABS
+// SHELF AUDIT — Claude Vision
+// ─────────────────────────────────────────────
+const CLAUDE_API_KEY = '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';
+let auditImageBase64 = null;
+let auditImageMime   = 'image/jpeg';
+
+// Wire up file input
+document.getElementById('auditFileInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  auditImageMime = file.type || 'image/jpeg';
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    auditImageBase64 = ev.target.result.split(',')[1];
+    const preview = document.getElementById('auditPreview');
+    const placeholder = document.getElementById('auditUploadPlaceholder');
+    const zone = document.getElementById('auditUploadZone');
+    preview.src = ev.target.result;
+    preview.style.display = 'block';
+    placeholder.style.display = 'none';
+    zone.classList.add('has-image');
+    document.getElementById('auditScanBtn').disabled = false;
+    // Hide previous results
+    document.getElementById('auditResults').classList.remove('show');
+    document.getElementById('auditThinking').classList.remove('show');
+  };
+  reader.readAsDataURL(file);
+});
+
+function getTargetSkus() {
+  if (!appData) return [];
+  const skus = [];
+  // From history (top items — must be on shelf)
+  (appData.history || []).forEach(h => {
+    if (h.name) skus.push({ name: h.name, barcode: '', category: 'أصناف أساسية', source: 'history' });
+  });
+  // From zeroSales — these are NOT ordered but should ideally be on shelf
+  (appData.zeroSales || []).forEach(s => {
+    const name = s.skuName || s.n || '';
+    if (name) skus.push({ name, barcode: s.barcode || s.b || '', category: s.category || s.c || 'أخرى', source: 'zero' });
+  });
+  // De-dup by name
+  const seen = new Set();
+  return skus.filter(s => { if (seen.has(s.name)) return false; seen.add(s.name); return true; });
+}
+
+async function runShelfAudit() {
+  if (!auditImageBase64) return;
+  const targetSkus = getTargetSkus();
+  if (!targetSkus.length) {
+    alert('لا توجد قائمة SKU للمقارنة. تأكد من وجود بيانات الأصناف.');
+    return;
+  }
+
+  // UI: show thinking
+  document.getElementById('auditScanBtn').disabled = true;
+  document.getElementById('auditResults').classList.remove('show');
+  document.getElementById('auditThinking').classList.add('show');
+
+  const skuListText = targetSkus.map((s, i) =>
+    `${i+1}. ${s.name}${s.barcode ? ' (باركود: ' + s.barcode + ')' : ''}${s.category ? ' [' + s.category + ']' : ''}`
+  ).join('\n');
+
+  const systemPrompt = `أنت نظام مراجعة أرفف متخصص لشركة Mighty Foods. مهمتك تحليل صورة رف في نقطة بيع وتحديد أي منتجات من قائمة الـ SKU المستهدفة موجودة أو غائبة.
+
+قائمة الـ SKU المستهدفة:
+${skuListText}
+
+قواعد التحليل:
+- راجع كل صنف في القائمة وحدد إن كان مرئي بوضوح في الصورة أم لا
+- اعتمد على اسم المنتج، شكل العبوة، الألوان المميزة لكل صنف
+- لو مش واثق 100% اعتبره غايب (أحسن تتأكد من وجوده فعلاً)
+
+رد بـ JSON فقط بالشكل ده (بدون أي نص إضافي):
+{
+  "found": ["اسم الصنف 1", "اسم الصنف 2"],
+  "missing": ["اسم الصنف 3", "اسم الصنف 4"],
+  "note": "ملاحظة مختصرة عن حالة الرف (جملة أو اتنين بالعربي)"
+}`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CLAUDE_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        system: systemPrompt,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: { type: 'base64', media_type: auditImageMime, data: auditImageBase64 }
+            },
+            { type: 'text', text: 'حلل الصورة وحدد الـ SKUs الموجودة والغايبة من القائمة.' }
+          ]
+        }]
+      })
+    });
+
+    if (!response.ok) throw new Error('API error: ' + response.status);
+    const data = await response.json();
+    const raw = data.content.map(c => c.text || '').join('');
+    // Strip markdown fences if any
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    renderAuditResults(parsed, targetSkus);
+  } catch(err) {
+    document.getElementById('auditThinking').classList.remove('show');
+    document.getElementById('auditScanBtn').disabled = false;
+    document.getElementById('auditResults').innerHTML =
+      `<div class="empty"><div class="empty-ico">❌</div><div class="empty-txt">فشل التحليل<br><small style="font-size:10px;opacity:.5">${err.message}</small></div></div>`;
+    document.getElementById('auditResults').classList.add('show');
+  }
+}
+
+function renderAuditResults(parsed, targetSkus) {
+  document.getElementById('auditThinking').classList.remove('show');
+
+  const foundNames   = new Set((parsed.found  || []).map(s => s.trim()));
+  const missingNames = new Set((parsed.missing || []).map(s => s.trim()));
+
+  document.getElementById('auditMissingCount').textContent = missingNames.size;
+  document.getElementById('auditFoundCount').textContent   = foundNames.size;
+
+  // Missing list
+  let missingHtml = '';
+  if (missingNames.size > 0) {
+    missingHtml += `<div class="audit-section-title">🚨 غايب من الرف — ${missingNames.size} صنف</div>`;
+    missingNames.forEach(name => {
+      const sku = targetSkus.find(s => s.name === name) || {};
+      missingHtml += `
+      <div class="audit-sku-card missing-card">
+        <div class="audit-sku-dot red"></div>
+        <div>
+          <div class="audit-sku-name">${name}</div>
+          ${sku.barcode ? `<div class="audit-sku-meta">باركود: ${sku.barcode}</div>` : ''}
+          ${sku.category ? `<div class="audit-sku-meta">📂 ${sku.category}</div>` : ''}
+        </div>
+      </div>`;
+    });
+  }
+  document.getElementById('auditMissingList').innerHTML = missingHtml;
+
+  // Found list
+  let foundHtml = '';
+  if (foundNames.size > 0) {
+    foundHtml += `<div class="audit-section-title">✅ موجود على الرف — ${foundNames.size} صنف</div>`;
+    foundNames.forEach(name => {
+      const sku = targetSkus.find(s => s.name === name) || {};
+      foundHtml += `
+      <div class="audit-sku-card found-card">
+        <div class="audit-sku-dot green"></div>
+        <div>
+          <div class="audit-sku-name">${name}</div>
+          ${sku.category ? `<div class="audit-sku-meta">📂 ${sku.category}</div>` : ''}
+        </div>
+      </div>`;
+    });
+  }
+  document.getElementById('auditFoundList').innerHTML = foundHtml;
+
+  // Note from Claude
+  const noteBox = document.getElementById('auditNoteBox');
+  if (parsed.note) {
+    noteBox.textContent = '💡 ' + parsed.note;
+    noteBox.style.display = 'block';
+  } else {
+    noteBox.style.display = 'none';
+  }
+
+  document.getElementById('auditScanBtn').disabled = false;
+  document.getElementById('auditResults').classList.add('show');
+}
+
+function resetAudit() {
+  auditImageBase64 = null;
+  document.getElementById('auditPreview').style.display = 'none';
+  document.getElementById('auditPreview').src = '';
+  document.getElementById('auditUploadPlaceholder').style.display = 'block';
+  document.getElementById('auditUploadZone').classList.remove('has-image');
+  document.getElementById('auditScanBtn').disabled = true;
+  document.getElementById('auditResults').classList.remove('show');
+  document.getElementById('auditThinking').classList.remove('show');
+  document.getElementById('auditFileInput').value = '';
+}
+
+// ─────────────────────────────────────────────
 // ─────────────────────────────────────────────
 function openTab(id, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -698,6 +1049,10 @@ function openTab(id, el) {
   // Lazy-load zero sales when tab first opened
   if (id === 'zero' && !zeroLoaded) {
     fetchZeroSales();
+  }
+  // Reset audit panel on tab switch away
+  if (id !== 'audit') {
+    // keep state — don't reset
   }
 }
 
