@@ -874,12 +874,22 @@ async function initMslTab() {
 
   try {
     const url = mslWebhook + '?cust=' + encodeURIComponent(custName);
-    const res  = await fetch(url);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
+    const res     = await fetch(url);
+    const rawText = await res.text();
+
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' — ' + rawText.substring(0, 100));
+    if (!rawText || !rawText.trim()) throw new Error('الـ Webhook رجّع response فاضية — تأكد إن الـ workflow Activated');
+
+    let json;
+    try { json = JSON.parse(rawText); }
+    catch(e) { throw new Error('Response مش JSON: ' + rawText.substring(0, 100)); }
+
+    // n8n may wrap in array [{...}] or return array directly
+    if (Array.isArray(json) && json.length && json[0].msl) json = json[0];
     const items = Array.isArray(json) ? json : (json.msl || json.data || []);
+
     mslLoaded = true;
-    if (appData) appData.msl = items; // cache
+    if (appData) appData.msl = items;
     renderMslData(items);
   } catch(e) {
     showMslError('فشل تحميل MSL — ' + e.message);
