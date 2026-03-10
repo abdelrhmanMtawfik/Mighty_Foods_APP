@@ -265,7 +265,13 @@ body {
 .msl-table td { padding:9px 10px; font-size:11.5px; vertical-align:middle; }
 .msl-td-name { font-weight:700; line-height:1.35; max-width:160px; }
 .msl-td-bar { font-size:10px; color:var(--sub); font-family:monospace; direction:ltr; }
-.msl-td-case { text-align:center; font-size:11px; color:var(--sub); }
+.msl-td-case  { text-align:center; font-size:11px; color:var(--sub); }
+.msl-td-stock { text-align:center; }
+.stock-badge  { display:inline-block; min-width:36px; padding:3px 8px; border-radius:20px; font-size:11px; font-weight:800; letter-spacing:.3px; }
+.stock-high   { background:rgba(15,186,115,.14); color:#0fba73; border:1px solid rgba(15,186,115,.25); }
+.stock-mid    { background:rgba(247,201,72,.13);  color:#f7c948; border:1px solid rgba(247,201,72,.25); }
+.stock-low    { background:rgba(240,64,64,.12);   color:#f04040; border:1px solid rgba(240,64,64,.22); }
+.stock-zero   { background:rgba(255,255,255,.05); color:var(--sub); border:1px solid var(--border); }
 .msl-qty-input { width:58px; background:var(--surface2); border:1.5px solid var(--border); border-radius:8px; padding:5px 4px; text-align:center; font-family:'Cairo',sans-serif; font-size:13px; font-weight:800; color:var(--text); outline:none; -moz-appearance:textfield; }
 .msl-qty-input::-webkit-inner-spin-button, .msl-qty-input::-webkit-outer-spin-button { -webkit-appearance:none; }
 .msl-qty-input:focus { border-color:var(--accent); }
@@ -750,8 +756,11 @@ async function fetchMsl() {
   const custName = appData?.name || '';
 
   if (!mslUrl) {
-    document.getElementById('mslContent').innerHTML =
-      `<div class="empty"><div class="empty-ico">⚙️</div><div class="empty-txt">رابط MSL webhook غير موجود في الـ payload</div></div>`;
+    // fallback to demo data already in appData
+    const demo = appData?.msl || [];
+    if (demo.length) { mslLoaded = true; renderMsl(demo); }
+    else document.getElementById('mslContent').innerHTML =
+      `<div class="empty"><div class="empty-ico">⚙️</div><div class="empty-txt">رابط MSL webhook غير موجود</div></div>`;
     return;
   }
 
@@ -805,7 +814,7 @@ function renderMsl(items) {
     <div class="msl-table-wrap">
       <table class="msl-table">
         <thead><tr>
-          <th>اسم الصنف</th><th>باركود</th><th class="num-col">كارتون</th><th class="num-col">الكمية</th>
+          <th>اسم الصنف</th><th>باركود</th><th class="num-col">مخزون</th><th class="num-col">كارتون</th><th class="num-col">الكمية</th>
         </tr></thead>
         <tbody id="mslTbody"></tbody>
       </table>
@@ -845,20 +854,33 @@ function renderMslTable() {
   if (!tbody) return;
 
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:28px;color:var(--sub)">لا توجد نتائج</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:28px;color:var(--sub)">لا توجد نتائج</td></tr>`;
     return;
   }
 
   tbody.innerHTML = filtered.map(item => {
-    const name = item.n || item.skuName || '';
-    const bar  = item.b || item.barcode || '';
-    const caseQ= item.c || item.caseQty || '–';
-    const key  = bar || name;
-    const qty  = mslQtyMap[key] || '';
-    const hasQ = qty > 0;
+    const name  = item.n || item.skuName || '';
+    const bar   = item.b || item.barcode || '';
+    const caseQ = item.c || item.caseQty || '–';
+    const stock = item.s !== undefined ? Number(item.s) : (item.stock !== undefined ? Number(item.stock) : null);
+    const key   = bar || name;
+    const qty   = mslQtyMap[key] || '';
+    const hasQ  = qty > 0;
+
+    let stockCell = '<td class="msl-td-stock"><span class="stock-badge stock-zero">—</span></td>';
+    if (stock !== null) {
+      let cls = 'stock-zero';
+      if      (stock === 0)   cls = 'stock-zero';
+      else if (stock <= 5)    cls = 'stock-low';
+      else if (stock <= 20)   cls = 'stock-mid';
+      else                    cls = 'stock-high';
+      stockCell = `<td class="msl-td-stock"><span class="stock-badge ${cls}">${stock}</span></td>`;
+    }
+
     return `<tr class="${hasQ ? 'has-qty' : ''}">
       <td class="msl-td-name">${name}</td>
       <td class="msl-td-bar">${bar || '–'}</td>
+      ${stockCell}
       <td class="msl-td-case">${caseQ}</td>
       <td style="text-align:center">
         <input class="msl-qty-input ${hasQ ? 'filled' : ''}" type="number" min="0" step="1"
@@ -967,6 +989,16 @@ function getDemoData() {
     notes: [
       { date:'05/03/2026', by:'Ahmed Samy', text:'العميل طلب زيادة تشكيلة المشروبات في الشهر القادم' },
       { date:'20/02/2026', by:'Mohamed Ali', text:'مخزن مكتمل من الشيبس — متابعة بعد أسبوعين' }
+    ],
+    mslWebhookUrl: '',
+    msl: [
+      { n:'شيبس ليز 100جم',      b:'6221024000015', s:42, c:'12', cat:'سناكس' },
+      { n:'شيبس ليز 50جم',       b:'6221024000016', s:5,  c:'24', cat:'سناكس' },
+      { n:'عصير بيبسي 330مل',    b:'6221024000022', s:0,  c:'6',  cat:'مشروبات' },
+      { n:'ماء نستله 600مل',     b:'6221024000031', s:80, c:'12', cat:'مشروبات' },
+      { n:'بسكويت ماريا 200جم',  b:'6221024000044', s:3,  c:'12', cat:'بسكويت' },
+      { n:'شوكولاتة كيتكات',     b:'6221024000058', s:15, c:'24', cat:'حلويات' },
+      { n:'كيتو كريمة 250جم',    b:'6221024000067', s:0,  c:'6',  cat:'ألبان' }
     ]
   };
 }
