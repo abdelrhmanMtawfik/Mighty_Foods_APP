@@ -851,17 +851,51 @@ let mslQtyMap  = {};
 let mslLoaded  = false;
 
 async function initMslTab() {
-  if (mslLoaded) return;
+  if (mslLoaded) return; // already loaded
 
-  const items = (appData && appData.msl) ? appData.msl : [];
-
-  if (!items.length) {
-    showMslError('لا توجد بيانات MSL — تأكد من تحديث الـ n8n workflow');
+  // If data already in payload (future optimization), use it
+  if (appData && appData.msl && appData.msl.length > 0) {
+    mslLoaded = true;
+    renderMslData(appData.msl);
     return;
   }
 
-  mslLoaded = true;
-  renderMslData(items);
+  // Fetch from webhook (same base URL as Zero Sales, different endpoint)
+  const webhookBase = (appData && appData.webhookUrl) ? appData.webhookUrl : '';
+  const mslWebhook  = webhookBase.replace('/webhook/zero-sales', '/webhook/msl-products');
+  const custName    = (appData && appData.name) ? appData.name : '';
+
+  if (!mslWebhook || !mslWebhook.startsWith('http')) {
+    showMslError('لم يتم ضبط رابط الـ Webhook بعد');
+    return;
+  }
+
+  document.getElementById('mslLoading').style.display = 'block';
+
+  try {
+    const url = mslWebhook + '?cust=' + encodeURIComponent(custName);
+    const res     = await fetch(url);
+    const rawText = await res.text();
+
+    if (!res.ok) throw new Error('HTTP ' + res.status + ' — ' + rawText.substring(0, 100));
+    if (!rawText || !rawText.trim()) throw new Error('الـ Webhook رجّع response فاضية — تأكد إن الـ workflow Activated');
+
+    let json;
+    try { json = JSON.parse(rawText); }
+    catch(e) { throw new Error('Response مش JSON: ' + rawText.substring(0, 100)); }
+
+    // n8n may wrap in array [{...}] or return array directly
+    if (Array.isArray(json) && json.length && json[0].msl) json = json[0];
+    const items = Array.isArray(json) ? json : (json.msl || json.data || []);
+
+    mslLoaded = true;
+    if (appData) appData.msl = items;
+    renderMslData(items);
+  } catch(e) {
+    showMslError('فشل تحميل MSL — ' + e.message);
+  } finally {
+    document.getElementById('mslLoading').style.display = 'none';
+  }
 }
 
 function showMslError(msg) {
@@ -1168,4 +1202,3 @@ window.addEventListener('load', () => {
 </script>
 </body>
 </html>
-
