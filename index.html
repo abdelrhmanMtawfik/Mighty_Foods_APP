@@ -910,22 +910,18 @@ function exportMsl() {
       const bar  = item.b || item.barcode || '';
       const caseQ= item.c || item.caseQty || '';
       const key  = bar || name;
-      return { name, bar, caseQ, qty: mslQtyMap[key] };
+      const qty  = mslQtyMap[key];
+      // هنا السر: نستخدم \t للفصل بين الأعمدة ليفهمها إكسيل
+      return `${name}\t${bar}\t${caseQ}\t${qty}`;
     });
+
   if (!ordered.length) return;
 
-  // نص قابل للنسخ
-  const lines = [
-    `📋 طلب MSL — ${doorName}`,
-    `📅 ${new Date().toLocaleDateString('ar-EG')}`,
-    '─'.repeat(28),
-    ...ordered.map((o,i) => `${i+1}. ${o.name}\n   باركود: ${o.bar||'—'}  |  كارتون: ${o.caseQ||'—'}  |  الكمية: ${o.qty}`),
-    '─'.repeat(28),
-    `إجمالي: ${ordered.length} صنف`
-  ];
-  const txt = lines.join('\n');
+  // إعداد رأس الجدول للإكسيل
+  const header = "اسم الصنف\tالباركود\tسعة الكرتونة\tالكمية المطلوبة";
+  const txt = header + "\n" + ordered.join('\n');
 
-  // Modal
+  // إظهار المودال (النافذة) بنفس التصميم لكن مع النص الجديد
   const old = document.getElementById('mslModal');
   if (old) old.remove();
   const modal = document.createElement('div');
@@ -934,18 +930,17 @@ function exportMsl() {
   modal.innerHTML = `
     <div style="background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-height:80vh;display:flex;flex-direction:column;border-top:1px solid var(--border);overflow:hidden">
       <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:14px;font-weight:900">📋 ${doorName}</div>
+        <div style="font-size:14px;font-weight:900">📋 جاهز للصق في إكسيل (${ordered.length} صنف)</div>
         <button onclick="document.getElementById('mslModal').remove()" style="background:none;border:none;color:var(--sub);font-size:22px;cursor:pointer">✕</button>
       </div>
-      <textarea id="mslExportTxt" readonly style="flex:1;background:var(--surface2);border:none;outline:none;font-family:'Cairo',monospace;font-size:11px;color:var(--text);padding:14px 16px;resize:none;line-height:1.9;direction:rtl;overflow-y:auto">${txt}</textarea>
+      <textarea id="mslExportTxt" readonly style="flex:1;background:var(--surface2);border:none;outline:none;font-family:monospace;font-size:10px;color:var(--text);padding:14px 16px;resize:none;white-space:pre;overflow-x:auto;direction:rtl">${txt}</textarea>
       <div style="padding:12px 16px">
-        <button onclick="copyMsl()" style="width:100%;padding:13px;border:none;border-radius:12px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff" id="mslCopyBtn">📋 نسخ الطلب</button>
+        <button onclick="copyMsl()" style="width:100%;padding:13px;border:none;border-radius:12px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--green),#0d9e62);color:#fff" id="mslCopyBtn">📋 نسخ للـ Excel</button>
       </div>
     </div>`;
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
   document.body.appendChild(modal);
 }
-
 function copyMsl() {
   const ta = document.getElementById('mslExportTxt');
   if (!ta) return;
