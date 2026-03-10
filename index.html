@@ -271,33 +271,13 @@ body {
 .msl-qty-input::-webkit-inner-spin-button, .msl-qty-input::-webkit-outer-spin-button { -webkit-appearance:none; }
 .msl-qty-input:focus { border-color:var(--accent); }
 .msl-qty-input.filled { border-color:var(--green); background:rgba(15,186,115,.08); color:var(--green); }
-.msl-summary-bar { position:sticky; bottom:80px; z-index:10; background:rgba(8,11,18,.92); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+.msl-summary-bar { position:fixed; bottom:60px; left:0; right:0; z-index:50; margin:0 12px; background:rgba(8,11,18,.96); backdrop-filter:blur(14px); border:1px solid var(--border); border-radius:14px; padding:10px 14px; display:none; align-items:center; gap:10px; box-shadow:0 -4px 24px rgba(0,0,0,.4); }
+.msl-summary-bar.visible { display:flex; }
 .msl-summary-info { flex:1; }
 .msl-summary-label { font-size:10px; color:var(--sub); }
 .msl-summary-val { font-size:16px; font-weight:900; color:var(--green); }
-.msl-export-btn { flex-shrink:0; padding:10px 16px; border:none; border-radius:10px; background:linear-gradient(135deg,var(--green),#0d9e62); color:#fff; font-family:'Cairo',sans-serif; font-size:12px; font-weight:800; cursor:pointer; transition:all .2s; box-shadow:0 3px 14px rgba(15,186,115,.3); }
+.msl-export-btn { flex-shrink:0; padding:10px 18px; border:none; border-radius:10px; background:linear-gradient(135deg,var(--green),#0d9e62); color:#fff; font-family:'Cairo',sans-serif; font-size:12px; font-weight:800; cursor:pointer; transition:all .2s; box-shadow:0 3px 14px rgba(15,186,115,.3); }
 .msl-export-btn:active { transform:scale(.96); }
-.msl-export-btn:disabled { opacity:.4; cursor:not-allowed; box-shadow:none; }
-
-/* Export modal */
-.export-modal-backdrop { position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.72);backdrop-filter:blur(6px);display:flex;align-items:flex-end; }
-.export-modal-sheet { background:var(--surface);border-radius:22px 22px 0 0;width:100%;border-top:1px solid var(--border);overflow:hidden; }
-.export-modal-header { padding:16px 16px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between; }
-.export-modal-title { font-size:14px;font-weight:900; }
-.export-modal-close { background:none;border:none;color:var(--sub);font-size:22px;cursor:pointer;padding:0 4px; }
-.export-modal-body { padding:16px; }
-.export-summary { background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:16px;font-size:12px;line-height:1.9;direction:rtl; }
-.export-summary strong { color:var(--accent); }
-.export-actions { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px; }
-.export-action-btn { display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 10px;border:1.5px solid var(--border);border-radius:14px;background:var(--surface2);cursor:pointer;transition:all .2s;font-family:'Cairo',sans-serif; }
-.export-action-btn:active { transform:scale(.96); }
-.export-action-btn.btn-excel { border-color:rgba(33,170,86,.35); }
-.export-action-btn.btn-csv   { border-color:rgba(61,127,255,.35); }
-.export-action-btn .btn-icon { font-size:26px;line-height:1; }
-.export-action-btn .btn-label { font-size:12px;font-weight:800;color:var(--text); }
-.export-action-btn .btn-hint  { font-size:9px;color:var(--sub); }
-.export-copy-btn { width:100%;padding:13px;border:1px solid var(--border);border-radius:12px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;background:var(--surface2);color:var(--text);transition:all .2s; }
-.export-copy-btn:active { transform:scale(.97); }
 @keyframes spin { to { transform:rotate(360deg); } }
 
 /* Color helpers */
@@ -433,6 +413,15 @@ body {
     <div class="empty"><div class="empty-ico">⏳</div><div class="empty-txt">اضغط التاب لتحميل البيانات</div></div>
   </div>
   <div class="pb"></div>
+</div>
+
+<!-- MSL fixed bottom bar — outside panel so never overwritten -->
+<div class="msl-summary-bar" id="mslSummaryBar">
+  <div class="msl-summary-info">
+    <div class="msl-summary-label">إجمالي الأصناف المطلوبة</div>
+    <div class="msl-summary-val"><span id="mslOrderedCount">0</span> صنف</div>
+  </div>
+  <button class="msl-export-btn" id="mslExportBtn" onclick="exportMsl()">📤 تصدير</button>
 </div>
 
 <!-- PANEL: NOTES -->
@@ -830,13 +819,6 @@ function renderMsl(items) {
         </tr></thead>
         <tbody id="mslTbody"></tbody>
       </table>
-    </div>
-    <div class="msl-summary-bar">
-      <div class="msl-summary-info">
-        <div class="msl-summary-label">إجمالي الأصناف المطلوبة</div>
-        <div class="msl-summary-val"><span id="mslOrderedCount">0</span> صنف</div>
-      </div>
-      <button class="msl-export-btn" id="mslExportBtn" onclick="exportMsl()" disabled>📋 تصدير الطلب</button>
     </div>`;
 
   renderMslTable();
@@ -896,7 +878,9 @@ function onMslQty(input) {
   else         { delete mslQtyMap[key]; input.classList.remove('filled'); input.closest('tr').classList.remove('has-qty'); }
   const count = Object.keys(mslQtyMap).length;
   document.getElementById('mslOrderedCount').textContent = count;
-  document.getElementById('mslExportBtn').disabled = count === 0;
+  // Show bar as soon as any item is entered
+  const bar = document.getElementById('mslSummaryBar');
+  if (bar) bar.classList.toggle('visible', count > 0);
 }
 
 function exportMsl() {
@@ -905,149 +889,140 @@ function exportMsl() {
   const today    = new Date();
   const dateStr  = `${today.getDate().toString().padStart(2,'0')}-${(today.getMonth()+1).toString().padStart(2,'0')}-${today.getFullYear()}`;
 
-  const ordered = items
-    .map(item => {
-      const name  = item.n || item.skuName || '';
-      const bar   = item.b || item.barcode || '';
-      const caseQ = item.c || item.caseQty || '';
-      const stock = item.s !== undefined ? item.s : (item.stock !== undefined ? item.stock : '');
-      const cat   = item.cat || item.category || '';
-      const key   = bar || name;
-      const qty   = mslQtyMap[key] || 0;
-      return { name, bar, stock, caseQ, cat, qty, key };
-    })
-    .filter(o => o.qty > 0);
+  const ordered = items.map(item => {
+    const name  = item.n || item.skuName || '';
+    const bar   = item.b || item.barcode || '';
+    const caseQ = item.c || item.caseQty || '';
+    const stock = item.s !== undefined ? item.s : (item.stock !== undefined ? item.stock : '');
+    const cat   = item.cat || item.category || '';
+    const key   = bar || name;
+    return { name, bar, stock, caseQ, cat, qty: mslQtyMap[key] || 0 };
+  }).filter(o => o.qty > 0);
 
   if (!ordered.length) return;
 
+  // Store for download functions
+  window._mslExport = { ordered, doorName, dateStr };
+
+  // Build modal
   const old = document.getElementById('mslExportModal');
   if (old) old.remove();
 
-  // Summary text
-  const totalLines = ordered.map((o,i) =>
-    `${i+1}. ${o.name}  |  الكمية: ${o.qty}${o.caseQ ? '  |  كارتون: '+o.caseQ : ''}`
-  ).join('\n');
-  const summaryTxt = `📋 طلب MSL — ${doorName}\n📅 ${dateStr}\n${'─'.repeat(32)}\n${totalLines}\n${'─'.repeat(32)}\nإجمالي: ${ordered.length} صنف`;
-
   const modal = document.createElement('div');
   modal.id = 'mslExportModal';
-  modal.className = 'export-modal-backdrop';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);display:flex;align-items:flex-end';
   modal.innerHTML = `
-    <div class="export-modal-sheet">
-      <div class="export-modal-header">
-        <div class="export-modal-title">📤 تصدير طلب MSL</div>
-        <button class="export-modal-close" onclick="document.getElementById('mslExportModal').remove()">✕</button>
+    <div style="background:var(--surface);border-radius:22px 22px 0 0;width:100%;border-top:1px solid var(--border);overflow:hidden">
+      <div style="padding:15px 16px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:14px;font-weight:900">📤 تصدير طلب MSL</div>
+        <button onclick="document.getElementById('mslExportModal').remove()" style="background:none;border:none;color:var(--sub);font-size:22px;cursor:pointer;line-height:1">✕</button>
       </div>
-      <div class="export-modal-body">
-        <div class="export-summary">
-          <strong>${doorName}</strong> — ${dateStr}<br>
-          <strong>${ordered.length}</strong> صنف مطلوب
+      <div style="padding:16px">
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:11px 14px;margin-bottom:14px;font-size:12px;line-height:1.9">
+          <strong style="color:var(--accent)">${doorName}</strong> — ${dateStr}<br>
+          <strong style="color:var(--green)">${ordered.length}</strong> صنف مطلوب
         </div>
-        <div class="export-actions">
-          <button class="export-action-btn btn-excel" onclick="downloadExcel()">
-            <span class="btn-icon">📊</span>
-            <span class="btn-label">Excel</span>
-            <span class="btn-hint">.xlsx — للفتح في Excel</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <button onclick="mslDownloadExcel()" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 8px;border:1.5px solid rgba(33,170,86,.4);border-radius:14px;background:rgba(33,170,86,.06);cursor:pointer;font-family:'Cairo',sans-serif">
+            <span style="font-size:28px">📊</span>
+            <span style="font-size:13px;font-weight:800;color:var(--text)">Excel</span>
+            <span style="font-size:10px;color:var(--sub)">.xlsx</span>
           </button>
-          <button class="export-action-btn btn-csv" onclick="downloadCsv()">
-            <span class="btn-icon">📄</span>
-            <span class="btn-label">CSV</span>
-            <span class="btn-hint">.csv — متوافق مع كل البرامج</span>
+          <button onclick="mslDownloadCsv()" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 8px;border:1.5px solid rgba(61,127,255,.4);border-radius:14px;background:rgba(61,127,255,.06);cursor:pointer;font-family:'Cairo',sans-serif">
+            <span style="font-size:28px">📄</span>
+            <span style="font-size:13px;font-weight:800;color:var(--text)">CSV</span>
+            <span style="font-size:10px;color:var(--sub)">.csv</span>
           </button>
         </div>
-        <button class="export-copy-btn" id="mslCopyBtn" onclick="copyMslText()">📋 نسخ الطلب كنص</button>
+        <button id="mslCopyBtn" onclick="mslCopyText()" style="width:100%;padding:12px;border:1px solid var(--border);border-radius:12px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;background:var(--surface2);color:var(--text)">📋 نسخ كنص</button>
       </div>
     </div>`;
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
   document.body.appendChild(modal);
-
-  // Store ordered items for download fns
-  window._mslExportData = { ordered, doorName, dateStr, summaryTxt };
 }
 
-function _getMslRows() {
-  const { ordered, doorName, dateStr } = window._mslExportData;
-  return ordered.map(o => ({
-    'اسم الصنف':   o.name,
-    'باركود':      o.bar,
-    'المخزون':     o.stock,
-    'كارتون':      o.caseQ,
-    'الفئة':       o.cat,
-    'الكمية المطلوبة': o.qty
+function mslDownloadExcel() {
+  const { ordered, doorName, dateStr } = window._mslExport;
+  if (typeof XLSX === 'undefined') { alert('جاري تحميل مكتبة Excel، جرب تاني'); return; }
+
+  const rows = ordered.map(o => ({
+    'اسم الصنف':         o.name,
+    'باركود':            o.bar,
+    'المخزون':           o.stock,
+    'كارتون':            o.caseQ,
+    'الفئة':             o.cat,
+    'الكمية المطلوبة':   o.qty
   }));
+
+  const ws = XLSX.utils.json_to_sheet(rows, {
+    header: ['اسم الصنف','باركود','المخزون','كارتون','الفئة','الكمية المطلوبة']
+  });
+  ws['!cols'] = [{ wch:30 },{ wch:18 },{ wch:10 },{ wch:10 },{ wch:14 },{ wch:16 }];
+  ws['!right-to-left'] = true;
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'MSL Order');
+  XLSX.writeFile(wb, `MSL_${doorName}_${dateStr}.xlsx`);
+  _mslToast('✅ تم تنزيل Excel');
 }
 
-function downloadExcel() {
-  try {
-    const { doorName, dateStr } = window._mslExportData;
-    const rows = _getMslRows();
-    const ws = XLSX.utils.json_to_sheet(rows, { header: ['اسم الصنف','باركود','المخزون','كارتون','الفئة','الكمية المطلوبة'] });
-
-    // Column widths
-    ws['!cols'] = [{ wch:30 },{ wch:18 },{ wch:10 },{ wch:10 },{ wch:14 },{ wch:16 }];
-
-    // Header row style (row 1)
-    const hdrRange = XLSX.utils.decode_range(ws['!ref']);
-    for (let C = hdrRange.s.c; C <= hdrRange.e.c; C++) {
-      const addr = XLSX.utils.encode_cell({ r:0, c:C });
-      if (!ws[addr]) continue;
-      ws[addr].s = { font:{ bold:true, sz:12 }, fill:{ fgColor:{ rgb:'1E2840' } }, alignment:{ horizontal:'center', readingOrder:2 } };
-    }
-
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'MSL Order');
-    XLSX.writeFile(wb, `MSL_${doorName}_${dateStr}.xlsx`);
-    _flashExportBtn('✅ تم تنزيل Excel');
-  } catch(e) {
-    alert('فشل تنزيل Excel: ' + e.message);
-  }
-}
-
-function downloadCsv() {
-  const { ordered, doorName, dateStr } = window._mslExportData;
-  const BOM = '\uFEFF';
+function mslDownloadCsv() {
+  const { ordered, doorName, dateStr } = window._mslExport;
+  const BOM    = '\uFEFF';
   const header = ['اسم الصنف','باركود','المخزون','كارتون','الفئة','الكمية المطلوبة'];
-  const rows = ordered.map(o => [o.name, o.bar, o.stock, o.caseQ, o.cat, o.qty]);
-  const csv  = BOM + [header, ...rows].map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const csvRows = ordered.map(o => [o.name, o.bar, o.stock, o.caseQ, o.cat, o.qty]);
+  const csv = BOM + [header, ...csvRows]
+    .map(r => r.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(','))
+    .join('\r\n');
 
   try {
-    const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement('a');
     a.href = url; a.download = `MSL_${doorName}_${dateStr}.csv`;
     document.body.appendChild(a); a.click();
-    document.body.removeChild(a); URL.revokeObjectURL(url);
-    _flashExportBtn('✅ تم تنزيل CSV');
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+    _mslToast('✅ تم تنزيل CSV');
   } catch(e) {
-    // Telegram fallback — open as data URI
+    // Telegram WebApp fallback
     const tg = window.Telegram?.WebApp;
-    if (tg) tg.openLink('data:text/csv;charset=utf-8,' + encodeURIComponent(csv));
-    else alert('فشل التنزيل: ' + e.message);
+    if (tg?.openLink) tg.openLink('data:text/csv;charset=utf-8,' + encodeURIComponent(csv));
+    else alert('تعذر التنزيل: ' + e.message);
   }
 }
 
-function copyMslText() {
-  const { summaryTxt } = window._mslExportData;
-  const btn = document.getElementById('mslCopyBtn');
-  const done = () => { if(btn){ btn.textContent='✅ تم النسخ'; setTimeout(()=>{ if(btn) btn.textContent='📋 نسخ الطلب كنص'; },2000); } };
-  if (navigator.clipboard) navigator.clipboard.writeText(summaryTxt).then(done).catch(()=>{ _copyFallback(summaryTxt); done(); });
-  else { _copyFallback(summaryTxt); done(); }
+function mslCopyText() {
+  const { ordered, doorName, dateStr } = window._mslExport;
+  const lines = [
+    `📋 طلب MSL — ${doorName}`,
+    `📅 ${dateStr}`,
+    '─'.repeat(30),
+    ...ordered.map((o,i) => `${i+1}. ${o.name}\n   باركود: ${o.bar||'—'}  |  كمية: ${o.qty}${o.caseQ ? '  |  كارتون: '+o.caseQ : ''}`),
+    '─'.repeat(30),
+    `إجمالي: ${ordered.length} صنف`
+  ];
+  const txt  = lines.join('\n');
+  const btn  = document.getElementById('mslCopyBtn');
+  const done = () => { if(btn){ btn.textContent='✅ تم النسخ'; setTimeout(()=>{ if(btn) btn.textContent='📋 نسخ كنص'; }, 2000); } };
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done).catch(() => { _mslCopyFallback(txt); done(); });
+  else { _mslCopyFallback(txt); done(); }
 }
 
-function _copyFallback(txt) {
+function _mslCopyFallback(txt) {
   const ta = document.createElement('textarea');
-  ta.value = txt; ta.style.cssText = 'position:fixed;opacity:0';
-  document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+  ta.value = txt; ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); } catch(e){}
   document.body.removeChild(ta);
 }
 
-function _flashExportBtn(msg) {
-  // brief toast at bottom
+function _mslToast(msg) {
   const t = document.createElement('div');
   t.textContent = msg;
-  t.style.cssText = 'position:fixed;bottom:120px;left:50%;transform:translateX(-50%);background:#1a2540;border:1px solid var(--border);border-radius:20px;padding:9px 22px;font-size:12px;font-weight:800;color:var(--green);z-index:9999;pointer-events:none;';
+  t.style.cssText = 'position:fixed;bottom:140px;left:50%;transform:translateX(-50%) translateY(10px);background:#111b30;border:1px solid rgba(15,186,115,.35);border-radius:20px;padding:9px 22px;font-size:12px;font-weight:800;color:var(--green);z-index:9999;pointer-events:none;opacity:0;transition:all .25s';
   document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2200);
+  requestAnimationFrame(() => { t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)'; });
+  setTimeout(() => { t.style.opacity='0'; setTimeout(() => t.remove(), 300); }, 2200);
 }
 
 // ─────────────────────────────────────────────
@@ -1060,6 +1035,9 @@ function openTab(id, el) {
   document.getElementById('panel-' + id).classList.add('active');
   if (id === 'zero' && !zeroLoaded) fetchZeroSales();
   if (id === 'msl'  && !mslLoaded)  fetchMsl();
+  // Show/hide MSL fixed bar based on active tab + whether items are selected
+  const bar = document.getElementById('mslSummaryBar');
+  if (bar) bar.classList.toggle('visible', id === 'msl' && Object.keys(mslQtyMap).length > 0);
 }
 
 
