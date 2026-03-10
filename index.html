@@ -245,99 +245,39 @@ body {
 .pb { height:80px; }
 
 /* ── MSL ORDER TAB ──────────────────────────── */
-.msl-header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:14px 0 10px;
-}
+.msl-header { display:flex; align-items:center; justify-content:space-between; padding:14px 0 10px; }
 .msl-header-title { font-size:13px; font-weight:900; }
-.msl-header-count {
-  font-size:10px; color:var(--sub);
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:20px; padding:3px 10px;
-}
-.msl-search-wrap {
-  position:relative; margin-bottom:12px;
-}
-.msl-search {
-  width:100%; background:var(--surface); border:1px solid var(--border);
-  border-radius:12px; padding:10px 14px 10px 36px;
-  font-family:'Cairo',sans-serif; font-size:12px; color:var(--text);
-  outline:none; transition:border-color .2s;
-}
+.msl-header-count { font-size:10px; color:var(--sub); background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:3px 10px; }
+.msl-search-wrap { position:relative; margin-bottom:12px; }
+.msl-search { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px 14px 10px 36px; font-family:'Cairo',sans-serif; font-size:12px; color:var(--text); outline:none; }
 .msl-search:focus { border-color:var(--accent); }
-.msl-search-icon {
-  position:absolute; left:12px; top:50%; transform:translateY(-50%);
-  font-size:14px; pointer-events:none;
-}
-.msl-filter-row {
-  display:flex; gap:6px; margin-bottom:12px;
-  overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;
-}
+.msl-search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:14px; pointer-events:none; }
+.msl-filter-row { display:flex; gap:6px; margin-bottom:12px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
 .msl-filter-row::-webkit-scrollbar { display:none; }
-.msl-chip {
-  flex-shrink:0; font-size:11px; font-weight:700; padding:5px 12px;
-  border-radius:20px; cursor:pointer; transition:all .2s;
-  background:var(--surface); border:1px solid var(--border); color:var(--sub);
-}
-.msl-chip.active {
-  background:rgba(61,127,255,.12); border-color:var(--accent); color:var(--accent);
-}
+.msl-chip { flex-shrink:0; font-size:11px; font-weight:700; padding:5px 12px; border-radius:20px; cursor:pointer; transition:all .2s; background:var(--surface); border:1px solid var(--border); color:var(--sub); }
+.msl-chip.active { background:rgba(61,127,255,.12); border-color:var(--accent); color:var(--accent); }
 .msl-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; margin-bottom:12px; }
-.msl-table {
-  width:100%; border-collapse:collapse; min-width:460px;
-}
-.msl-table thead th {
-  font-size:9px; font-weight:800; color:var(--sub); text-transform:uppercase;
-  letter-spacing:.8px; padding:8px 10px; text-align:right;
-  border-bottom:2px solid var(--border); background:var(--surface); position:sticky; top:0;
-}
+.msl-table { width:100%; border-collapse:collapse; min-width:440px; }
+.msl-table thead th { font-size:9px; font-weight:800; color:var(--sub); text-transform:uppercase; letter-spacing:.8px; padding:8px 10px; text-align:right; border-bottom:2px solid var(--border); background:var(--surface); }
 .msl-table thead th.num-col { text-align:center; }
-.msl-table tbody tr {
-  border-bottom:1px solid rgba(30,40,64,.6); transition:background .15s;
-}
-.msl-table tbody tr:active { background:rgba(61,127,255,.05); }
-.msl-table tbody tr.has-qty { background:rgba(15,186,115,.04); border-bottom-color:rgba(15,186,115,.15); }
-.msl-table td {
-  padding:9px 10px; font-size:11.5px; vertical-align:middle;
-}
+.msl-table tbody tr { border-bottom:1px solid rgba(30,40,64,.6); }
+.msl-table tbody tr.has-qty { background:rgba(15,186,115,.04); }
+.msl-table td { padding:9px 10px; font-size:11.5px; vertical-align:middle; }
 .msl-td-name { font-weight:700; line-height:1.35; max-width:160px; }
 .msl-td-bar { font-size:10px; color:var(--sub); font-family:monospace; direction:ltr; }
-.msl-td-stock { text-align:center; font-weight:700; font-size:12px; }
-.msl-td-stock.ok  { color:var(--green); }
-.msl-td-stock.low { color:var(--yellow); }
-.msl-td-stock.out { color:var(--red); }
 .msl-td-case { text-align:center; font-size:11px; color:var(--sub); }
-.msl-qty-input {
-  width:60px; background:var(--surface2); border:1.5px solid var(--border);
-  border-radius:8px; padding:5px 4px; text-align:center;
-  font-family:'Cairo',sans-serif; font-size:13px; font-weight:800; color:var(--text);
-  outline:none; -moz-appearance:textfield;
-}
-.msl-qty-input::-webkit-inner-spin-button,
-.msl-qty-input::-webkit-outer-spin-button { -webkit-appearance:none; }
-.msl-qty-input:focus { border-color:var(--accent); background:rgba(61,127,255,.06); }
+.msl-qty-input { width:58px; background:var(--surface2); border:1.5px solid var(--border); border-radius:8px; padding:5px 4px; text-align:center; font-family:'Cairo',sans-serif; font-size:13px; font-weight:800; color:var(--text); outline:none; -moz-appearance:textfield; }
+.msl-qty-input::-webkit-inner-spin-button, .msl-qty-input::-webkit-outer-spin-button { -webkit-appearance:none; }
+.msl-qty-input:focus { border-color:var(--accent); }
 .msl-qty-input.filled { border-color:var(--green); background:rgba(15,186,115,.08); color:var(--green); }
-
-.msl-summary-bar {
-  position:sticky; bottom:80px; z-index:10;
-  background:rgba(8,11,18,.92); backdrop-filter:blur(12px);
-  border:1px solid var(--border); border-radius:14px;
-  padding:12px 14px; margin-bottom:10px;
-  display:flex; align-items:center; gap:10px;
-}
+.msl-summary-bar { position:sticky; bottom:80px; z-index:10; background:rgba(8,11,18,.92); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:10px; display:flex; align-items:center; gap:10px; }
 .msl-summary-info { flex:1; }
 .msl-summary-label { font-size:10px; color:var(--sub); }
 .msl-summary-val { font-size:16px; font-weight:900; color:var(--green); }
-.msl-export-btn {
-  flex-shrink:0; padding:10px 16px; border:none; border-radius:10px;
-  background:linear-gradient(135deg,var(--green),#0d9e62);
-  color:#fff; font-family:'Cairo',sans-serif; font-size:12px; font-weight:800;
-  cursor:pointer; transition:all .2s; box-shadow:0 3px 14px rgba(15,186,115,.3);
-}
+.msl-export-btn { flex-shrink:0; padding:10px 16px; border:none; border-radius:10px; background:linear-gradient(135deg,var(--green),#0d9e62); color:#fff; font-family:'Cairo',sans-serif; font-size:12px; font-weight:800; cursor:pointer; transition:all .2s; box-shadow:0 3px 14px rgba(15,186,115,.3); }
 .msl-export-btn:active { transform:scale(.96); }
 .msl-export-btn:disabled { opacity:.4; cursor:not-allowed; box-shadow:none; }
-.msl-empty { text-align:center; padding:40px 20px; color:var(--sub); }
-.msl-empty-ico { font-size:40px; margin-bottom:10px; }
+@keyframes spin { to { transform:rotate(360deg); } }
 
 /* Color helpers */
 .c-g { color:var(--green); }
@@ -468,56 +408,9 @@ body {
     <div class="msl-header-title">🛒 قائمة MSL — طلب الأصناف المؤهلة</div>
     <div class="msl-header-count" id="mslCount">0 صنف</div>
   </div>
-
-  <!-- Loading / Error state -->
-  <div id="mslLoading" style="display:none;text-align:center;padding:40px 20px">
-    <div style="width:40px;height:40px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--accent);animation:auditSpin 1s linear infinite;margin:0 auto 12px"></div>
-    <div style="font-size:12px;color:var(--sub)">جاري تحميل قائمة MSL...</div>
+  <div id="mslContent">
+    <div class="empty"><div class="empty-ico">⏳</div><div class="empty-txt">اضغط التاب لتحميل البيانات</div></div>
   </div>
-
-  <!-- Search -->
-  <div class="msl-search-wrap" id="mslSearchWrap" style="display:none">
-    <span class="msl-search-icon">🔍</span>
-    <input class="msl-search" id="mslSearch" type="text"
-      placeholder="ابحث عن صنف أو باركود..." oninput="renderMslTable()"/>
-  </div>
-
-  <!-- Category filters -->
-  <div class="msl-filter-row" id="mslFilters"></div>
-
-  <!-- Table -->
-  <div class="msl-table-wrap" id="mslTableWrap" style="display:none">
-    <table class="msl-table">
-      <thead>
-        <tr>
-          <th>اسم الصنف</th>
-          <th>باركود</th>
-          <th class="num-col">مخزون</th>
-          <th class="num-col">كارتون</th>
-          <th class="num-col">الكمية</th>
-        </tr>
-      </thead>
-      <tbody id="mslTbody"></tbody>
-    </table>
-  </div>
-
-  <!-- Empty state -->
-  <div class="msl-empty" id="mslEmpty" style="display:none">
-    <div class="msl-empty-ico">📦</div>
-    <div>لا توجد أصناف MSL لهذا العميل</div>
-  </div>
-
-  <!-- Summary + Export -->
-  <div class="msl-summary-bar" id="mslSummaryBar" style="display:none">
-    <div class="msl-summary-info">
-      <div class="msl-summary-label">إجمالي الأصناف المطلوبة</div>
-      <div class="msl-summary-val"><span id="mslOrderedCount">0</span> صنف</div>
-    </div>
-    <button class="msl-export-btn" id="mslExportBtn" onclick="exportMslOrder()" disabled>
-      ⬇️ تصدير الطلب
-    </button>
-  </div>
-
   <div class="pb"></div>
 </div>
 
@@ -560,11 +453,11 @@ function decodeB64(str) {
       monthly:   raw.m  || 0,
       timeGone:  raw.tg || 0,
       mtd:       raw.mtd|| 0,
-      webhookUrl:raw.wh || '',
+      webhookUrl:   raw.wh || '',
+      mslWebhookUrl:raw.mw || '',
       offers:   (raw.o ||[]).map(x=>({name:x.n,barcode:x.b,discount:x.d,before:x.bf,after:x.af,until:x.u})),
       history:  (raw.h ||[]).map(x=>({name:x.n,qty:x.q,avg:x.a,days:x.d,type:x.t})),
       zeroSales:(raw.z ||[]).map(x=>({skuName:x.n,barcode:x.b,brand:x.br,category:x.c,skuClass:x.cl,stock:x.s})),
-      msl:      (raw.ms||[]).map(x=>({skuName:x.n,barcode:x.b,stockQty:x.s,caseQty:x.c,category:x.cat||''})),
       notes:    (raw.nt||[]).map(x=>({date:x.d,by:x.by,text:x.tx})),
       customers:(raw.cu||[]).map(x=>({name:x.n,target:x.tg,mtd:x.m}))
     };
@@ -846,293 +739,200 @@ async function fetchZeroSales() {
 // ─────────────────────────────────────────────
 // MSL ORDER TAB
 // ─────────────────────────────────────────────
+let mslLoaded = false;
+let mslQtyMap = {};
 let mslActiveCategory = 'الكل';
-let mslQtyMap  = {};
-let mslLoaded  = false;
 
-async function initMslTab() {
-  if (mslLoaded) return; // already loaded
+async function fetchMsl() {
+  if (mslLoaded) return;
 
-  // If data already in payload (future optimization), use it
-  if (appData && appData.msl && appData.msl.length > 0) {
-    mslLoaded = true;
-    renderMslData(appData.msl);
+  const mslUrl   = appData?.mslWebhookUrl || '';
+  const custName = appData?.name || '';
+
+  if (!mslUrl) {
+    document.getElementById('mslContent').innerHTML =
+      `<div class="empty"><div class="empty-ico">⚙️</div><div class="empty-txt">رابط MSL webhook غير موجود في الـ payload</div></div>`;
     return;
   }
 
-  // Fetch from webhook (same base URL as Zero Sales, different endpoint)
-  const webhookBase = (appData && appData.webhookUrl) ? appData.webhookUrl : '';
-  const mslWebhook  = webhookBase.replace('/webhook/zero-sales', '/webhook/msl-products');
-  const custName    = (appData && appData.name) ? appData.name : '';
-
-  if (!mslWebhook || !mslWebhook.startsWith('http')) {
-    showMslError('لم يتم ضبط رابط الـ Webhook بعد');
-    return;
-  }
-
-  document.getElementById('mslLoading').style.display = 'block';
+  document.getElementById('mslContent').innerHTML =
+    `<div class="empty"><div class="empty-ico" style="animation:logopulse 1.2s infinite">⏳</div><div class="empty-txt">جاري تحميل MSL...</div></div>`;
 
   try {
-    const url = mslWebhook + '?cust=' + encodeURIComponent(custName);
-    const res     = await fetch(url);
+    const res     = await fetch(mslUrl + '?cust=' + encodeURIComponent(custName));
     const rawText = await res.text();
 
-    if (!res.ok) throw new Error('HTTP ' + res.status + ' — ' + rawText.substring(0, 100));
-    if (!rawText || !rawText.trim()) throw new Error('الـ Webhook رجّع response فاضية — تأكد إن الـ workflow Activated');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    if (!rawText || !rawText.trim()) throw new Error('response فاضية — تأكد إن الـ workflow Activated');
 
     let json;
-    try { json = JSON.parse(rawText); }
-    catch(e) { throw new Error('Response مش JSON: ' + rawText.substring(0, 100)); }
+    try { json = JSON.parse(rawText); } catch(e) { throw new Error('مش JSON: ' + rawText.slice(0, 80)); }
 
-    // n8n may wrap in array [{...}] or return array directly
-    if (Array.isArray(json) && json.length && json[0].msl) json = json[0];
-    const items = Array.isArray(json) ? json : (json.msl || json.data || []);
+    // n8n قد يرجع [{mslItems:[...]}, ...] أو مصفوفة مباشرة
+    if (Array.isArray(json) && json[0]?.mslItems) json = json[0].mslItems;
+    else if (!Array.isArray(json)) json = json.mslItems || json.msl || json.data || [];
 
     mslLoaded = true;
-    if (appData) appData.msl = items;
-    renderMslData(items);
+    appData.msl = json;
+    renderMsl(json);
   } catch(e) {
-    showMslError('فشل تحميل MSL — ' + e.message);
-  } finally {
-    document.getElementById('mslLoading').style.display = 'none';
+    document.getElementById('mslContent').innerHTML =
+      `<div class="empty"><div class="empty-ico">❌</div><div class="empty-txt">فشل تحميل MSL<br><small style="font-size:10px;opacity:.5">${e.message}</small></div></div>`;
   }
 }
 
-function showMslError(msg) {
-  document.getElementById('mslLoading').style.display = 'none';
-  document.getElementById('mslEmpty').style.display   = 'block';
-  document.getElementById('mslEmpty').innerHTML =
-    `<div class="msl-empty-ico">❌</div><div style="font-size:12px">${msg}</div>`;
-}
-
-function renderMslData(items) {
+function renderMsl(items) {
   document.getElementById('mslCount').textContent = items.length + ' صنف';
 
   if (!items.length) {
-    document.getElementById('mslEmpty').style.display = 'block';
+    document.getElementById('mslContent').innerHTML =
+      `<div class="empty"><div class="empty-ico">📦</div><div class="empty-txt">لا توجد أصناف MSL لهذا العميل</div></div>`;
     return;
   }
 
-  document.getElementById('mslSearchWrap').style.display  = 'block';
-  document.getElementById('mslTableWrap').style.display   = 'block';
-  document.getElementById('mslSummaryBar').style.display  = 'flex';
-
-  // Build category chips
-  const cats = ['الكل', ...new Set(items.map(i => i.category || i.cat || '').filter(Boolean))];
-  const filtersEl = document.getElementById('mslFilters');
-  filtersEl.innerHTML = cats.map(c =>
-    `<div class="msl-chip ${c === mslActiveCategory ? 'active' : ''}" onclick="setMslCategory('${c}')">${c}</div>`
+  // Category chips
+  const cats = ['الكل', ...new Set(items.map(i => i.cat || i.category || '').filter(Boolean))];
+  const chipsHtml = cats.map(c =>
+    `<div class="msl-chip ${c === mslActiveCategory ? 'active' : ''}" onclick="setMslCat('${c}')">${c}</div>`
   ).join('');
+
+  document.getElementById('mslContent').innerHTML = `
+    <div class="msl-search-wrap">
+      <span class="msl-search-icon">🔍</span>
+      <input class="msl-search" id="mslSearch" type="text" placeholder="ابحث عن صنف أو باركود..." oninput="renderMslTable()"/>
+    </div>
+    <div class="msl-filter-row" id="mslFilters">${chipsHtml}</div>
+    <div class="msl-table-wrap">
+      <table class="msl-table">
+        <thead><tr>
+          <th>اسم الصنف</th><th>باركود</th><th class="num-col">كارتون</th><th class="num-col">الكمية</th>
+        </tr></thead>
+        <tbody id="mslTbody"></tbody>
+      </table>
+    </div>
+    <div class="msl-summary-bar">
+      <div class="msl-summary-info">
+        <div class="msl-summary-label">إجمالي الأصناف المطلوبة</div>
+        <div class="msl-summary-val"><span id="mslOrderedCount">0</span> صنف</div>
+      </div>
+      <button class="msl-export-btn" id="mslExportBtn" onclick="exportMsl()" disabled>📋 تصدير الطلب</button>
+    </div>`;
 
   renderMslTable();
 }
 
-function setMslCategory(cat) {
+function setMslCat(cat) {
   mslActiveCategory = cat;
-  document.querySelectorAll('.msl-chip').forEach(el => {
-    el.classList.toggle('active', el.textContent === cat);
-  });
+  document.querySelectorAll('.msl-chip').forEach(el =>
+    el.classList.toggle('active', el.textContent === cat)
+  );
   renderMslTable();
 }
 
 function renderMslTable() {
-  const items  = (appData && appData.msl) ? appData.msl : [];
-  const query  = (document.getElementById('mslSearch').value || '').trim().toLowerCase();
-
+  const items = appData?.msl || [];
+  const q     = (document.getElementById('mslSearch')?.value || '').trim().toLowerCase();
   const filtered = items.filter(item => {
-    const name = item.skuName || item.n || '';
-    const bar  = item.barcode || item.b || '';
-    const cat  = item.category || item.cat || '';
+    const name = item.n || item.skuName || '';
+    const bar  = item.b || item.barcode || '';
+    const cat  = item.cat || item.category || '';
     const catOk = mslActiveCategory === 'الكل' || cat === mslActiveCategory;
-    const q     = query ? (name.toLowerCase().includes(query) || bar.toLowerCase().includes(query)) : true;
-    return catOk && q;
+    const qOk   = !q || name.toLowerCase().includes(q) || bar.toLowerCase().includes(q);
+    return catOk && qOk;
   });
 
   const tbody = document.getElementById('mslTbody');
+  if (!tbody) return;
+
   if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--sub)">لا توجد نتائج</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:28px;color:var(--sub)">لا توجد نتائج</td></tr>`;
     return;
   }
 
   tbody.innerHTML = filtered.map(item => {
-    const name  = item.skuName  || item.n  || '';
-    const bar   = item.barcode  || item.b  || '';
-    const stock = Number(item.stockQty || item.s || 0);
-    const caseQ = item.caseQty  || item.c  || '–';
-    const key   = bar || name;
-    const qty   = mslQtyMap[key] || '';
-    const stockCls = stock === 0 ? 'out' : stock < 10 ? 'low' : 'ok';
-    const stockTxt = stock === 0 ? 'نفذ' : stock;
-    const hasQty   = qty > 0;
-    return `<tr class="${hasQty ? 'has-qty' : ''}" data-key="${key}">
-      <td class="msl-td-name">${name || '–'}</td>
+    const name = item.n || item.skuName || '';
+    const bar  = item.b || item.barcode || '';
+    const caseQ= item.c || item.caseQty || '–';
+    const key  = bar || name;
+    const qty  = mslQtyMap[key] || '';
+    const hasQ = qty > 0;
+    return `<tr class="${hasQ ? 'has-qty' : ''}">
+      <td class="msl-td-name">${name}</td>
       <td class="msl-td-bar">${bar || '–'}</td>
-      <td class="msl-td-stock ${stockCls}">${stockTxt}</td>
       <td class="msl-td-case">${caseQ}</td>
       <td style="text-align:center">
-        <input class="msl-qty-input ${hasQty ? 'filled' : ''}"
-          type="number" min="0" step="1" value="${qty}"
-          data-key="${key}" oninput="onMslQtyChange(this)" placeholder="0"/>
+        <input class="msl-qty-input ${hasQ ? 'filled' : ''}" type="number" min="0" step="1"
+          value="${qty}" data-key="${key}" oninput="onMslQty(this)" placeholder="0"/>
       </td>
     </tr>`;
   }).join('');
-
-  updateMslSummary();
 }
 
-function onMslQtyChange(input) {
+function onMslQty(input) {
   const key = input.dataset.key;
   const val = parseInt(input.value) || 0;
-  if (val > 0) {
-    mslQtyMap[key] = val;
-    input.classList.add('filled');
-    input.closest('tr').classList.add('has-qty');
-  } else {
-    delete mslQtyMap[key];
-    input.classList.remove('filled');
-    input.closest('tr').classList.remove('has-qty');
-  }
-  updateMslSummary();
-}
-
-function updateMslSummary() {
+  if (val > 0) { mslQtyMap[key] = val; input.classList.add('filled'); input.closest('tr').classList.add('has-qty'); }
+  else         { delete mslQtyMap[key]; input.classList.remove('filled'); input.closest('tr').classList.remove('has-qty'); }
   const count = Object.keys(mslQtyMap).length;
   document.getElementById('mslOrderedCount').textContent = count;
   document.getElementById('mslExportBtn').disabled = count === 0;
 }
 
-function exportMslOrder() {
-  const items    = (appData && appData.msl) ? appData.msl : [];
-  const doorName = (appData && appData.name) ? appData.name : 'MSL Order';
-
-  const ordered = items.filter(item => {
-    const key = item.barcode || item.b || item.skuName || item.n;
-    return mslQtyMap[key] > 0;
-  }).map(item => {
-    const name  = item.skuName  || item.n  || '';
-    const bar   = item.barcode  || item.b  || '';
-    const caseQ = item.caseQty  || item.c  || '';
-    const key   = bar || name;
-    return { name, bar, caseQ, qty: mslQtyMap[key] || 0 };
-  });
-
+function exportMsl() {
+  const items    = appData?.msl || [];
+  const doorName = appData?.name || 'MSL Order';
+  const ordered  = items
+    .filter(item => mslQtyMap[item.b || item.barcode || item.n || item.skuName] > 0)
+    .map(item => {
+      const name = item.n || item.skuName || '';
+      const bar  = item.b || item.barcode || '';
+      const caseQ= item.c || item.caseQty || '';
+      const key  = bar || name;
+      return { name, bar, caseQ, qty: mslQtyMap[key] };
+    });
   if (!ordered.length) return;
 
-  // ── Build text summary (copy-friendly)
+  // نص قابل للنسخ
   const lines = [
     `📋 طلب MSL — ${doorName}`,
     `📅 ${new Date().toLocaleDateString('ar-EG')}`,
-    `${'─'.repeat(30)}`,
-    ...ordered.map((o, i) =>
-      `${i+1}. ${o.name}\n   باركود: ${o.bar || '—'}  |  كارتون: ${o.caseQ || '—'}  |  الكمية: ${o.qty}`
-    ),
-    `${'─'.repeat(30)}`,
-    `إجمالي الأصناف: ${ordered.length}`
+    '─'.repeat(28),
+    ...ordered.map((o,i) => `${i+1}. ${o.name}\n   باركود: ${o.bar||'—'}  |  كارتون: ${o.caseQ||'—'}  |  الكمية: ${o.qty}`),
+    '─'.repeat(28),
+    `إجمالي: ${ordered.length} صنف`
   ];
-  const summaryText = lines.join('\n');
+  const txt = lines.join('\n');
 
-  // ── Build CSV
-  const csvHeader = '\uFEFFاسم الصنف,الباركود,الكارتون,الكمية المطلوبة';
-  const csvRows   = ordered.map(o =>
-    [o.name, o.bar, o.caseQ, o.qty].map(v => {
-      const s = String(v || '');
-      return s.includes(',') ? `"${s}"` : s;
-    }).join(',')
-  );
-  const csvAll = [csvHeader, ...csvRows, '', `العميل:,${doorName}`, `التاريخ:,${new Date().toLocaleDateString('ar-EG')}`].join('\n');
-
-  // ── Show modal
-  showExportModal(summaryText, csvAll, doorName);
-}
-
-function showExportModal(summaryText, csvText, doorName) {
-  // Remove old modal if exists
-  const old = document.getElementById('mslExportModal');
+  // Modal
+  const old = document.getElementById('mslModal');
   if (old) old.remove();
-
   const modal = document.createElement('div');
-  modal.id = 'mslExportModal';
-  modal.style.cssText = `
-    position:fixed;inset:0;z-index:999;
-    background:rgba(0,0,0,.75);backdrop-filter:blur(6px);
-    display:flex;align-items:flex-end;justify-content:center;
-  `;
+  modal.id = 'mslModal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);display:flex;align-items:flex-end';
   modal.innerHTML = `
-    <div style="
-      background:var(--surface);border-radius:20px 20px 0 0;
-      width:100%;max-height:80vh;display:flex;flex-direction:column;
-      border-top:1px solid var(--border);overflow:hidden;
-    ">
+    <div style="background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-height:80vh;display:flex;flex-direction:column;border-top:1px solid var(--border);overflow:hidden">
       <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:14px;font-weight:900">📋 ${doorName}</div>
-        <button onclick="document.getElementById('mslExportModal').remove()"
-          style="background:none;border:none;color:var(--sub);font-size:20px;cursor:pointer;line-height:1">✕</button>
+        <button onclick="document.getElementById('mslModal').remove()" style="background:none;border:none;color:var(--sub);font-size:22px;cursor:pointer">✕</button>
       </div>
-      <textarea id="mslExportText" readonly style="
-        flex:1;background:var(--surface2);border:none;outline:none;
-        font-family:'Cairo',monospace;font-size:11px;color:var(--text);
-        padding:14px 16px;resize:none;line-height:1.8;direction:rtl;
-        overflow-y:auto;
-      ">${summaryText}</textarea>
-      <div style="padding:12px 16px;display:flex;gap:8px">
-        <button onclick="copyExport()" style="
-          flex:1;padding:13px;border:none;border-radius:12px;cursor:pointer;
-          font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;
-          background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;
-        ">📋 نسخ الطلب</button>
-        <button onclick="downloadCsv()" style="
-          flex:1;padding:13px;border:none;border-radius:12px;cursor:pointer;
-          font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;
-          background:linear-gradient(135deg,var(--green),#0d9e62);color:#fff;
-        ">⬇️ تنزيل CSV</button>
+      <textarea id="mslExportTxt" readonly style="flex:1;background:var(--surface2);border:none;outline:none;font-family:'Cairo',monospace;font-size:11px;color:var(--text);padding:14px 16px;resize:none;line-height:1.9;direction:rtl;overflow-y:auto">${txt}</textarea>
+      <div style="padding:12px 16px">
+        <button onclick="copyMsl()" style="width:100%;padding:13px;border:none;border-radius:12px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff" id="mslCopyBtn">📋 نسخ الطلب</button>
       </div>
-    </div>
-  `;
-  // Store csv for download button
-  modal._csv     = csvText;
-  modal._door    = doorName;
-  document.body.appendChild(modal);
-  // Close on backdrop click
+    </div>`;
   modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
 }
 
-function copyExport() {
-  const ta = document.getElementById('mslExportText');
+function copyMsl() {
+  const ta = document.getElementById('mslExportTxt');
   if (!ta) return;
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(ta.value).then(() => flashBtn('📋 نسخ الطلب', '✅ تم النسخ!'));
-  } else {
-    ta.select(); document.execCommand('copy');
-    flashBtn('📋 نسخ الطلب', '✅ تم النسخ!');
-  }
-}
-
-function flashBtn(from, to) {
-  const btns = document.querySelectorAll('#mslExportModal button');
-  btns.forEach(b => { if (b.textContent.includes('نسخ')) { b.textContent = to; setTimeout(()=>{ b.textContent = from; }, 2000); } });
-}
-
-function downloadCsv() {
-  const modal = document.getElementById('mslExportModal');
-  if (!modal) return;
-  const csv      = modal._csv;
-  const doorName = modal._door || 'MSL_Order';
-  const filename = doorName.replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '_') + '_MSL.csv';
-
-  // Try Telegram openLink with data URI (opens in external browser)
-  const tg = window.Telegram?.WebApp;
-  if (tg && tg.openLink) {
-    const dataUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-    try { tg.openLink(dataUri); return; } catch(e) {}
-  }
-  // Fallback: anchor download
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = filename;
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  const copy = () => {
+    document.getElementById('mslCopyBtn').textContent = '✅ تم النسخ!';
+    setTimeout(() => { const b = document.getElementById('mslCopyBtn'); if(b) b.textContent = '📋 نسخ الطلب'; }, 2000);
+  };
+  if (navigator.clipboard) navigator.clipboard.writeText(ta.value).then(copy);
+  else { ta.select(); document.execCommand('copy'); copy(); }
 }
 
 // ─────────────────────────────────────────────
@@ -1143,16 +943,11 @@ function openTab(id, el) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('panel-' + id).classList.add('active');
-  // Lazy-load zero sales when tab first opened
-  if (id === 'zero' && !zeroLoaded) {
-    fetchZeroSales();
-  }
-  if (id === 'msl') initMslTab();
+  if (id === 'zero' && !zeroLoaded) fetchZeroSales();
+  if (id === 'msl'  && !mslLoaded)  fetchMsl();
 }
 
-// ─────────────────────────────────────────────
-// DEMO DATA (يظهر لو فُتح بدون بيانات)
-// ─────────────────────────────────────────────
+
 function getDemoData() {
   return {
     type: 'cust',
@@ -1172,15 +967,6 @@ function getDemoData() {
     notes: [
       { date:'05/03/2026', by:'Ahmed Samy', text:'العميل طلب زيادة تشكيلة المشروبات في الشهر القادم' },
       { date:'20/02/2026', by:'Mohamed Ali', text:'مخزن مكتمل من الشيبس — متابعة بعد أسبوعين' }
-    ],
-    msl: [
-      { skuName:'شيبس ليز 100جم',        barcode:'6221024000015', stockQty:48,  caseQty:24, category:'سناكس' },
-      { skuName:'شيبس ليز 50جم',         barcode:'6221024000016', stockQty:0,   caseQty:24, category:'سناكس' },
-      { skuName:'بيبسي 330مل',           barcode:'6221024000022', stockQty:120, caseQty:12, category:'مشروبات' },
-      { skuName:'بيبسي زيرو 330مل',      barcode:'6221024000023', stockQty:8,   caseQty:12, category:'مشروبات' },
-      { skuName:'شاي مثلج بالخوخ 330مل', barcode:'6221024000031', stockQty:36,  caseQty:12, category:'مشروبات' },
-      { skuName:'كيتو كريمة 200جم',      barcode:'6221024000041', stockQty:0,   caseQty:18, category:'ألبان' },
-      { skuName:'بسكويت ماريا 100جم',    barcode:'6221024000051', stockQty:60,  caseQty:30, category:'بسكويت' }
     ]
   };
 }
