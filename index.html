@@ -5,1013 +5,1084 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Mighty Foods</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #080b12;
-  --surface: #10141f;
-  --surface2: #171d2e;
-  --border: #1e2840;
-  --accent: #3d7fff;
-  --accent2: #5b5ef4;
-  --green: #0fba73;
-  --yellow: #f5a623;
-  --red: #f04040;
-  --text: #eaf0ff;
-  --sub: #5e6e8a;
-  --gold: #f7c948;
+  --bg:#080b12; --s1:#10141f; --s2:#171d2e; --s3:#1c2438;
+  --border:#1e2840; --border2:#263050;
+  --accent:#f97316; --accent2:#fb923c;
+  --blue:#3d7fff; --blue2:#5b5ef4;
+  --green:#0fba73; --yellow:#f7c948; --red:#f04040;
+  --text:#eaf0ff; --sub:#5e6e8a; --muted:#3a4a66;
+  --gold:#f7c948; --purple:#a855f7;
+  --r:14px; --r-sm:10px; --r-xs:8px;
 }
-* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html, body { height:100%; }
-body {
-  font-family:'Cairo',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  overflow-x:hidden;
-}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
 
-/* ── LOADER ─────────────────────────────── */
-#loader {
-  position:fixed; inset:0; z-index:999;
-  background:var(--bg);
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  gap:18px; transition:opacity .4s ease;
-}
-#loader.out { opacity:0; pointer-events:none; }
-.loader-logo {
-  width:76px; height:76px; border-radius:22px;
-  background:linear-gradient(135deg,#3d7fff,#5b5ef4);
-  display:flex; align-items:center; justify-content:center;
-  font-size:32px;
-  box-shadow:0 0 50px rgba(61,127,255,.45);
-  animation:logopulse 1.8s ease-in-out infinite;
-}
-@keyframes logopulse {
-  0%,100%{box-shadow:0 0 30px rgba(61,127,255,.4)}
-  50%{box-shadow:0 0 70px rgba(61,127,255,.75)}
-}
-.loader-title { font-size:22px; font-weight:900; letter-spacing:-.5px; }
-.loader-sub { font-size:12px; color:var(--sub); }
-.loader-bar {
-  width:100px; height:2px;
-  background:var(--border); border-radius:2px; overflow:hidden;
-}
-.loader-fill {
-  height:100%;
-  background:linear-gradient(90deg,var(--accent),var(--accent2));
-  animation:fillbar 1.4s ease forwards;
-}
-@keyframes fillbar { to { width:100%; } }
+/* ─── LOADER ─── */
+#loader{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .4s}
+#loader.out{opacity:0;pointer-events:none}
+.ld-logo{width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,var(--accent),#c2410c);display:flex;align-items:center;justify-content:center;font-size:36px;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 30px rgba(249,115,22,.4)}50%{box-shadow:0 0 70px rgba(249,115,22,.75)}}
+.ld-title{font-size:22px;font-weight:900;letter-spacing:-.5px}
+.ld-sub{font-size:12px;color:var(--sub)}
+.ld-bar{width:120px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.ld-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));animation:lfill 1.6s ease forwards}
+@keyframes lfill{to{width:100%}}
 
-/* ── TOP BAR ──────────────────────────── */
-.topbar {
-  position:sticky; top:0; z-index:50;
-  background:rgba(8,11,18,.88); backdrop-filter:blur(18px);
-  border-bottom:1px solid var(--border);
-  padding:12px 16px;
-  display:flex; align-items:center; gap:10px;
-}
-.topbar-icon {
-  width:34px; height:34px; border-radius:10px; flex-shrink:0;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  display:flex; align-items:center; justify-content:center; font-size:16px;
-}
-.topbar-info { flex:1; min-width:0; }
-.topbar-name {
-  font-size:14px; font-weight:800;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-.topbar-type { font-size:11px; color:var(--sub); }
-.topbar-badge {
-  font-size:10px; font-weight:700; padding:3px 9px;
-  border-radius:20px; flex-shrink:0;
-}
-.badge-cust { background:rgba(15,186,115,.12); color:var(--green); border:1px solid rgba(15,186,115,.25); }
-.badge-rep { background:rgba(61,127,255,.12); color:var(--accent); border:1px solid rgba(61,127,255,.25); }
+/* ─── LAYOUT ─── */
+#app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.topbar{flex-shrink:0;padding:10px 14px;background:rgba(8,11,18,.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.topbar-icon{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--accent),#c2410c);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.topbar-info{flex:1;min-width:0}
+.topbar-name{font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-door{font-size:10px;color:var(--sub)}
+.topbar-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;flex-shrink:0;background:rgba(249,115,22,.12);color:var(--accent);border:1px solid rgba(249,115,22,.3)}
+.door-btn{flex-shrink:0;padding:5px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--s2);font-size:10px;font-weight:700;color:var(--sub);cursor:pointer;font-family:'Cairo',sans-serif}
+.door-btn:active{transform:scale(.95)}
 
-/* ── RING HERO ────────────────────────── */
-.ring-section {
-  padding:20px 16px 12px;
-  display:flex; align-items:center; gap:18px;
-  background:linear-gradient(180deg,rgba(61,127,255,.06) 0%, transparent 100%);
-  border-bottom:1px solid var(--border);
-}
-.ring-wrap { position:relative; display:inline-flex; flex-shrink:0; }
-.ring-svg { transform:rotate(-90deg); }
-.ring-track { fill:none; stroke:var(--border); stroke-width:9; }
-.ring-fill { fill:none; stroke-width:9; stroke-linecap:round; transition:stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1); }
-.ring-center { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-.ring-pct { font-size:26px; font-weight:900; line-height:1; }
-.ring-lbl { font-size:9px; color:var(--sub); margin-top:1px; }
-.ring-stats { flex:1; display:flex; flex-direction:column; gap:9px; }
-.rstat { }
-.rstat-row { display:flex; justify-content:space-between; margin-bottom:5px; }
-.rstat-label { font-size:11px; color:var(--sub); }
-.rstat-val { font-size:11px; font-weight:700; }
-.rstat-bar { height:5px; background:var(--border); border-radius:3px; overflow:hidden; }
-.rstat-fill { height:100%; border-radius:3px; transition:width 1.2s cubic-bezier(.4,0,.2,1); }
+/* ─── SCROLL BODY ─── */
+#scroll-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#scroll-body::-webkit-scrollbar{display:none}
 
-/* ── NUMBERS GRID ────────────────────── */
-.nums-grid {
-  display:grid; grid-template-columns:1fr 1fr;
-  gap:8px; padding:14px 16px 10px;
-}
-.num-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:14px; padding:13px 12px;
-}
-.num-card-lbl { font-size:10px; color:var(--sub); }
-.num-card-val { font-size:19px; font-weight:900; margin-top:3px; line-height:1; }
-.num-card-sub { font-size:9px; color:var(--sub); margin-top:3px; }
+/* ─── RING ─── */
+.ring-section{padding:18px 14px 12px;display:flex;align-items:center;gap:16px;background:linear-gradient(180deg,rgba(249,115,22,.05) 0%,transparent 100%);border-bottom:1px solid var(--border)}
+.ring-wrap{position:relative;display:inline-flex;flex-shrink:0}
+.ring-svg{transform:rotate(-90deg)}
+.ring-track{fill:none;stroke:var(--border);stroke-width:9}
+.ring-fill{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-pct{font-size:24px;font-weight:900;line-height:1}
+.ring-lbl{font-size:9px;color:var(--sub);margin-top:1px}
+.ring-stats{flex:1;display:flex;flex-direction:column;gap:8px}
+.rstat-row{display:flex;justify-content:space-between;margin-bottom:4px}
+.rstat-lbl{font-size:11px;color:var(--sub)}
+.rstat-val{font-size:11px;font-weight:700}
+.rstat-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.rstat-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
 
-/* ── TABS ────────────────────────────── */
-.tabs-wrap {
-  display:flex; gap:6px; padding:6px 16px 10px;
-  overflow-x:auto; -webkit-overflow-scrolling:touch;
-  scrollbar-width:none;
-}
-.tabs-wrap::-webkit-scrollbar { display:none; }
-.tab {
-  flex-shrink:0; font-size:12px; font-weight:700;
-  padding:7px 14px; border-radius:20px;
-  background:var(--surface); border:1px solid var(--border);
-  cursor:pointer; transition:all .2s; color:var(--sub);
-}
-.tab.active {
-  background:rgba(61,127,255,.12);
-  border-color:var(--accent); color:var(--accent);
-}
-.tab:active { transform:scale(.95); }
+/* ─── KPI GRID ─── */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 8px}
+.kpi-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px}
+.kpi-lbl{font-size:9px;color:var(--sub);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.kpi-val{font-size:20px;font-weight:900;margin-top:4px;line-height:1}
+.kpi-sub{font-size:9px;color:var(--sub);margin-top:3px}
 
-/* ── TAB PANELS ──────────────────────── */
-.panel { display:none; padding:0 16px 90px; }
-.panel.active { display:block; }
+/* ─── TABS ─── */
+.tabs-wrap{display:flex;gap:5px;padding:6px 14px 8px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.tabs-wrap::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;font-size:11px;font-weight:700;padding:6px 13px;border-radius:20px;background:var(--s1);border:1px solid var(--border);cursor:pointer;transition:all .2s;color:var(--sub);font-family:'Cairo',sans-serif}
+.tab.active{background:rgba(249,115,22,.12);border-color:var(--accent);color:var(--accent)}
+.tab:active{transform:scale(.95)}
+.tab-badge{display:inline-block;background:var(--red);color:#fff;font-size:9px;padding:1px 5px;border-radius:10px;margin-right:4px}
 
-/* Offer cards */
-.offer-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:14px; padding:14px; margin-bottom:8px;
-  position:relative; overflow:hidden;
-}
-.offer-live {
-  position:absolute; top:12px; left:12px;
-  font-size:9px; font-weight:800; padding:3px 8px;
-  border-radius:20px;
-  background:rgba(247,201,72,.12); color:var(--gold);
-  border:1px solid rgba(247,201,72,.3);
-}
-.offer-name { font-size:14px; font-weight:800; margin:20px 0 10px 0; }
-.offer-chips { display:flex; gap:6px; flex-wrap:wrap; }
-.chip {
-  font-size:10px; padding:4px 9px; border-radius:20px;
-  background:var(--surface2); border:1px solid var(--border);
-}
-.chip-red { background:rgba(240,64,64,.08); border-color:rgba(240,64,64,.2); color:#f87171; }
-.chip-blue { background:rgba(61,127,255,.08); border-color:rgba(61,127,255,.2); color:#7eb4ff; }
+/* ─── PANELS ─── */
+.panel{display:none;padding:0 14px 90px}
+.panel.active{display:block}
+.section-title{font-size:10px;font-weight:800;color:var(--sub);letter-spacing:1.2px;text-transform:uppercase;padding:14px 0 8px;border-bottom:1px solid var(--border);margin-bottom:8px}
 
-/* History */
-.hist-section-title {
-  font-size:10px; font-weight:800; letter-spacing:1.5px;
-  color:var(--sub); text-transform:uppercase;
-  padding:14px 0 8px;
-}
-.hist-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:12px; padding:12px 14px; margin-bottom:7px;
-  display:flex; align-items:center; gap:10px;
-}
-.hist-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-.hist-dot.hot { background:var(--green); box-shadow:0 0 8px rgba(15,186,115,.5); }
-.hist-dot.warn { background:var(--yellow); box-shadow:0 0 8px rgba(245,166,35,.5); }
-.hist-name { font-size:13px; font-weight:700; }
-.hist-meta { font-size:10px; color:var(--sub); margin-top:3px; }
+/* ─── DOOR CARDS ─── */
+.door-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:7px;cursor:pointer;transition:border-color .2s}
+.door-card.current{border-color:var(--accent)}
+.door-card-name{font-size:13px;font-weight:700}
+.door-card-ch{font-size:10px;color:var(--sub);margin-top:2px}
+.door-pct{font-size:11px;margin-top:6px;display:flex;justify-content:space-between}
+.door-prog{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:5px}
+.door-prog-fill{height:100%;border-radius:2px;background:var(--green);transition:width 1.2s cubic-bezier(.4,0,.2,1)}
 
-/* Notes */
-.note-card {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:14px; padding:14px; margin-bottom:8px;
-}
-.note-top { display:flex; align-items:center; gap:8px; margin-bottom:9px; }
-.note-idx {
-  width:22px; height:22px; border-radius:7px; flex-shrink:0;
-  background:rgba(91,94,244,.18); color:var(--accent2);
-  font-size:11px; font-weight:800;
-  display:flex; align-items:center; justify-content:center;
-}
-.note-meta { font-size:10px; color:var(--sub); }
-.note-text { font-size:13px; line-height:1.8; }
+/* ─── MSL TABLE ─── */
+.msl-controls{padding:12px 0 8px;display:flex;flex-direction:column;gap:8px}
+.search-wrap{position:relative}
+.search-input{width:100%;background:var(--s1);border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 12px 9px 34px;font-family:'Cairo',sans-serif;font-size:12px;color:var(--text);outline:none}
+.search-input:focus{border-color:var(--accent)}
+.search-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none}
+.chips-row{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips-row::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;font-size:10px;font-weight:700;padding:4px 11px;border-radius:20px;cursor:pointer;transition:all .2s;background:var(--s1);border:1px solid var(--border);color:var(--sub);font-family:'Cairo',sans-serif}
+.chip.active{background:rgba(249,115,22,.12);border-color:var(--accent);color:var(--accent)}
 
-/* Customers list (rep view) */
-.cust-row {
-  background:var(--surface); border:1px solid var(--border);
-  border-radius:12px; padding:12px 14px; margin-bottom:7px;
-}
-.cust-row-name { font-size:13px; font-weight:700; }
-.cust-row-pct { font-size:11px; margin-top:5px; }
-.cust-prog { height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-top:6px; }
-.cust-fill { height:100%; border-radius:2px; transition:width 1.2s cubic-bezier(.4,0,.2,1); }
+.msl-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r-sm);border:1px solid var(--border)}
+.msl-tbl{width:100%;border-collapse:collapse;min-width:480px}
+.msl-tbl thead th{font-size:9px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.7px;padding:8px 8px;text-align:right;border-bottom:2px solid var(--border);background:var(--s1);white-space:nowrap}
+.msl-tbl thead th.cen{text-align:center}
+.msl-tbl tbody tr{border-bottom:1px solid rgba(30,40,64,.5);transition:background .15s}
+.msl-tbl tbody tr:last-child{border-bottom:none}
+.msl-tbl tbody tr.has-qty{background:rgba(15,186,115,.04)}
+.msl-tbl tbody tr.is-promo{background:rgba(249,115,22,.04)}
+.msl-tbl td{padding:8px;font-size:11px;vertical-align:middle}
 
-/* Empty */
-.empty { text-align:center; padding:50px 20px; color:var(--sub); }
+.td-img-btn{text-align:center}
+.img-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border2);background:var(--s2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s}
+.img-btn:active{transform:scale(.9)}
 
-/* ── ZERO SALES ─────────────────────────────── */
-.zero-group-title {
-  font-size:11px; font-weight:800; color:var(--sub);
-  letter-spacing:.06em; text-transform:uppercase;
-  padding:18px 0 8px; border-bottom:1px solid var(--border);
-  margin-bottom:8px;
-}
-.zero-card {
-  background:var(--surface);
-  border:1px solid rgba(240,64,64,.18);
-  border-right:3px solid var(--red);
-  border-radius:12px; padding:11px 14px; margin-bottom:7px;
-}
-.zero-name { font-size:12.5px; font-weight:700; line-height:1.5; margin-bottom:6px; }
-.zero-chips { display:flex; gap:4px; flex-wrap:wrap; }
-.chip-red { background:rgba(240,64,64,.12)!important; color:var(--red)!important; border-color:rgba(240,64,64,.25)!important; }
-.zero-summary {
-  background:rgba(240,64,64,.07); border:1px solid rgba(240,64,64,.15);
-  border-radius:10px; padding:10px 14px; margin-bottom:14px;
-  font-size:12px; color:var(--sub); display:flex; align-items:center; gap:8px;
-}
-.zero-summary strong { color:var(--red); font-size:16px; }
-.empty-ico { font-size:44px; margin-bottom:12px; }
-.empty-txt { font-size:13px; }
+.td-name{max-width:170px}
+.sku-name{font-size:11.5px;font-weight:700;line-height:1.4}
+.sku-badges{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px}
+.badge{display:inline-block;font-size:9px;font-weight:800;padding:2px 6px;border-radius:10px;white-space:nowrap}
+.badge-zero{background:rgba(240,64,64,.12);color:var(--red);border:1px solid rgba(240,64,64,.25)}
+.badge-promo{background:rgba(249,115,22,.15);color:var(--accent);border:1px solid rgba(249,115,22,.3)}
+.badge-cat{background:var(--s2);color:var(--sub);border:1px solid var(--border)}
 
-/* Scroll padding */
-.pb { height:80px; }
+.td-case{text-align:center;font-size:10px;color:var(--sub)}
+.td-stock{text-align:center}
+.stock-badge{display:inline-block;min-width:38px;padding:3px 7px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:.3px;text-align:center}
+.stk-high{background:rgba(15,186,115,.14);color:var(--green);border:1px solid rgba(15,186,115,.25)}
+.stk-mid{background:rgba(247,201,72,.13);color:var(--yellow);border:1px solid rgba(247,201,72,.25)}
+.stk-low{background:rgba(240,64,64,.12);color:var(--red);border:1px solid rgba(240,64,64,.22)}
+.stk-zero{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--border)}
 
-/* ── MSL ORDER TAB ──────────────────────────── */
-.msl-header { display:flex; align-items:center; justify-content:space-between; padding:14px 0 10px; }
-.msl-header-title { font-size:13px; font-weight:900; }
-.msl-header-count { font-size:10px; color:var(--sub); background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:3px 10px; }
-.msl-search-wrap { position:relative; margin-bottom:12px; }
-.msl-search { width:100%; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px 14px 10px 36px; font-family:'Cairo',sans-serif; font-size:12px; color:var(--text); outline:none; }
-.msl-search:focus { border-color:var(--accent); }
-.msl-search-icon { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:14px; pointer-events:none; }
-.msl-filter-row { display:flex; gap:6px; margin-bottom:12px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
-.msl-filter-row::-webkit-scrollbar { display:none; }
-.msl-chip { flex-shrink:0; font-size:11px; font-weight:700; padding:5px 12px; border-radius:20px; cursor:pointer; transition:all .2s; background:var(--surface); border:1px solid var(--border); color:var(--sub); }
-.msl-chip.active { background:rgba(61,127,255,.12); border-color:var(--accent); color:var(--accent); }
-.msl-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; margin-bottom:12px; }
-.msl-table { width:100%; border-collapse:collapse; min-width:440px; }
-.msl-table thead th { font-size:9px; font-weight:800; color:var(--sub); text-transform:uppercase; letter-spacing:.8px; padding:8px 10px; text-align:right; border-bottom:2px solid var(--border); background:var(--surface); }
-.msl-table thead th.num-col { text-align:center; }
-.msl-table tbody tr { border-bottom:1px solid rgba(30,40,64,.6); }
-.msl-table tbody tr.has-qty { background:rgba(15,186,115,.04); }
-.msl-table td { padding:9px 10px; font-size:11.5px; vertical-align:middle; }
-.msl-td-name { font-weight:700; line-height:1.35; max-width:160px; }
-.msl-td-bar { font-size:10px; color:var(--sub); font-family:monospace; direction:ltr; }
-.msl-td-case  { text-align:center; font-size:11px; color:var(--sub); }
-.msl-td-stock { text-align:center; }
-.stock-badge  { display:inline-block; min-width:36px; padding:3px 8px; border-radius:20px; font-size:11px; font-weight:800; letter-spacing:.3px; }
-.stock-high   { background:rgba(15,186,115,.14); color:#0fba73; border:1px solid rgba(15,186,115,.25); }
-.stock-mid    { background:rgba(247,201,72,.13);  color:#f7c948; border:1px solid rgba(247,201,72,.25); }
-.stock-low    { background:rgba(240,64,64,.12);   color:#f04040; border:1px solid rgba(240,64,64,.22); }
-.stock-zero   { background:rgba(255,255,255,.05); color:var(--sub); border:1px solid var(--border); }
-.msl-qty-input { width:58px; background:var(--surface2); border:1.5px solid var(--border); border-radius:8px; padding:5px 4px; text-align:center; font-family:'Cairo',sans-serif; font-size:13px; font-weight:800; color:var(--text); outline:none; -moz-appearance:textfield; }
-.msl-qty-input::-webkit-inner-spin-button, .msl-qty-input::-webkit-outer-spin-button { -webkit-appearance:none; }
-.msl-qty-input:focus { border-color:var(--accent); }
-.msl-qty-input.filled { border-color:var(--green); background:rgba(15,186,115,.08); color:var(--green); }
-.msl-summary-bar { position:sticky; bottom:80px; z-index:10; background:rgba(8,11,18,.92); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:10px; display:flex; align-items:center; gap:10px; }
-.msl-summary-info { flex:1; }
-.msl-summary-label { font-size:10px; color:var(--sub); }
-.msl-summary-val { font-size:16px; font-weight:900; color:var(--green); }
-.msl-export-btn { flex-shrink:0; padding:10px 16px; border:none; border-radius:10px; background:linear-gradient(135deg,var(--green),#0d9e62); color:#fff; font-family:'Cairo',sans-serif; font-size:12px; font-weight:800; cursor:pointer; transition:all .2s; box-shadow:0 3px 14px rgba(15,186,115,.3); }
-.msl-export-btn:active { transform:scale(.96); }
-.msl-export-btn:disabled { opacity:.4; cursor:not-allowed; box-shadow:none; }
-@keyframes spin { to { transform:rotate(360deg); } }
+.td-last{text-align:center;font-size:10px}
+.last-date{color:var(--sub)}
+.last-qty{font-weight:700;font-size:11px;margin-top:1px}
 
-/* Color helpers */
-.c-g { color:var(--green); }
-.c-y { color:var(--yellow); }
-.c-r { color:var(--red); }
-.c-a { color:var(--accent); }
+.td-promo{text-align:center;font-size:10px}
+.promo-disc{color:var(--accent);font-weight:800}
+.promo-price{color:var(--sub);font-size:9px;margin-top:1px}
 
-/* Anim on load */
-.fade-up { opacity:0; transform:translateY(16px); animation:fadeup .4s ease forwards; }
-@keyframes fadeup { to { opacity:1; transform:translateY(0); } }
-.d1{animation-delay:.05s} .d2{animation-delay:.1s}
-.d3{animation-delay:.15s} .d4{animation-delay:.2s}
-.d5{animation-delay:.25s}
+.td-qty{text-align:center}
+.qty-input{width:54px;background:var(--s2);border:1.5px solid var(--border);border-radius:8px;padding:5px 4px;text-align:center;font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;color:var(--text);outline:none;-moz-appearance:textfield}
+.qty-input::-webkit-inner-spin-button,.qty-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.qty-input:focus{border-color:var(--accent)}
+.qty-input.filled{border-color:var(--green);background:rgba(15,186,115,.08);color:var(--green)}
+
+/* Summary bar */
+.msl-summary{position:sticky;bottom:5px;z-index:10;background:rgba(8,11,18,.95);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;gap:10px;margin-top:10px}
+.sum-info{flex:1}
+.sum-lbl{font-size:10px;color:var(--sub)}
+.sum-val{font-size:17px;font-weight:900;color:var(--green)}
+.export-btn{flex-shrink:0;padding:9px 16px;border:none;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--green),#0d9e62);color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 3px 14px rgba(15,186,115,.3)}
+.export-btn:active{transform:scale(.96)}
+.export-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+
+/* ─── HISTORY ─── */
+.hist-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:10px}
+.hist-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.hist-dot.hot{background:var(--green);box-shadow:0 0 8px rgba(15,186,115,.5)}
+.hist-dot.warn{background:var(--yellow);box-shadow:0 0 8px rgba(247,201,72,.5)}
+.hist-dot.stop{background:var(--red);box-shadow:0 0 8px rgba(240,64,64,.5)}
+.hist-main{flex:1;min-width:0}
+.hist-name{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-meta{font-size:10px;color:var(--sub);margin-top:2px}
+.hist-right{text-align:left;flex-shrink:0}
+.hist-qty{font-size:15px;font-weight:900}
+.hist-sub{font-size:9px;color:var(--sub)}
+
+/* ─── ZERO ─── */
+.zero-summary{background:rgba(240,64,64,.07);border:1px solid rgba(240,64,64,.15);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--sub)}
+.zero-num{font-size:20px;font-weight:900;color:var(--red)}
+.zero-card{background:var(--s1);border:1px solid rgba(240,64,64,.18);border-right:3px solid var(--red);border-radius:var(--r-sm);padding:10px 13px;margin-bottom:7px}
+.zero-name{font-size:12.5px;font-weight:700;line-height:1.5;margin-bottom:5px}
+.zero-meta{font-size:10px;color:var(--sub)}
+
+/* ─── PROMO ─── */
+.promo-card{background:var(--s1);border:1px solid rgba(249,115,22,.25);border-radius:var(--r);padding:14px;margin-bottom:8px;position:relative;overflow:hidden}
+.promo-card::before{content:'';position:absolute;top:0;right:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--accent),var(--accent2))}
+.promo-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.promo-name{font-size:13px;font-weight:800;line-height:1.4;flex:1}
+.promo-disc-badge{flex-shrink:0;background:rgba(249,115,22,.15);color:var(--accent);border:1px solid rgba(249,115,22,.3);font-size:12px;font-weight:900;padding:4px 10px;border-radius:20px}
+.promo-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.promo-chip{font-size:10px;padding:3px 9px;border-radius:20px}
+.promo-chip.price{background:var(--s2);color:var(--text);border:1px solid var(--border)}
+.promo-chip.price-after{background:rgba(249,115,22,.12);color:var(--accent);border:1px solid rgba(249,115,22,.25)}
+.promo-chip.exp{background:rgba(240,64,64,.08);color:#f87171;border:1px solid rgba(240,64,64,.2)}
+.promo-chip.group{background:rgba(61,127,255,.08);color:#7eb4ff;border:1px solid rgba(61,127,255,.2)}
+.promo-expired-label{position:absolute;top:10px;left:10px;font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px;background:rgba(15,186,115,.12);color:var(--green);border:1px solid rgba(15,186,115,.25)}
+
+/* ─── LOADING SPINNER ─── */
+.tab-loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;gap:12px}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner-txt{font-size:12px;color:var(--sub)}
+
+/* ─── EMPTY ─── */
+.empty{text-align:center;padding:50px 20px;color:var(--sub)}
+.empty-ico{font-size:40px;margin-bottom:10px}
+.empty-txt{font-size:13px}
+
+/* ─── DOOR SELECTOR OVERLAY ─── */
+#door-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:none;align-items:flex-end}
+#door-overlay.open{display:flex}
+.door-sheet{background:var(--s1);border-radius:22px 22px 0 0;width:100%;padding:18px 16px 40px;border-top:1px solid var(--border);animation:slideup .3s ease}
+@keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-handle{width:36px;height:3px;border-radius:2px;background:var(--muted);margin:0 auto 16px}
+.sheet-title{font-size:14px;font-weight:900;margin-bottom:14px}
+.door-opt{display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--r-sm);cursor:pointer;transition:background .15s;margin-bottom:5px}
+.door-opt:active{background:var(--s2)}
+.door-opt.sel{background:rgba(249,115,22,.1)}
+.door-opt-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;transition:all .2s}
+.door-opt.sel .door-opt-dot{background:var(--accent);border-color:var(--accent)}
+.door-opt-info{flex:1}
+.door-opt-name{font-size:13px;font-weight:700}
+.door-opt-ch{font-size:10px;color:var(--sub)}
+.door-opt-pct{font-size:11px;font-weight:700}
+
+/* ─── IMAGE MODAL ─── */
+#img-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:20px}
+#img-modal.open{display:flex}
+#img-modal img{max-width:100%;max-height:65vh;border-radius:var(--r);object-fit:contain;background:var(--s1)}
+.modal-sku-name{font-size:14px;font-weight:800;text-align:center;color:var(--text)}
+.modal-close{padding:10px 28px;border:none;border-radius:var(--r-sm);background:var(--s2);color:var(--sub);font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer}
+.modal-img-err{font-size:13px;color:var(--sub);text-align:center;padding:30px}
+
+/* ─── HELPERS ─── */
+.c-g{color:var(--green)}.c-y{color:var(--yellow)}.c-r{color:var(--red)}.c-a{color:var(--accent)}.c-b{color:var(--blue)}
+.fade-up{opacity:0;transform:translateY(12px);animation:fadeup .35s ease forwards}
+@keyframes fadeup{to{opacity:1;transform:translateY(0)}}
+.d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}.d4{animation-delay:.2s}.d5{animation-delay:.25s}
+.pb{height:80px}
 </style>
 </head>
 <body>
 
 <!-- LOADER -->
 <div id="loader">
-  <div class="loader-logo">🍽️</div>
-  <div class="loader-title">Mighty Foods</div>
-  <div class="loader-sub">جاري تحميل البيانات...</div>
-  <div class="loader-bar"><div class="loader-fill"></div></div>
+  <div class="ld-logo">🍊</div>
+  <div class="ld-title">Mighty Foods</div>
+  <div class="ld-sub">جاري تحميل بياناتك...</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
 </div>
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <div class="topbar-icon" id="tbIcon">🏢</div>
-  <div class="topbar-info">
-    <div class="topbar-name" id="tbName">–</div>
-    <div class="topbar-type" id="tbType">–</div>
+<!-- DOOR SELECTOR OVERLAY -->
+<div id="door-overlay">
+  <div class="door-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">اختر المحل</div>
+    <div id="door-opts"></div>
   </div>
-  <div class="topbar-badge" id="tbBadge">–</div>
 </div>
 
-<!-- RING HERO -->
-<div class="ring-section fade-up d1">
-  <div class="ring-wrap">
-    <svg class="ring-svg" width="120" height="120" viewBox="0 0 120 120">
-      <circle class="ring-track" cx="60" cy="60" r="52"/>
-      <circle class="ring-fill" id="ringEl" cx="60" cy="60" r="52"
-        stroke-dasharray="327" stroke-dashoffset="327"/>
-    </svg>
-    <div class="ring-center">
-      <div class="ring-pct" id="ringPct">0%</div>
-      <div class="ring-lbl">إنجاز</div>
+<!-- IMAGE MODAL -->
+<div id="img-modal">
+  <img id="modal-img" src="" alt="">
+  <div id="modal-name" class="modal-sku-name"></div>
+  <button class="modal-close" onclick="closeImgModal()">إغلاق</button>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-icon">🍊</div>
+    <div class="topbar-info">
+      <div class="topbar-name" id="tb-rep">...</div>
+      <div class="topbar-door" id="tb-door">جاري التحميل...</div>
     </div>
+    <div class="topbar-badge" id="tb-ch">-</div>
+    <button class="door-btn" onclick="openDoorSelector()">تغيير 🔽</button>
   </div>
-  <div class="ring-stats">
-    <div class="rstat">
-      <div class="rstat-row">
-        <span class="rstat-label">التارجت الشهري</span>
-        <span class="rstat-val c-a" id="rsMonthly">–</span>
+
+  <!-- SCROLLABLE BODY -->
+  <div id="scroll-body">
+
+    <!-- RING HERO -->
+    <div class="ring-section" id="ring-section">
+      <div class="ring-wrap">
+        <svg class="ring-svg" width="96" height="96" viewBox="0 0 96 96">
+          <circle class="ring-track" cx="48" cy="48" r="39"/>
+          <circle class="ring-fill" id="ring-fill" cx="48" cy="48" r="39" stroke="var(--accent)"
+                  stroke-dasharray="245" stroke-dashoffset="245"/>
+        </svg>
+        <div class="ring-center">
+          <div class="ring-pct c-a" id="ring-pct">0%</div>
+          <div class="ring-lbl">إنجاز</div>
+        </div>
       </div>
-      <div class="rstat-bar"><div class="rstat-fill" id="rsBarMonthly" style="width:0%"></div></div>
-    </div>
-    <div class="rstat">
-      <div class="rstat-row">
-        <span class="rstat-label">تارجت الفترة</span>
-        <span class="rstat-val c-y" id="rsTimegone">–</span>
+      <div class="ring-stats">
+        <div class="rstat">
+          <div class="rstat-row"><span class="rstat-lbl">الهدف الشهري</span><span class="rstat-val" id="rs-target">-</span></div>
+          <div class="rstat-bar"><div class="rstat-fill" id="rs-target-bar" style="width:0%;background:var(--accent)"></div></div>
+        </div>
+        <div class="rstat">
+          <div class="rstat-row"><span class="rstat-lbl">هدف الوقت</span><span class="rstat-val c-y" id="rs-time">-</span></div>
+          <div class="rstat-bar"><div class="rstat-fill" id="rs-time-bar" style="width:0%;background:var(--yellow)"></div></div>
+        </div>
+        <div class="rstat">
+          <div class="rstat-row"><span class="rstat-lbl">المحقق (MTD)</span><span class="rstat-val c-g" id="rs-mtd">-</span></div>
+          <div class="rstat-bar"><div class="rstat-fill" id="rs-mtd-bar" style="width:0%;background:var(--green)"></div></div>
+        </div>
       </div>
-      <div class="rstat-bar"><div class="rstat-fill" id="rsBarTime" style="width:0%"></div></div>
     </div>
-    <div class="rstat">
-      <div class="rstat-row">
-        <span class="rstat-label">المحقق (MTD)</span>
-        <span class="rstat-val" id="rsMTD">–</span>
+
+    <!-- KPI GRID -->
+    <div class="kpi-grid">
+      <div class="kpi-card fade-up d1">
+        <div class="kpi-lbl">الفجوة</div>
+        <div class="kpi-val c-r" id="kpi-gap">-</div>
+        <div class="kpi-sub">لإتمام الهدف</div>
+      </div>
+      <div class="kpi-card fade-up d2">
+        <div class="kpi-lbl">نسبة الوقت</div>
+        <div class="kpi-val c-y" id="kpi-time-pct">-</div>
+        <div class="kpi-sub">من الشهر انقضى</div>
+      </div>
+      <div class="kpi-card fade-up d3">
+        <div class="kpi-lbl">عدد المحلات</div>
+        <div class="kpi-val c-b" id="kpi-doors">-</div>
+        <div class="kpi-sub">في مسار اليوم</div>
+      </div>
+      <div class="kpi-card fade-up d4">
+        <div class="kpi-lbl">أفضل محل</div>
+        <div class="kpi-val" id="kpi-best" style="font-size:13px;margin-top:6px">-</div>
+        <div class="kpi-sub" id="kpi-best-pct">-</div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- NUMBERS -->
-<div class="nums-grid fade-up d2">
-  <div class="num-card">
-    <div class="num-card-lbl">📈 إنجاز الشهر</div>
-    <div class="num-card-val" id="ncMonthPct">–</div>
-  </div>
-  <div class="num-card">
-    <div class="num-card-lbl">🚀 إنجاز الفترة</div>
-    <div class="num-card-val" id="ncTimePct">–</div>
-  </div>
-  <div class="num-card">
-    <div class="num-card-lbl">🔥 الأصناف المتوقفة</div>
-    <div class="num-card-val c-y" id="ncStopped">–</div>
-  </div>
-  <div class="num-card">
-    <div class="num-card-lbl">🎁 عروض شغالة</div>
-    <div class="num-card-val c-g" id="ncOffers">–</div>
-  </div>
-</div>
+    <!-- TABS -->
+    <div class="tabs-wrap">
+      <div class="tab active" id="tab-home" onclick="switchTab('home')">🏠 الرئيسية</div>
+      <div class="tab" id="tab-msl" onclick="switchTab('msl')">📋 طلب MSL</div>
+      <div class="tab" id="tab-hist" onclick="switchTab('hist')">📈 التاريخ</div>
+      <div class="tab" id="tab-zero" onclick="switchTab('zero')">🔴 الصفر <span class="tab-badge" id="zero-cnt" style="display:none">0</span></div>
+      <div class="tab" id="tab-promo" onclick="switchTab('promo')">🎁 العروض <span class="tab-badge" id="promo-cnt" style="display:none;background:var(--accent)">0</span></div>
+    </div>
 
-<!-- TABS -->
-<div class="tabs-wrap fade-up d3">
-  <div class="tab active" onclick="openTab('perf',this)">📊 الأداء</div>
-  <div class="tab" onclick="openTab('offers',this)">🎁 العروض</div>
-  <div class="tab" onclick="openTab('history',this)">📦 الأصناف</div>
-  <div class="tab" onclick="openTab('zero',this)">🚨 Zero Sales</div>
-  <div class="tab" onclick="openTab('msl',this)">🛒 طلب MSL</div>
-  <div class="tab" onclick="openTab('notes',this)">📝 الملاحظات</div>
-</div>
+    <!-- PANEL: HOME -->
+    <div class="panel active" id="panel-home">
+      <div class="section-title">محلاتك اليوم</div>
+      <div id="home-doors"></div>
+    </div>
 
-<!-- PANEL: PERF -->
-<div class="panel active fade-up d4" id="panel-perf">
-  <div id="perfContent"></div>
-</div>
+    <!-- PANEL: MSL -->
+    <div class="panel" id="panel-msl">
+      <div class="msl-controls">
+        <div class="search-wrap">
+          <span class="search-ico">🔍</span>
+          <input class="search-input" type="text" id="msl-search" placeholder="ابحث باسم المنتج أو الكود..." oninput="filterMSL()">
+        </div>
+        <div class="chips-row" id="cat-chips">
+          <div class="chip active" data-cat="الكل" onclick="filterCat(this)">الكل</div>
+        </div>
+      </div>
+      <div id="msl-body"><div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل قائمة MSL...</div></div></div>
+      <div class="msl-summary" id="msl-summary" style="display:none">
+        <div class="sum-info">
+          <div class="sum-lbl">إجمالي الطلب</div>
+          <div class="sum-val" id="sum-val">0 كرتونة</div>
+        </div>
+        <button class="export-btn" id="export-btn" onclick="exportOrder()" disabled>📤 تصدير</button>
+      </div>
+    </div>
 
-<!-- PANEL: OFFERS -->
-<div class="panel" id="panel-offers">
-  <div id="offersContent"></div>
-</div>
+    <!-- PANEL: HISTORY -->
+    <div class="panel" id="panel-hist">
+      <div id="hist-body"><div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل السجل...</div></div></div>
+    </div>
 
-<!-- PANEL: HISTORY -->
-<div class="panel" id="panel-history">
-  <div id="histContent"></div>
-</div>
+    <!-- PANEL: ZERO -->
+    <div class="panel" id="panel-zero">
+      <div id="zero-body"><div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل قائمة الصفر...</div></div></div>
+    </div>
 
-<!-- PANEL: ZERO SALES -->
-<div class="panel" id="panel-zero">
-  <div id="zeroContent">
-    <div class="empty"><div class="empty-ico">⏳</div><div class="empty-txt">اضغط التاب لتحميل البيانات</div></div>
-  </div>
-</div>
+    <!-- PANEL: PROMO -->
+    <div class="panel" id="panel-promo">
+      <div id="promo-body"><div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل العروض...</div></div></div>
+    </div>
 
-<!-- PANEL: MSL ORDER -->
-<div class="panel" id="panel-msl">
-  <div class="msl-header">
-    <div class="msl-header-title">🛒 قائمة MSL — طلب الأصناف المؤهلة</div>
-    <div class="msl-header-count" id="mslCount">0 صنف</div>
-  </div>
-  <div id="mslContent">
-    <div class="empty"><div class="empty-ico">⏳</div><div class="empty-txt">اضغط التاب لتحميل البيانات</div></div>
-  </div>
-  <div class="pb"></div>
-</div>
-
-<!-- PANEL: NOTES -->
-<div class="panel" id="panel-notes">
-  <div id="notesContent"></div>
-</div>
+  </div><!-- /scroll-body -->
+</div><!-- /app -->
 
 <script>
-// ─────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════
+// TELEGRAM SETUP
+// ═══════════════════════════════════════════════════════
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+
+// ═══════════════════════════════════════════════════════
+// DEMO DATA
+// ═══════════════════════════════════════════════════════
+const DEMO = {
+  rep_id:'R001', rep_name:'أحمد محمد', monthly_target:120000, time_gone_target:85000, mtd_sales:78000,
+  doors:[
+    {door_id:'D001',door_name:'كارفور مدينتي',channel:'Modern Trade',account:'carrefour',target:25000,mtd:18000,time_gone:17700},
+    {door_id:'D002',door_name:'سبينيس التجمع',channel:'Modern Trade',account:'spinneys',target:20000,mtd:15500,time_gone:14200},
+    {door_id:'D003',door_name:'هايبر وان الشيخ زايد',channel:'Hypermarket',account:'hyperhero',target:30000,mtd:28000,time_gone:21300},
+    {door_id:'D004',door_name:'كارمارت الرحاب',channel:'Modern Trade',account:'carrefour',target:15000,mtd:9500,time_gone:10650},
+  ],
+  ep:{
+    msl:'https://vmi3102625.contaboserver.net/webhook/msl',
+    zero:'https://vmi3102625.contaboserver.net/webhook/zero-sales',
+    history:'https://vmi3102625.contaboserver.net/webhook/history'
+  }
+};
+const DEMO_MSL = {items:[
+  {sku_id:'103010802',sku_name:'بوبز ذرة فشار بطعم مالح للتحضير بالميكروويف 90 جرام',category:'Snacks',brand:'Popz',pack_size:15,stock_units:143843,last_order_date:'2026-03-01',last_order_qty:30,is_zero_sale:false,promo:null},
+  {sku_id:'105040201',sku_name:'تايم هاي هاي بسكويت بالكريمة مغطى بالكاكاو 10 جرام',category:'Snacks',brand:'Time',pack_size:48,stock_units:73657,last_order_date:'2026-02-15',last_order_qty:48,is_zero_sale:true,promo:{discount:0.1,price_before:13,price_after:8,expires:'2026-03-30'}},
+  {sku_id:'314120601',sku_name:'مياه معدنية طبيعية 600 مل',category:'Beverages',brand:'Natural',pack_size:12,stock_units:5200,last_order_date:'2026-03-10',last_order_qty:12,is_zero_sale:false,promo:null},
+  {sku_id:'420050201',sku_name:'عصير مانجو طبيعي 250 مل',category:'Beverages',brand:'Mango+',pack_size:24,stock_units:350,last_order_date:'2026-01-20',last_order_qty:24,is_zero_sale:true,promo:{discount:0.15,price_before:20,price_after:17,expires:'2026-03-25'}},
+  {sku_id:'208010107',sku_name:'شيبس مالح كلاسيك 80 جرام',category:'Snacks',brand:'Chipsy',pack_size:20,stock_units:0,last_order_date:'2026-03-05',last_order_qty:40,is_zero_sale:false,promo:null},
+  {sku_id:'435010202',sku_name:'حلوى جيلي بالفراولة 20 جرام',category:'Candy',brand:'Jelly+',pack_size:60,stock_units:12000,last_order_date:'2026-03-12',last_order_qty:60,is_zero_sale:false,promo:null},
+  {sku_id:'539224',sku_name:'زد كاندي تورنادو مصاصة بالفراولة مع اللبان',category:'Candy',brand:'ZD',pack_size:30,stock_units:2800,last_order_date:'2026-03-03',last_order_qty:30,is_zero_sale:false,promo:{discount:0.08,price_before:25,price_after:23,expires:'2026-03-28'}},
+  {sku_id:'53993533',sku_name:'زد كاندي جو بريكر تورنادو بلو راز مع اللبان',category:'Candy',brand:'ZD',pack_size:30,stock_units:0,last_order_date:'2026-01-10',last_order_qty:15,is_zero_sale:true,promo:null},
+]};
+const DEMO_HIST = {
+  top_items:[
+    {sku_id:'103010802',sku_name:'بوبز ذرة فشار مالح 90 جرام',avg_monthly:36,last_qty:30,last_date:'2026-03-01',total_qty:216},
+    {sku_id:'435010202',sku_name:'حلوى جيلي بالفراولة 20 جرام',avg_monthly:55,last_qty:60,last_date:'2026-03-12',total_qty:330},
+    {sku_id:'314120601',sku_name:'مياه معدنية 600 مل',avg_monthly:18,last_qty:12,last_date:'2026-03-10',total_qty:108},
+  ],
+  stopped_items:[
+    {sku_id:'420050201',sku_name:'عصير مانجو 250 مل',days_stopped:52,last_qty:24,last_date:'2026-01-20'},
+    {sku_id:'53993533',sku_name:'زد كاندي جو بريكر بلو راز',days_stopped:62,last_qty:15,last_date:'2026-01-10'},
+  ]
+};
+const DEMO_ZERO = {items:[
+  {sku_id:'420050201',sku_name:'عصير مانجو طبيعي 250 مل',category:'Beverages',audit_date:'2026-03-10'},
+  {sku_id:'105040201',sku_name:'تايم هاي هاي كاكاو 10 جرام',category:'Snacks',audit_date:'2026-03-10'},
+  {sku_id:'53993533',sku_name:'زد كاندي جو بريكر بلو راز',category:'Candy',audit_date:'2026-03-08'},
+]};
+const DEMO_PROMO = {items:[
+  {sku_id:'105040201',sku_name:'تايم هاي هاي بسكويت كاكاو 10 جرام',category:'Snacks',discount:0.1,price_before:13,price_after:8,customer_group:'breadfast',from:'2026-03-01',expires:'2026-03-30'},
+  {sku_id:'420050201',sku_name:'عصير مانجو طبيعي 250 مل',category:'Beverages',discount:0.15,price_before:20,price_after:17,customer_group:'carrefour',from:'2026-03-05',expires:'2026-03-25'},
+  {sku_id:'539224',sku_name:'زد كاندي تورنادو مصاصة بالفراولة',category:'Candy',discount:0.08,price_before:25,price_after:23,customer_group:'hyperhero',from:'2026-03-01',expires:'2026-03-28'},
+]};
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const S = {
+  rep:null, doors:[], door:null, ep:null,
+  cache:{},          // door_id → { msl, hist, zero, promo }
+  qty:{},            // sku_id → qty
+  activeTab:'home',
+  activeCat:'الكل',
+  mslItems:[],       // current door's MSL flat list
+  isDemo:false
+};
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  const p = new URLSearchParams(location.search);
+  const d = p.get('d');
+  if (d) {
+    try {
+      const payload = JSON.parse(atob(d));
+      S.rep = {id:payload.rep_id||'', name:payload.rep_name||'مندوب', target:Number(payload.monthly_target||0), timeGone:Number(payload.time_gone_target||0), mtd:Number(payload.mtd_sales||0)};
+      S.doors = payload.doors || [];
+      S.door = S.doors[0] || null;
+      S.ep = payload.ep || {};
+    } catch(e) { loadDemo(); }
+  } else { loadDemo(); }
+  setTimeout(startApp, 1400);
+});
+
+function loadDemo() {
+  S.isDemo = true;
+  S.rep = {id:DEMO.rep_id, name:DEMO.rep_name, target:DEMO.monthly_target, timeGone:DEMO.time_gone_target, mtd:DEMO.mtd_sales};
+  S.doors = DEMO.doors;
+  S.door = DEMO.doors[0];
+  S.ep = DEMO.ep;
+}
+
+function startApp() {
+  document.getElementById('loader').classList.add('out');
+  document.getElementById('app').style.display = 'flex';
+  renderTopBar();
+  renderRing();
+  renderKPIs();
+  renderHome();
+  renderDoorOpts();
+}
+
+// ═══════════════════════════════════════════════════════
 // HELPERS
-// ─────────────────────────────────────────────
-const fmt = n => Number(n||0).toLocaleString('en-US',{maximumFractionDigits:0});
-const pct = (a,b) => b > 0 ? Math.round((a/b)*100) : 0;
+// ═══════════════════════════════════════════════════════
+const fmt = n => {
+  if (!n && n !== 0) return '-';
+  n = Number(n);
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'م';
+  if (n >= 1000) return (n/1000).toFixed(1)+'ك';
+  return n.toLocaleString('ar-EG');
+};
+const pct = (a,b) => b ? Math.min(Math.round(a/b*100),100) : 0;
+const fmtDate = s => {
+  if (!s) return '-';
+  const d = new Date(s);
+  if (isNaN(d)) return s;
+  return `${d.getDate()}/${d.getMonth()+1}`;
+};
+const IMG_BASE = 'https://mightyfoodss-my.sharepoint.com/personal/abdelrahman_tawfik_mighty-foods_com/Documents/ImgSKu/';
 
-function pctColor(p) {
-  if (p >= 90) return 'var(--green)';
-  if (p >= 70) return 'var(--yellow)';
-  return 'var(--red)';
-}
-function pctClass(p) {
-  if (p >= 90) return 'c-g';
-  if (p >= 70) return 'c-y';
-  return 'c-r';
-}
+function doorData() { return S.door || {}; }
 
-// ─────────────────────────────────────────────
-// LOAD DATA FROM URL HASH  (#base64json)
-// n8n will build:  index.html#BASE64_JSON
-// ─────────────────────────────────────────────
-function decodeB64(str) {
-  const bytes = Uint8Array.from(atob(str), c => c.charCodeAt(0));
-  const raw = JSON.parse(new TextDecoder('utf-8').decode(bytes));
-  // Support compressed keys
-  if (raw.t !== undefined) {
-    return {
-      type:      raw.t,
-      name:      raw.n  || '',
-      channel:   raw.ch || '',
-      monthly:   raw.m  || 0,
-      timeGone:  raw.tg || 0,
-      mtd:       raw.mtd|| 0,
-      webhookUrl:   raw.wh || '',
-      mslWebhookUrl:raw.mw || '',
-      offers:   (raw.o ||[]).map(x=>({name:x.n,barcode:x.b,discount:x.d,before:x.bf,after:x.af,until:x.u})),
-      history:  (raw.h ||[]).map(x=>({name:x.n,qty:x.q,avg:x.a,days:x.d,type:x.t})),
-      zeroSales:(raw.z ||[]).map(x=>({skuName:x.n,barcode:x.b,brand:x.br,category:x.c,skuClass:x.cl,stock:x.s})),
-      notes:    (raw.nt||[]).map(x=>({date:x.d,by:x.by,text:x.tx})),
-      customers:(raw.cu||[]).map(x=>({name:x.n,target:x.tg,mtd:x.m}))
-    };
-  }
-  return raw;
+// ═══════════════════════════════════════════════════════
+// TOP BAR
+// ═══════════════════════════════════════════════════════
+function renderTopBar() {
+  const r = S.rep, d = S.door;
+  document.getElementById('tb-rep').textContent = r?.name || 'مندوب';
+  document.getElementById('tb-door').textContent = d?.door_name || 'اختر محلاً';
+  document.getElementById('tb-ch').textContent = d?.channel || '-';
 }
 
-function loadData() {
-  let data = null;
-  const param = new URLSearchParams(location.search).get('d');
-  if (param) { try { data = decodeB64(param); } catch(e){ console.error('?d= fail', e); } }
-  if (!data) {
-    const hash = location.hash.slice(1);
-    if (hash) { try { data = decodeB64(hash); } catch(e){ console.error('# fail', e); } }
-  }
-  if (!data) data = getDemoData();
-  return data;
+// ═══════════════════════════════════════════════════════
+// RING
+// ═══════════════════════════════════════════════════════
+function renderRing() {
+  const d = S.door;
+  const target = d?.target || S.rep?.target || 1;
+  const timeGone = d?.time_gone || S.rep?.timeGone || 0;
+  const mtd = d?.mtd || S.rep?.mtd || 0;
+  const p = pct(mtd, target);
+  const circ = 245;
+  document.getElementById('ring-fill').style.strokeDashoffset = circ - (circ * p / 100);
+  document.getElementById('ring-pct').textContent = p + '%';
+  const color = p >= 100 ? 'var(--green)' : p >= 70 ? 'var(--accent)' : p >= 40 ? 'var(--yellow)' : 'var(--red)';
+  document.getElementById('ring-fill').style.stroke = color;
+  document.getElementById('ring-pct').style.color = color;
+  document.getElementById('rs-target').textContent = fmt(target);
+  document.getElementById('rs-target-bar').style.width = '100%';
+  document.getElementById('rs-time').textContent = fmt(timeGone);
+  document.getElementById('rs-time-bar').style.width = pct(timeGone, target) + '%';
+  document.getElementById('rs-mtd').textContent = fmt(mtd);
+  document.getElementById('rs-mtd-bar').style.width = p + '%';
+  document.getElementById('rs-mtd-bar').style.background = color;
 }
 
-// ─────────────────────────────────────────────
-// RENDER
-// ─────────────────────────────────────────────
-let appData = null; // global — used by openTab for lazy loading
-
-function render(d) {
-  const isRep = d.type === 'rep';
-  const monthlyPct = pct(d.mtd, d.monthly);
-  const timePct    = pct(d.mtd, d.timeGone);
-
-  // Top bar
-  document.getElementById('tbIcon').textContent = isRep ? '👤' : '🏢';
-  document.getElementById('tbName').textContent = d.name;
-  document.getElementById('tbType').textContent = (isRep ? 'مندوب' : 'عميل') + ' — ' + (d.channel||'');
-  const badge = document.getElementById('tbBadge');
-  badge.textContent = isRep ? 'مندوب' : 'عميل';
-  badge.className = 'topbar-badge ' + (isRep ? 'badge-rep' : 'badge-cust');
-
-  // Ring
-  const circumference = 2 * Math.PI * 52; // ≈ 327
-  const offset = circumference - (Math.min(monthlyPct,100) / 100) * circumference;
-  const ringEl = document.getElementById('ringEl');
-  ringEl.style.stroke = pctColor(monthlyPct);
-  ringEl.style.filter = `drop-shadow(0 0 5px ${pctColor(monthlyPct)}80)`;
-  setTimeout(() => { ringEl.style.strokeDashoffset = offset; }, 200);
-
-  const rpEl = document.getElementById('ringPct');
-  rpEl.textContent = monthlyPct + '%';
-  rpEl.className = 'ring-pct ' + pctClass(monthlyPct);
-
-  // Ring stats
-  document.getElementById('rsMonthly').textContent = fmt(d.monthly);
-  document.getElementById('rsTimegone').textContent = fmt(d.timeGone);
-  document.getElementById('rsMTD').className = 'rstat-val ' + pctClass(monthlyPct);
-  document.getElementById('rsMTD').textContent = fmt(d.mtd);
-
-  const barM = document.getElementById('rsBarMonthly');
-  barM.style.background = pctColor(monthlyPct);
-  setTimeout(() => { barM.style.width = Math.min(monthlyPct,100) + '%'; }, 250);
-
-  const barT = document.getElementById('rsBarTime');
-  barT.style.background = pctColor(timePct);
-  setTimeout(() => { barT.style.width = Math.min(timePct,100) + '%'; }, 300);
-
-  // Numbers grid
-  const mpEl = document.getElementById('ncMonthPct');
-  mpEl.textContent = monthlyPct + '%';
-  mpEl.className = 'num-card-val ' + pctClass(monthlyPct);
-
-  const tpEl = document.getElementById('ncTimePct');
-  tpEl.textContent = timePct + '%';
-  tpEl.className = 'num-card-val ' + pctClass(timePct);
-
-  const stopped = (d.history||[]).filter(h=>h.type==='stopped').length;
-  document.getElementById('ncStopped').textContent = stopped;
-  document.getElementById('ncOffers').textContent = (d.offers||[]).length;
-
-  // Panels
-  renderPerf(d, isRep, monthlyPct, timePct);
-  renderOffers(d.offers || []);
-  renderHistory(d.history || []);
-  renderNotes(d.notes || []);
-  // Zero Sales: if already in payload render now, otherwise lazy-load via webhook
-  if (d.zeroSales && d.zeroSales.length > 0) {
-    renderZero(d.zeroSales);
+// ═══════════════════════════════════════════════════════
+// KPIs
+// ═══════════════════════════════════════════════════════
+function renderKPIs() {
+  const d = S.door;
+  const target = d?.target || S.rep?.target || 1;
+  const timeGone = d?.time_gone || S.rep?.timeGone || 0;
+  const mtd = d?.mtd || S.rep?.mtd || 0;
+  const gap = Math.max(0, target - mtd);
+  const timePct = pct(timeGone, target);
+  document.getElementById('kpi-gap').textContent = fmt(gap);
+  document.getElementById('kpi-time-pct').textContent = timePct + '%';
+  document.getElementById('kpi-doors').textContent = S.doors.length;
+  const best = [...S.doors].sort((a,b) => pct(b.mtd,b.target) - pct(a.mtd,a.target))[0];
+  if (best) {
+    const name = best.door_name.split('_')[0].replace(/\s.*/,'');
+    document.getElementById('kpi-best').textContent = name;
+    document.getElementById('kpi-best-pct').textContent = pct(best.mtd, best.target) + '% إنجاز';
   }
 }
 
-// ── PERF PANEL ──
-function renderPerf(d, isRep, monthlyPct, timePct) {
-  let html = '';
-
-  if (isRep && d.customers && d.customers.length) {
-    // Rep: show per-customer breakdown
-    html += `<div class="hist-section-title">تفاصيل العملاء</div>`;
-    d.customers.forEach(c => {
-      const cp = pct(c.mtd, c.target);
-      html += `
-      <div class="cust-row">
-        <div class="cust-row-name">${c.name}</div>
-        <div class="cust-row-pct ${pctClass(cp)}">
-          هدف: ${fmt(c.target)} &nbsp;|&nbsp; محقق: ${fmt(c.mtd)} &nbsp;|&nbsp; <strong>${cp}%</strong>
+// ═══════════════════════════════════════════════════════
+// HOME TAB — DOORS
+// ═══════════════════════════════════════════════════════
+function renderHome() {
+  const el = document.getElementById('home-doors');
+  el.innerHTML = S.doors.map((d,i) => {
+    const p = pct(d.mtd, d.target);
+    const isCur = d.door_id === S.door?.door_id;
+    const col = p>=100?'var(--green)':p>=70?'var(--accent)':p>=40?'var(--yellow)':'var(--red)';
+    return `<div class="door-card fade-up ${isCur?'current':''} d${Math.min(i+1,5)}" onclick="selectDoor('${d.door_id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="door-card-name">${d.door_name}</div>
+          <div class="door-card-ch">${d.channel}</div>
         </div>
-        <div class="cust-prog">
-          <div class="cust-fill" style="width:${Math.min(cp,100)}%;background:${pctColor(cp)}"></div>
+        <div style="text-align:left">
+          <div style="font-size:18px;font-weight:900;color:${col}">${p}%</div>
+          <div style="font-size:9px;color:var(--sub)">إنجاز</div>
         </div>
-      </div>`;
-    });
-  } else {
-    // Customer: detailed numbers
-    const rows = [
-      ['🎯 التارجت الشهري', fmt(d.monthly), 'c-a'],
-      ['⏳ تارجت الفترة', fmt(d.timeGone), 'c-y'],
-      ['💰 المحقق (MTD)', fmt(d.mtd), pctClass(monthlyPct)],
-      ['📈 إنجاز الشهر', monthlyPct + '%', pctClass(monthlyPct)],
-      ['🚀 إنجاز الفترة', timePct + '%', pctClass(timePct)],
-    ];
-    html += `<div class="hist-section-title" style="padding-top:14px">ملخص الأداء</div>`;
-    rows.forEach(([lbl,val,cls]) => {
-      html += `
-      <div class="cust-row" style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:13px;color:var(--sub)">${lbl}</span>
-        <span style="font-size:15px;font-weight:800" class="${cls}">${val}</span>
-      </div>`;
-    });
-  }
-
-  document.getElementById('perfContent').innerHTML = html;
-}
-
-// ── OFFERS PANEL ──
-function renderOffers(offers) {
-  if (!offers.length) {
-    document.getElementById('offersContent').innerHTML =
-      `<div class="empty"><div class="empty-ico">📭</div><div class="empty-txt">لا توجد عروض شغالة حالياً</div></div>`;
-    return;
-  }
-  let html = '';
-  offers.forEach(o => {
-    html += `
-    <div class="offer-card">
-      <div class="offer-live">🔥 ساري</div>
-      <div class="offer-name">${o.name}</div>
-      <div class="offer-chips">
-        <span class="chip">${o.barcode}</span>
-        <span class="chip chip-red">خصم ${o.discount}</span>
-        <span class="chip">قبل: ${fmt(o.before)}</span>
-        <span class="chip">بعد: ${fmt(o.after)}</span>
-        <span class="chip chip-blue">⏳ حتى ${o.until}</span>
       </div>
-    </div>`;
-  });
-  document.getElementById('offersContent').innerHTML = html;
-}
-
-// ── HISTORY PANEL ──
-function renderHistory(history) {
-  const top     = history.filter(h => h.type === 'top');
-  const stopped = history.filter(h => h.type === 'stopped');
-  let html = '';
-
-  if (top.length) {
-    html += `<div class="hist-section-title">🔥 أصناف أساسية</div>`;
-    top.forEach(h => {
-      html += `
-      <div class="hist-card">
-        <div class="hist-dot hot"></div>
-        <div style="flex:1">
-          <div class="hist-name">${h.name}</div>
-          <div class="hist-meta">آخر كمية: ${h.qty} | متوسط: ${h.avg} | منذ ${h.days} يوم</div>
-        </div>
-      </div>`;
-    });
-  }
-  if (stopped.length) {
-    html += `<div class="hist-section-title">⚠️ أصناف غائبة — فرص بيع</div>`;
-    stopped.forEach(h => {
-      html += `
-      <div class="hist-card">
-        <div class="hist-dot warn"></div>
-        <div style="flex:1">
-          <div class="hist-name">${h.name}</div>
-          <div class="hist-meta">متوقف منذ ${h.days} يوم | كانت كميته: ${h.qty}</div>
-        </div>
-      </div>`;
-    });
-  }
-  if (!html) html = `<div class="empty"><div class="empty-ico">📦</div><div class="empty-txt">لا توجد بيانات تاريخية</div></div>`;
-  document.getElementById('histContent').innerHTML = html;
-}
-
-// ── NOTES PANEL ──
-function renderNotes(notes) {
-  if (!notes.length) {
-    document.getElementById('notesContent').innerHTML =
-      `<div class="empty"><div class="empty-ico">📝</div><div class="empty-txt">لا توجد ملاحظات مسجلة</div></div>`;
-    return;
-  }
-  let html = '';
-  notes.forEach((n, i) => {
-    html += `
-    <div class="note-card">
-      <div class="note-top">
-        <div class="note-idx">${i+1}</div>
-        <div class="note-meta">${n.date} — ${n.by}</div>
+      <div class="door-pct">
+        <span style="color:var(--sub)">MTD: <span style="color:var(--text);font-weight:700">${fmt(d.mtd)}</span></span>
+        <span style="color:var(--sub)">الهدف: <span style="color:var(--text);font-weight:700">${fmt(d.target)}</span></span>
       </div>
-      <div class="note-text">${n.text}</div>
+      <div class="door-prog"><div class="door-prog-fill" style="width:${p}%;background:${col}"></div></div>
     </div>`;
-  });
-  document.getElementById('notesContent').innerHTML = html;
-}
-
-// ── ZERO SALES PANEL ──
-let zeroLoaded = false;
-
-function renderZero(items) {
-  zeroLoaded = true;
-  if (!items || !items.length) {
-    document.getElementById('zeroContent').innerHTML =
-      `<div class="empty"><div class="empty-ico">✅</div><div class="empty-txt">لا توجد أصناف Zero Sales لهذا العميل</div></div>`;
-    return;
-  }
-  const byCat = {};
-  items.forEach(item => {
-    const cat = item.category || item.c || 'أخرى';
-    if (!byCat[cat]) byCat[cat] = [];
-    byCat[cat].push(item);
-  });
-  let html = `<div class="zero-summary">🚨 <strong>${items.length}</strong> صنف غائب عن هذا العميل</div>`;
-  Object.entries(byCat).forEach(([cat, skus]) => {
-    html += `<div class="zero-group-title">📂 ${cat} — ${skus.length} صنف</div>`;
-    skus.forEach(s => {
-      const name     = s.skuName || s.n || '';
-      const barcode  = s.barcode || s.b || '';
-      const brand    = s.brand   || s.br|| '';
-      const skuClass = s.skuClass|| s.cl|| '';
-      const stock    = s.stock   || s.s || 0;
-      html += `
-      <div class="zero-card">
-        <div class="zero-name">${name}</div>
-        <div class="zero-chips">
-          ${barcode  ? `<span class="chip">${barcode}</span>` : ''}
-          ${brand    ? `<span class="chip" style="color:var(--sub)">${brand}</span>` : ''}
-          ${skuClass ? `<span class="chip" style="color:var(--sub)">${skuClass}</span>` : ''}
-          ${stock > 0? `<span class="chip chip-red">مخزون: ${stock}</span>` : ''}
-        </div>
-      </div>`;
-    });
-  });
-  document.getElementById('zeroContent').innerHTML = html;
-}
-
-async function fetchZeroSales() {
-  if (!appData) return;
-  const webhookUrl = appData.webhookUrl || '';
-  const custName   = appData.name || '';
-
-  if (!webhookUrl) {
-    document.getElementById('zeroContent').innerHTML =
-      `<div class="empty"><div class="empty-ico">⚙️</div><div class="empty-txt">لم يتم ضبط رابط الـ Webhook بعد</div></div>`;
-    return;
-  }
-
-  document.getElementById('zeroContent').innerHTML =
-    `<div class="empty"><div class="empty-ico" style="animation:logopulse 1.2s infinite">⏳</div><div class="empty-txt">جاري تحميل Zero Sales...</div></div>`;
-
-  try {
-    const url = webhookUrl + '?cust=' + encodeURIComponent(custName);
-    const res  = await fetch(url);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    const items = Array.isArray(json) ? json : (json.zeroSales || json.data || []);
-    renderZero(items);
-  } catch(e) {
-    document.getElementById('zeroContent').innerHTML =
-      `<div class="empty"><div class="empty-ico">❌</div><div class="empty-txt">فشل التحميل — تأكد من اتصال الـ Webhook<br><small style="font-size:10px;opacity:.5">${e.message}</small></div></div>`;
-  }
-}
-
-// ─────────────────────────────────────────────
-// MSL ORDER TAB
-// ─────────────────────────────────────────────
-let mslLoaded = false;
-let mslQtyMap = {};
-let mslActiveCategory = 'الكل';
-
-async function fetchMsl() {
-  if (mslLoaded) return;
-
-  const mslUrl   = appData?.mslWebhookUrl || '';
-  const custName = appData?.name || '';
-
-  if (!mslUrl) {
-    // fallback to demo data already in appData
-    const demo = appData?.msl || [];
-    if (demo.length) { mslLoaded = true; renderMsl(demo); }
-    else document.getElementById('mslContent').innerHTML =
-      `<div class="empty"><div class="empty-ico">⚙️</div><div class="empty-txt">رابط MSL webhook غير موجود</div></div>`;
-    return;
-  }
-
-  document.getElementById('mslContent').innerHTML =
-    `<div class="empty"><div class="empty-ico" style="animation:logopulse 1.2s infinite">⏳</div><div class="empty-txt">جاري تحميل MSL...</div></div>`;
-
-  try {
-    const res     = await fetch(mslUrl + '?cust=' + encodeURIComponent(custName));
-    const rawText = await res.text();
-
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    if (!rawText || !rawText.trim()) throw new Error('response فاضية — تأكد إن الـ workflow Activated');
-
-    let json;
-    try { json = JSON.parse(rawText); } catch(e) { throw new Error('مش JSON: ' + rawText.slice(0, 80)); }
-
-    // n8n قد يرجع [{mslItems:[...]}, ...] أو مصفوفة مباشرة
-    if (Array.isArray(json) && json[0]?.mslItems) json = json[0].mslItems;
-    else if (!Array.isArray(json)) json = json.mslItems || json.msl || json.data || [];
-
-    mslLoaded = true;
-    appData.msl = json;
-    renderMsl(json);
-  } catch(e) {
-    document.getElementById('mslContent').innerHTML =
-      `<div class="empty"><div class="empty-ico">❌</div><div class="empty-txt">فشل تحميل MSL<br><small style="font-size:10px;opacity:.5">${e.message}</small></div></div>`;
-  }
-}
-
-function renderMsl(items) {
-  document.getElementById('mslCount').textContent = items.length + ' صنف';
-
-  if (!items.length) {
-    document.getElementById('mslContent').innerHTML =
-      `<div class="empty"><div class="empty-ico">📦</div><div class="empty-txt">لا توجد أصناف MSL لهذا العميل</div></div>`;
-    return;
-  }
-
-  // Category chips
-  const cats = ['الكل', ...new Set(items.map(i => i.cat || i.category || '').filter(Boolean))];
-  const chipsHtml = cats.map(c =>
-    `<div class="msl-chip ${c === mslActiveCategory ? 'active' : ''}" onclick="setMslCat('${c}')">${c}</div>`
-  ).join('');
-
-  document.getElementById('mslContent').innerHTML = `
-    <div class="msl-search-wrap">
-      <span class="msl-search-icon">🔍</span>
-      <input class="msl-search" id="mslSearch" type="text" placeholder="ابحث عن صنف أو باركود..." oninput="renderMslTable()"/>
-    </div>
-    <div class="msl-filter-row" id="mslFilters">${chipsHtml}</div>
-    <div class="msl-table-wrap">
-      <table class="msl-table">
-        <thead><tr>
-          <th>اسم الصنف</th><th>باركود</th><th class="num-col">مخزون</th><th class="num-col">كارتون</th><th class="num-col">الكمية</th>
-        </tr></thead>
-        <tbody id="mslTbody"></tbody>
-      </table>
-    </div>
-    <div class="msl-summary-bar">
-      <div class="msl-summary-info">
-        <div class="msl-summary-label">إجمالي الأصناف المطلوبة</div>
-        <div class="msl-summary-val"><span id="mslOrderedCount">0</span> صنف</div>
-      </div>
-      <button class="msl-export-btn" id="mslExportBtn" onclick="exportMsl()" disabled>📋 تصدير الطلب</button>
-    </div>`;
-
-  renderMslTable();
-}
-
-function setMslCat(cat) {
-  mslActiveCategory = cat;
-  document.querySelectorAll('.msl-chip').forEach(el =>
-    el.classList.toggle('active', el.textContent === cat)
-  );
-  renderMslTable();
-}
-
-function renderMslTable() {
-  const items = appData?.msl || [];
-  const q     = (document.getElementById('mslSearch')?.value || '').trim().toLowerCase();
-  const filtered = items.filter(item => {
-    const name = item.n || item.skuName || '';
-    const bar  = item.b || item.barcode || '';
-    const cat  = item.cat || item.category || '';
-    const catOk = mslActiveCategory === 'الكل' || cat === mslActiveCategory;
-    const qOk   = !q || name.toLowerCase().includes(q) || bar.toLowerCase().includes(q);
-    return catOk && qOk;
-  });
-
-  const tbody = document.getElementById('mslTbody');
-  if (!tbody) return;
-
-  if (!filtered.length) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:28px;color:var(--sub)">لا توجد نتائج</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = filtered.map(item => {
-    const name  = item.n || item.skuName || '';
-    const bar   = item.b || item.barcode || '';
-    const caseQ = item.c || item.caseQty || '–';
-    const stock = item.s !== undefined ? Number(item.s) : (item.stock !== undefined ? Number(item.stock) : null);
-    const key   = bar || name;
-    const qty   = mslQtyMap[key] || '';
-    const hasQ  = qty > 0;
-
-    let stockCell = '<td class="msl-td-stock"><span class="stock-badge stock-zero">—</span></td>';
-    if (stock !== null) {
-      let cls = 'stock-zero';
-      if      (stock === 0)   cls = 'stock-zero';
-      else if (stock <= 5)    cls = 'stock-low';
-      else if (stock <= 20)   cls = 'stock-mid';
-      else                    cls = 'stock-high';
-      stockCell = `<td class="msl-td-stock"><span class="stock-badge ${cls}">${stock}</span></td>`;
-    }
-
-    return `<tr class="${hasQ ? 'has-qty' : ''}">
-      <td class="msl-td-name">${name}</td>
-      <td class="msl-td-bar">${bar || '–'}</td>
-      ${stockCell}
-      <td class="msl-td-case">${caseQ}</td>
-      <td style="text-align:center">
-        <input class="msl-qty-input ${hasQ ? 'filled' : ''}" type="number" min="0" step="1"
-          value="${qty}" data-key="${key}" oninput="onMslQty(this)" placeholder="0"/>
-      </td>
-    </tr>`;
   }).join('');
 }
 
-function onMslQty(input) {
-  const key = input.dataset.key;
-  const val = parseInt(input.value) || 0;
-  if (val > 0) { mslQtyMap[key] = val; input.classList.add('filled'); input.closest('tr').classList.add('has-qty'); }
-  else         { delete mslQtyMap[key]; input.classList.remove('filled'); input.closest('tr').classList.remove('has-qty'); }
-  const count = Object.keys(mslQtyMap).length;
-  document.getElementById('mslOrderedCount').textContent = count;
-  document.getElementById('mslExportBtn').disabled = count === 0;
-}
-
-function exportMsl() {
-  const items    = appData?.msl || [];
-  const doorName = appData?.name || 'MSL Order';
-  const ordered  = items
-    .filter(item => mslQtyMap[item.b || item.barcode || item.n || item.skuName] > 0)
-    .map(item => {
-      const name = item.n || item.skuName || '';
-      const bar  = item.b || item.barcode || '';
-      const caseQ= item.c || item.caseQty || '';
-      const key  = bar || name;
-      const qty  = mslQtyMap[key];
-      // هنا السر: نستخدم \t للفصل بين الأعمدة ليفهمها إكسيل
-      return `${name}\t${bar}\t${caseQ}\t${qty}`;
-    });
-
-  if (!ordered.length) return;
-
-  // إعداد رأس الجدول للإكسيل
-  const header = "اسم الصنف\tالباركود\tسعة الكرتونة\tالكمية المطلوبة";
-  const txt = header + "\n" + ordered.join('\n');
-
-  // إظهار المودال (النافذة) بنفس التصميم لكن مع النص الجديد
-  const old = document.getElementById('mslModal');
-  if (old) old.remove();
-  const modal = document.createElement('div');
-  modal.id = 'mslModal';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);display:flex;align-items:flex-end';
-  modal.innerHTML = `
-    <div style="background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-height:80vh;display:flex;flex-direction:column;border-top:1px solid var(--border);overflow:hidden">
-      <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-        <div style="font-size:14px;font-weight:900">📋 جاهز للصق في إكسيل (${ordered.length} صنف)</div>
-        <button onclick="document.getElementById('mslModal').remove()" style="background:none;border:none;color:var(--sub);font-size:22px;cursor:pointer">✕</button>
+// ═══════════════════════════════════════════════════════
+// DOOR SELECTOR
+// ═══════════════════════════════════════════════════════
+function renderDoorOpts() {
+  const el = document.getElementById('door-opts');
+  el.innerHTML = S.doors.map(d => {
+    const p = pct(d.mtd, d.target);
+    const isSel = d.door_id === S.door?.door_id;
+    return `<div class="door-opt ${isSel?'sel':''}" onclick="selectDoor('${d.door_id}');closeDoorSelector()">
+      <div class="door-opt-dot"></div>
+      <div class="door-opt-info">
+        <div class="door-opt-name">${d.door_name}</div>
+        <div class="door-opt-ch">${d.channel}</div>
       </div>
-      <textarea id="mslExportTxt" readonly style="flex:1;background:var(--surface2);border:none;outline:none;font-family:monospace;font-size:10px;color:var(--text);padding:14px 16px;resize:none;white-space:pre;overflow-x:auto;direction:rtl">${txt}</textarea>
-      <div style="padding:12px 16px">
-        <button onclick="copyMsl()" style="width:100%;padding:13px;border:none;border-radius:12px;cursor:pointer;font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;background:linear-gradient(135deg,var(--green),#0d9e62);color:#fff" id="mslCopyBtn">📋 نسخ للـ Excel</button>
-      </div>
+      <div class="door-opt-pct" style="color:${p>=100?'var(--green)':p>=70?'var(--accent)':'var(--yellow)'}">${p}%</div>
     </div>`;
-  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
-  document.body.appendChild(modal);
-}
-function copyMsl() {
-  const ta = document.getElementById('mslExportTxt');
-  if (!ta) return;
-  const copy = () => {
-    document.getElementById('mslCopyBtn').textContent = '✅ تم النسخ!';
-    setTimeout(() => { const b = document.getElementById('mslCopyBtn'); if(b) b.textContent = '📋 نسخ الطلب'; }, 2000);
-  };
-  if (navigator.clipboard) navigator.clipboard.writeText(ta.value).then(copy);
-  else { ta.select(); document.execCommand('copy'); copy(); }
+  }).join('');
 }
 
-// ─────────────────────────────────────────────
-// TABS
-// ─────────────────────────────────────────────
-function openTab(id, el) {
+function openDoorSelector() {
+  document.getElementById('door-overlay').classList.add('open');
+}
+function closeDoorSelector() {
+  document.getElementById('door-overlay').classList.remove('open');
+}
+document.getElementById('door-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('door-overlay')) closeDoorSelector();
+});
+
+function selectDoor(doorId) {
+  const d = S.doors.find(x => x.door_id === doorId);
+  if (!d) return;
+  S.door = d;
+  S.qty = {};
+  // Reset loaded flags for new door
+  delete S.cache[doorId];
+  renderTopBar();
+  renderRing();
+  renderKPIs();
+  renderHome();
+  renderDoorOpts();
+  // If on a lazy tab, reload it
+  if (S.activeTab === 'msl') { document.getElementById('msl-body').innerHTML = '<div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل قائمة MSL...</div></div>'; loadMSL(); }
+  else if (S.activeTab === 'hist') { document.getElementById('hist-body').innerHTML = '<div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل السجل...</div></div>'; loadHistory(); }
+  else if (S.activeTab === 'zero') { document.getElementById('zero-body').innerHTML = '<div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل قائمة الصفر...</div></div>'; loadZero(); }
+  else if (S.activeTab === 'promo') { document.getElementById('promo-body').innerHTML = '<div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل العروض...</div></div>'; loadPromo(); }
+}
+
+// ═══════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════
+function switchTab(name) {
+  S.activeTab = name;
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+  document.getElementById('scroll-body').scrollTop = 0;
+
+  const doorId = S.door?.door_id;
+  if (!doorId) return;
+  const c = S.cache[doorId] || {};
+
+  if (name === 'msl' && !c.msl) loadMSL();
+  if (name === 'hist' && !c.hist) loadHistory();
+  if (name === 'zero' && !c.zero) loadZero();
+  if (name === 'promo' && !c.promo) loadPromo();
+
+  if (name === 'msl' && c.msl) renderMSL(c.msl);
+  if (name === 'hist' && c.hist) renderHistory(c.hist);
+  if (name === 'zero' && c.zero) renderZero(c.zero);
+  if (name === 'promo' && c.promo) renderPromo(c.promo);
+}
+
+// ═══════════════════════════════════════════════════════
+// MSL — LOAD
+// ═══════════════════════════════════════════════════════
+async function loadMSL() {
+  const doorId = S.door?.door_id;
+  if (!doorId) return;
+  if (S.isDemo) {
+    setTimeout(() => {
+      S.cache[doorId] = S.cache[doorId] || {};
+      S.cache[doorId].msl = DEMO_MSL.items;
+      renderMSL(DEMO_MSL.items);
+    }, 700);
+    return;
+  }
+  try {
+    const r = await fetch(`${S.ep.msl}?door_id=${encodeURIComponent(doorId)}`);
+    const data = await r.json();
+    S.cache[doorId] = S.cache[doorId] || {};
+    S.cache[doorId].msl = data.items || [];
+    renderMSL(data.items || []);
+  } catch(e) {
+    document.getElementById('msl-body').innerHTML = `<div class="empty"><div class="empty-ico">⚠️</div><div class="empty-txt">تعذر تحميل البيانات<br><small style="color:var(--sub)">${e.message}</small></div></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// MSL — RENDER
+// ═══════════════════════════════════════════════════════
+function renderMSL(items) {
+  S.mslItems = items;
+  // Build category chips
+  const cats = ['الكل', ...new Set(items.map(x => x.category).filter(Boolean))];
+  document.getElementById('cat-chips').innerHTML = cats.map(c =>
+    `<div class="chip ${c===S.activeCat?'active':''}" data-cat="${c}" onclick="filterCat(this)">${c}</div>`
+  ).join('');
+  renderMSLTable(items);
+}
+
+function getFilteredItems() {
+  let items = S.mslItems || [];
+  const q = document.getElementById('msl-search')?.value?.trim().toLowerCase() || '';
+  if (S.activeCat !== 'الكل') items = items.filter(x => x.category === S.activeCat);
+  if (q) items = items.filter(x => (x.sku_name||'').toLowerCase().includes(q) || String(x.sku_id).includes(q));
+  return items;
+}
+
+function filterCat(el) {
+  S.activeCat = el.dataset.cat;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('panel-' + id).classList.add('active');
-  if (id === 'zero' && !zeroLoaded) fetchZeroSales();
-  if (id === 'msl'  && !mslLoaded)  fetchMsl();
+  renderMSLTable(getFilteredItems());
 }
 
+function filterMSL() { renderMSLTable(getFilteredItems()); }
 
-function getDemoData() {
-  return {
-    type: 'cust',
-    name: 'فرع المعادي - Carrefour',
-    channel: 'Modern Trade',
-    monthly: 150000, timeGone: 120000, mtd: 103000,
-    offers: [
-      { name:'شيبس ليز 100جم', barcode:'6221024000015', discount:'15%', before:12500, after:10625, until:'31/03/2026' },
-      { name:'عصير بيبسي 330مل', barcode:'6221024000022', discount:'10%', before:9800, after:8820, until:'15/04/2026' }
-    ],
-    history: [
-      { name:'شيبس ليز 100جم', qty:48, avg:52, days:5, type:'top' },
-      { name:'بيبسي 330مل', qty:120, avg:130, days:3, type:'top' },
-      { name:'كيتو كريمة', qty:24, avg:28, days:52, type:'stopped' },
-      { name:'بسكويت ماريا', qty:36, avg:40, days:67, type:'stopped' }
-    ],
-    notes: [
-      { date:'05/03/2026', by:'Ahmed Samy', text:'العميل طلب زيادة تشكيلة المشروبات في الشهر القادم' },
-      { date:'20/02/2026', by:'Mohamed Ali', text:'مخزن مكتمل من الشيبس — متابعة بعد أسبوعين' }
-    ],
-    mslWebhookUrl: '',
-    msl: [
-      { n:'شيبس ليز 100جم',      b:'6221024000015', s:42, c:'12', cat:'سناكس' },
-      { n:'شيبس ليز 50جم',       b:'6221024000016', s:5,  c:'24', cat:'سناكس' },
-      { n:'عصير بيبسي 330مل',    b:'6221024000022', s:0,  c:'6',  cat:'مشروبات' },
-      { n:'ماء نستله 600مل',     b:'6221024000031', s:80, c:'12', cat:'مشروبات' },
-      { n:'بسكويت ماريا 200جم',  b:'6221024000044', s:3,  c:'12', cat:'بسكويت' },
-      { n:'شوكولاتة كيتكات',     b:'6221024000058', s:15, c:'24', cat:'حلويات' },
-      { n:'كيتو كريمة 250جم',    b:'6221024000067', s:0,  c:'6',  cat:'ألبان' }
-    ]
+function stockBadge(stockUnits, packSize) {
+  const cases = packSize > 0 ? Math.floor(stockUnits / packSize) : 0;
+  if (stockUnits === 0 || cases === 0) return `<span class="stock-badge stk-zero">صفر</span>`;
+  if (cases > 20) return `<span class="stock-badge stk-high">${fmt(stockUnits)}</span>`;
+  if (cases > 5) return `<span class="stock-badge stk-mid">${fmt(stockUnits)}</span>`;
+  return `<span class="stock-badge stk-low">${fmt(stockUnits)}</span>`;
+}
+
+function renderMSLTable(items) {
+  const el = document.getElementById('msl-body');
+  if (!items || items.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-ico">📭</div><div class="empty-txt">لا توجد منتجات</div></div>';
+    document.getElementById('msl-summary').style.display = 'none';
+    return;
+  }
+
+  let html = `<div class="msl-tbl-wrap"><table class="msl-tbl">
+  <thead><tr>
+    <th>اسم المنتج</th>
+    <th class="cen">كرتونة</th>
+    <th class="cen">رصيد</th>
+    <th class="cen">آخر طلب</th>
+    <th class="cen">عرض</th>
+    <th class="cen">الطلب</th>
+    <th class="cen">📷</th>
+  </tr></thead><tbody>`;
+
+  items.forEach(item => {
+    const qty = S.qty[item.sku_id] || '';
+    const hasQty = qty > 0;
+    const isPromo = !!item.promo;
+    const rowCls = hasQty ? 'has-qty' : isPromo ? 'is-promo' : '';
+    const promoCell = item.promo
+      ? `<div class="promo-disc">${Math.round(item.promo.discount*100)}%</div><div class="promo-price">${item.promo.price_after} ج</div>`
+      : `<span style="color:var(--muted)">—</span>`;
+    const badges = [
+      item.is_zero_sale ? `<span class="badge badge-zero">🔴 صفر</span>` : '',
+      isPromo ? `<span class="badge badge-promo">🎁 عرض</span>` : '',
+      `<span class="badge badge-cat">${item.category||''}</span>`
+    ].filter(Boolean).join('');
+
+    html += `<tr class="${rowCls}">
+      <td class="td-name">
+        <div class="sku-name">${item.sku_name}</div>
+        <div class="sku-badges">${badges}</div>
+      </td>
+      <td class="td-case">${item.pack_size||'-'}</td>
+      <td class="td-stock">${stockBadge(item.stock_units||0, item.pack_size||1)}</td>
+      <td class="td-last"><div class="last-date">${fmtDate(item.last_order_date)}</div><div class="last-qty">${item.last_order_qty||'-'}</div></td>
+      <td class="td-promo">${promoCell}</td>
+      <td class="td-qty"><input class="qty-input ${hasQty?'filled':''}" type="number" min="0" value="${qty}" data-sku="${item.sku_id}" placeholder="0" oninput="onQtyChange(this)"></td>
+      <td class="td-img-btn"><div class="img-btn" onclick="showImage('${item.sku_id}','${(item.sku_name||'').replace(/'/g,"\\'")}')">📷</div></td>
+    </tr>`;
+  });
+
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+
+  // Show summary bar
+  document.getElementById('msl-summary').style.display = 'flex';
+  updateSummary();
+}
+
+function onQtyChange(input) {
+  const skuId = input.dataset.sku;
+  const val = parseInt(input.value) || 0;
+  if (val > 0) { S.qty[skuId] = val; input.classList.add('filled'); }
+  else { delete S.qty[skuId]; input.classList.remove('filled'); }
+  const row = input.closest('tr');
+  if (row) row.classList.toggle('has-qty', val > 0);
+  updateSummary();
+}
+
+function updateSummary() {
+  const total = Object.values(S.qty).reduce((a,b) => a+Number(b), 0);
+  document.getElementById('sum-val').textContent = total > 0 ? `${total} كرتونة` : '0 كرتونة';
+  const btn = document.getElementById('export-btn');
+  btn.disabled = total === 0;
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════
+function exportOrder() {
+  const items = S.mslItems || [];
+  const ordered = items.filter(x => S.qty[x.sku_id] > 0);
+  if (ordered.length === 0) return;
+  const d = S.door;
+  const today = new Date();
+  const dateStr = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
+
+  const rows = [
+    ['Mighty Foods — طلب MSL'],
+    [`المحل: ${d?.door_name||'-'}   |   التاريخ: ${dateStr}   |   المندوب: ${S.rep?.name||'-'}`],
+    [],
+    ['كود SKU','اسم المنتج','الفئة','كرتونة/حبة','رصيد الوحدات','آخر طلب','آخر كمية','الكمية المطلوبة (كرتونة)','عرض','سعر العرض']
+  ];
+
+  ordered.forEach(item => {
+    rows.push([
+      item.sku_id,
+      item.sku_name,
+      item.category||'',
+      item.pack_size||'',
+      item.stock_units||0,
+      fmtDate(item.last_order_date),
+      item.last_order_qty||0,
+      S.qty[item.sku_id]||0,
+      item.promo ? `${Math.round(item.promo.discount*100)}%` : '',
+      item.promo ? `${item.promo.price_after} ج` : ''
+    ]);
+  });
+  rows.push([]);
+  rows.push(['','','','','','','الإجمالي', Object.values(S.qty).reduce((a,b)=>a+b,0),'','']);
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:12},{wch:40},{wch:12},{wch:12},{wch:14},{wch:10},{wch:10},{wch:16},{wch:8},{wch:12}];
+  ws['!merges'] = [{s:{r:0,c:0},e:{r:0,c:9}}];
+  XLSX.utils.book_append_sheet(wb, ws, 'طلب MSL');
+  XLSX.writeFile(wb, `MSL_Order_${d?.door_id||'door'}_${dateStr}.xlsx`);
+}
+
+// ═══════════════════════════════════════════════════════
+// HISTORY — LOAD & RENDER
+// ═══════════════════════════════════════════════════════
+async function loadHistory() {
+  const doorId = S.door?.door_id;
+  if (!doorId) return;
+  if (S.isDemo) {
+    setTimeout(() => {
+      S.cache[doorId] = S.cache[doorId] || {};
+      S.cache[doorId].hist = DEMO_HIST;
+      if (S.activeTab === 'hist') renderHistory(DEMO_HIST);
+    }, 600);
+    return;
+  }
+  try {
+    const r = await fetch(`${S.ep.history}?door_id=${encodeURIComponent(doorId)}`);
+    const data = await r.json();
+    S.cache[doorId] = S.cache[doorId] || {};
+    S.cache[doorId].hist = data;
+    if (S.activeTab === 'hist') renderHistory(data);
+  } catch(e) {
+    document.getElementById('hist-body').innerHTML = `<div class="empty"><div class="empty-ico">⚠️</div><div class="empty-txt">تعذر تحميل السجل</div></div>`;
+  }
+}
+
+function renderHistory(data) {
+  const el = document.getElementById('hist-body');
+  let html = '';
+  const tops = data.top_items || [];
+  const stopped = data.stopped_items || [];
+
+  if (tops.length) {
+    html += `<div class="section-title">🏆 الأكثر مبيعاً</div>
+    <div style="background:rgba(15,186,115,.07);border:1px solid rgba(15,186,115,.15);border-radius:10px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--sub)">
+      استخدم هذه البيانات لإقناع المشتري بتاريخ الشراء المنتظم
+    </div>`;
+    tops.forEach((x,i) => {
+      html += `<div class="hist-card fade-up d${i+1}">
+        <div class="hist-dot hot"></div>
+        <div class="hist-main">
+          <div class="hist-name">${x.sku_name}</div>
+          <div class="hist-meta">متوسط شهري: <strong style="color:var(--green)">${x.avg_monthly} كرتونة</strong> · آخر طلب: ${fmtDate(x.last_date)}</div>
+        </div>
+        <div class="hist-right">
+          <div class="hist-qty c-g">${x.last_qty}</div>
+          <div class="hist-sub">آخر كمية</div>
+        </div>
+      </div>`;
+    });
+  }
+
+  if (stopped.length) {
+    html += `<div class="section-title" style="margin-top:16px">⏸ توقف عن الشراء</div>
+    <div style="background:rgba(240,64,64,.07);border:1px solid rgba(240,64,64,.15);border-radius:10px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--sub)">
+      منتجات كان المحل يشتريها وتوقف — فرصة لإعادة التفعيل
+    </div>`;
+    stopped.forEach((x,i) => {
+      html += `<div class="hist-card fade-up d${i+1}">
+        <div class="hist-dot stop"></div>
+        <div class="hist-main">
+          <div class="hist-name">${x.sku_name}</div>
+          <div class="hist-meta">متوقف منذ <strong style="color:var(--red)">${x.days_stopped} يوم</strong> · آخر كمية: ${x.last_qty} كرتونة</div>
+        </div>
+        <div class="hist-right">
+          <div class="hist-qty c-r">${x.days_stopped}</div>
+          <div class="hist-sub">يوم</div>
+        </div>
+      </div>`;
+    });
+  }
+
+  if (!tops.length && !stopped.length) html = `<div class="empty"><div class="empty-ico">📊</div><div class="empty-txt">لا توجد بيانات مبيعات</div></div>`;
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+// ZERO SALES — LOAD & RENDER
+// ═══════════════════════════════════════════════════════
+async function loadZero() {
+  const doorId = S.door?.door_id;
+  if (!doorId) return;
+  if (S.isDemo) {
+    setTimeout(() => {
+      S.cache[doorId] = S.cache[doorId] || {};
+      S.cache[doorId].zero = DEMO_ZERO;
+      if (S.activeTab === 'zero') renderZero(DEMO_ZERO);
+      updateZeroBadge(DEMO_ZERO.items?.length || 0);
+    }, 500);
+    return;
+  }
+  try {
+    const r = await fetch(`${S.ep.zero}?door_id=${encodeURIComponent(doorId)}`);
+    const data = await r.json();
+    S.cache[doorId] = S.cache[doorId] || {};
+    S.cache[doorId].zero = data;
+    if (S.activeTab === 'zero') renderZero(data);
+    updateZeroBadge(data.items?.length || 0);
+  } catch(e) {
+    document.getElementById('zero-body').innerHTML = `<div class="empty"><div class="empty-ico">⚠️</div><div class="empty-txt">تعذر تحميل البيانات</div></div>`;
+  }
+}
+
+function updateZeroBadge(n) {
+  const el = document.getElementById('zero-cnt');
+  if (n > 0) { el.textContent = n; el.style.display = 'inline'; }
+  else el.style.display = 'none';
+}
+
+function renderZero(data) {
+  const items = data.items || [];
+  const el = document.getElementById('zero-body');
+  if (!items.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-ico">✅</div><div class="empty-txt">ممتاز! لا توجد منتجات بصفر مبيعات</div></div>`;
+    return;
+  }
+  let html = `<div class="zero-summary"><div><div class="zero-num">${items.length}</div></div><div>منتج بصفر مبيعات في هذا المحل حسب آخر تدقيق — تأكد من التواجد والعرض</div></div>`;
+  // Group by category
+  const byCat = {};
+  items.forEach(x => { const c = x.category||'أخرى'; (byCat[c]=byCat[c]||[]).push(x); });
+  Object.entries(byCat).forEach(([cat, list]) => {
+    html += `<div class="section-title">${cat}</div>`;
+    list.forEach(x => {
+      html += `<div class="zero-card">
+        <div class="zero-name">${x.sku_name}</div>
+        <div class="zero-meta">آخر تدقيق: ${fmtDate(x.audit_date)} &nbsp;·&nbsp; كود: ${x.sku_id}</div>
+      </div>`;
+    });
+  });
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+// PROMO — LOAD & RENDER
+// ═══════════════════════════════════════════════════════
+async function loadPromo() {
+  const doorId = S.door?.door_id;
+  if (!doorId) return;
+  if (S.isDemo) {
+    setTimeout(() => {
+      S.cache[doorId] = S.cache[doorId] || {};
+      S.cache[doorId].promo = DEMO_PROMO;
+      if (S.activeTab === 'promo') renderPromo(DEMO_PROMO);
+      updatePromoBadge(DEMO_PROMO.items?.length || 0);
+    }, 600);
+    return;
+  }
+  try {
+    const r = await fetch(`${S.ep.history}?door_id=${encodeURIComponent(doorId)}&promo=1`);
+    const data = await r.json();
+    S.cache[doorId] = S.cache[doorId] || {};
+    S.cache[doorId].promo = data;
+    if (S.activeTab === 'promo') renderPromo(data);
+    updatePromoBadge(data.items?.length || 0);
+  } catch(e) {
+    document.getElementById('promo-body').innerHTML = `<div class="empty"><div class="empty-ico">⚠️</div><div class="empty-txt">تعذر تحميل العروض</div></div>`;
+  }
+}
+
+function updatePromoBadge(n) {
+  const el = document.getElementById('promo-cnt');
+  if (n > 0) { el.textContent = n; el.style.display = 'inline'; }
+  else el.style.display = 'none';
+}
+
+function renderPromo(data) {
+  const items = data.items || [];
+  const el = document.getElementById('promo-body');
+  if (!items.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-ico">🎁</div><div class="empty-txt">لا توجد عروض نشطة لهذا المحل الآن</div></div>`;
+    return;
+  }
+  const today = new Date();
+  let html = '';
+  items.forEach((x,i) => {
+    const exp = new Date(x.expires);
+    const daysLeft = Math.ceil((exp - today) / 86400000);
+    const daysClass = daysLeft <= 3 ? 'c-r' : daysLeft <= 7 ? 'c-y' : 'c-g';
+    html += `<div class="promo-card fade-up d${Math.min(i+1,5)}">
+      <div class="promo-expired-label">🟢 نشط</div>
+      <div class="promo-head">
+        <div class="promo-name">${x.sku_name}</div>
+        <div class="promo-disc-badge">${Math.round(x.discount*100)}%</div>
+      </div>
+      <div class="promo-chips">
+        <span class="promo-chip price"><s style="opacity:.5">${x.price_before} ج</s></span>
+        <span class="promo-chip price-after">→ ${x.price_after} ج</span>
+        <span class="promo-chip group">🏷 ${x.customer_group||'الكل'}</span>
+        <span class="promo-chip exp ${daysClass}">⏰ ${daysLeft > 0 ? daysLeft+' يوم' : 'ينتهي اليوم'}</span>
+      </div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+// IMAGE VIEWER
+// ═══════════════════════════════════════════════════════
+function showImage(skuId, skuName) {
+  const modal = document.getElementById('img-modal');
+  const img = document.getElementById('modal-img');
+  const nameEl = document.getElementById('modal-name');
+  const url = `${IMG_BASE}${skuId}.Jpg`;
+  nameEl.textContent = skuName;
+  img.style.display = 'none';
+  img.onerror = () => {
+    img.style.display = 'none';
+    nameEl.insertAdjacentHTML('afterend','<div class="modal-img-err">⚠️ لا توجد صورة متاحة<br><small style="opacity:.6">'+url+'</small></div>');
   };
+  img.onload = () => { img.style.display = 'block'; };
+  img.src = url;
+  modal.classList.add('open');
 }
 
-// ─────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────
-window.addEventListener('load', () => {
-  const tg = window.Telegram?.WebApp;
-  if (tg) { tg.expand(); tg.ready(); }
-
-  setTimeout(() => {
-    appData = loadData();
-    render(appData);
-    document.getElementById('loader').classList.add('out');
-    setTimeout(() => document.getElementById('loader').remove(), 500);
-  }, 1200);
+function closeImgModal() {
+  document.getElementById('img-modal').classList.remove('open');
+  document.getElementById('modal-img').src = '';
+  document.querySelectorAll('.modal-img-err').forEach(e => e.remove());
+}
+document.getElementById('img-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('img-modal')) closeImgModal();
 });
+
+// ═══════════════════════════════════════════════════════
+// PRELOAD ZERO & PROMO badges silently
+// ═══════════════════════════════════════════════════════
+function preloadBadges() {
+  if (!S.door) return;
+  const doorId = S.door.door_id;
+  const c = S.cache[doorId] || {};
+  if (!c.zero) loadZero();
+  if (!c.promo) loadPromo();
+}
+
+// after app starts, preload badges silently
+setTimeout(preloadBadges, 2000);
+
 </script>
 </body>
 </html>
