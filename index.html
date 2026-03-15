@@ -462,7 +462,7 @@ window.addEventListener('load', () => {
   const d = p.get('d');
   if (d) {
     try {
-      const payload = JSON.parse(atob(d));
+      const payload = JSON.parse(decodeURIComponent(atob(d)));
       S.rep = {id:payload.rep_id||'', name:payload.rep_name||'مندوب', target:Number(payload.monthly_target||0), timeGone:Number(payload.time_gone_target||0), mtd:Number(payload.mtd_sales||0)};
       S.doors = payload.doors || [];
       S.door = S.doors[0] || null;
@@ -526,9 +526,9 @@ function renderTopBar() {
 // ═══════════════════════════════════════════════════════
 function renderRing() {
   const d = S.door;
-  const target = d?.target || S.rep?.target || 1;
-  const timeGone = d?.time_gone || S.rep?.timeGone || 0;
-  const mtd = d?.mtd || S.rep?.mtd || 0;
+  const target   = Number(d?.target    || d?.monthly_target    || S.rep?.target    || 0) || 1;
+  const timeGone = Number(d?.time_gone || d?.time_gone_target  || S.rep?.timeGone  || 0);
+  const mtd      = Number(d?.mtd       || d?.mtd_sales         || S.rep?.mtd       || 0);
   const p = pct(mtd, target);
   const circ = 245;
   document.getElementById('ring-fill').style.strokeDashoffset = circ - (circ * p / 100);
@@ -550,19 +550,19 @@ function renderRing() {
 // ═══════════════════════════════════════════════════════
 function renderKPIs() {
   const d = S.door;
-  const target = d?.target || S.rep?.target || 1;
-  const timeGone = d?.time_gone || S.rep?.timeGone || 0;
-  const mtd = d?.mtd || S.rep?.mtd || 0;
+  const target   = Number(d?.target    || d?.monthly_target    || S.rep?.target    || 0) || 1;
+  const timeGone = Number(d?.time_gone || d?.time_gone_target  || S.rep?.timeGone  || 0);
+  const mtd      = Number(d?.mtd       || d?.mtd_sales         || S.rep?.mtd       || 0);
   const gap = Math.max(0, target - mtd);
   const timePct = pct(timeGone, target);
   document.getElementById('kpi-gap').textContent = fmt(gap);
   document.getElementById('kpi-time-pct').textContent = timePct + '%';
   document.getElementById('kpi-doors').textContent = S.doors.length;
-  const best = [...S.doors].sort((a,b) => pct(b.mtd,b.target) - pct(a.mtd,a.target))[0];
+  const best = [...S.doors].sort((a,b) => pct(Number(b.mtd||b.mtd_sales||0),Number(b.target||b.monthly_target||1)) - pct(Number(a.mtd||a.mtd_sales||0),Number(a.target||a.monthly_target||1)))[0];
   if (best) {
     const name = best.door_name.split('_')[0].replace(/\s.*/,'');
     document.getElementById('kpi-best').textContent = name;
-    document.getElementById('kpi-best-pct').textContent = pct(best.mtd, best.target) + '% إنجاز';
+    document.getElementById('kpi-best-pct').textContent = pct(Number(best.mtd||best.mtd_sales||0), Number(best.target||best.monthly_target||1)) + '% إنجاز';
   }
 }
 
@@ -572,7 +572,7 @@ function renderKPIs() {
 function renderHome() {
   const el = document.getElementById('home-doors');
   el.innerHTML = S.doors.map((d,i) => {
-    const p = pct(d.mtd, d.target);
+    const p = pct(Number(d.mtd||d.mtd_sales||0), Number(d.target||d.monthly_target||1));
     const isCur = d.door_id === S.door?.door_id;
     const col = p>=100?'var(--green)':p>=70?'var(--accent)':p>=40?'var(--yellow)':'var(--red)';
     return `<div class="door-card fade-up ${isCur?'current':''} d${Math.min(i+1,5)}" onclick="selectDoor('${d.door_id}')">
@@ -587,8 +587,8 @@ function renderHome() {
         </div>
       </div>
       <div class="door-pct">
-        <span style="color:var(--sub)">MTD: <span style="color:var(--text);font-weight:700">${fmt(d.mtd)}</span></span>
-        <span style="color:var(--sub)">الهدف: <span style="color:var(--text);font-weight:700">${fmt(d.target)}</span></span>
+        <span style="color:var(--sub)">MTD: <span style="color:var(--text);font-weight:700">${fmt(d.mtd||d.mtd_sales||0)}</span></span>
+        <span style="color:var(--sub)">الهدف: <span style="color:var(--text);font-weight:700">${fmt(d.target||d.monthly_target||0)}</span></span>
       </div>
       <div class="door-prog"><div class="door-prog-fill" style="width:${p}%;background:${col}"></div></div>
     </div>`;
@@ -601,7 +601,7 @@ function renderHome() {
 function renderDoorOpts() {
   const el = document.getElementById('door-opts');
   el.innerHTML = S.doors.map(d => {
-    const p = pct(d.mtd, d.target);
+    const p = pct(Number(d.mtd||d.mtd_sales||0), Number(d.target||d.monthly_target||1));
     const isSel = d.door_id === S.door?.door_id;
     return `<div class="door-opt ${isSel?'sel':''}" onclick="selectDoor('${d.door_id}');closeDoorSelector()">
       <div class="door-opt-dot"></div>
@@ -609,7 +609,7 @@ function renderDoorOpts() {
         <div class="door-opt-name">${d.door_name}</div>
         <div class="door-opt-ch">${d.channel}</div>
       </div>
-      <div class="door-opt-pct" style="color:${p>=100?'var(--green)':p>=70?'var(--accent)':'var(--yellow)'}">${p}%</div>
+      <div class="door-opt-pct" style="color:${pct(Number(d.mtd||d.mtd_sales||0),Number(d.target||d.monthly_target||1))>=100?'var(--green)':pct(Number(d.mtd||d.mtd_sales||0),Number(d.target||d.monthly_target||1))>=70?'var(--accent)':'var(--yellow)'}">${pct(Number(d.mtd||d.mtd_sales||0),Number(d.target||d.monthly_target||1))}%</div>
     </div>`;
   }).join('');
 }
