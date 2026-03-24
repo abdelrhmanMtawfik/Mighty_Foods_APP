@@ -232,7 +232,10 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);overf
 /* ─── DOOR SELECTOR OVERLAY ─── */
 #door-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:none;align-items:flex-end}
 #door-overlay.open{display:flex}
-.door-sheet{background:var(--s1);border-radius:22px 22px 0 0;width:100%;padding:18px 16px 40px;border-top:1px solid var(--border);animation:slideup .3s ease}
+.door-sheet{background:var(--s1);border-radius:22px 22px 0 0;width:100%;padding:18px 16px 0;border-top:1px solid var(--border);animation:slideup .3s ease;max-height:75vh;display:flex;flex-direction:column}
+.door-sheet-header{flex-shrink:0;padding-bottom:12px}
+.door-opts-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:40px}
+.door-opts-scroll::-webkit-scrollbar{display:none}
 @keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .sheet-handle{width:36px;height:3px;border-radius:2px;background:var(--muted);margin:0 auto 16px}
 .sheet-title{font-size:14px;font-weight:900;margin-bottom:14px}
@@ -275,9 +278,13 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);overf
 <!-- DOOR SELECTOR OVERLAY -->
 <div id="door-overlay">
   <div class="door-sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title">اختر المحل</div>
-    <div id="door-opts"></div>
+    <div class="door-sheet-header">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">اختر المحل</div>
+    </div>
+    <div class="door-opts-scroll">
+      <div id="door-opts"></div>
+    </div>
   </div>
 </div>
 
@@ -309,9 +316,9 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);overf
       <div class="hero-card">
         <div class="hero-top">
           <div class="hero-left">
-            <div class="hero-greeting">إنجاز الشهر</div>
+            <div class="hero-greeting">إجمالي كل المحلات</div>
             <div class="hero-mtd-val c-g" id="hero-mtd">—</div>
-            <div class="hero-mtd-lbl">المحقق حتى الآن (MTD)</div>
+            <div class="hero-mtd-lbl">المحقق حتى الآن (MTD إجمالي)</div>
           </div>
           <div class="hero-ring-wrap">
             <svg class="hero-ring-svg" width="88" height="88" viewBox="0 0 88 88">
@@ -579,10 +586,10 @@ function renderTopBar() {
 // HERO
 // ═══════════════════════════════════════════════════════
 function renderRing() {
-  const d = S.door;
-  const target   = Number(d?.target    || d?.monthly_target    || S.rep?.target    || 0);
-  const timeGone = Number(d?.time_gone || d?.time_gone_target  || S.rep?.timeGone  || 0);
-  const mtd      = Number(d?.mtd       || d?.mtd_sales         || S.rep?.mtd       || 0);
+  // Always show REP-LEVEL totals (sum of all doors)
+  const target   = Number(S.rep?.target   || 0);
+  const timeGone = Number(S.rep?.timeGone || 0);
+  const mtd      = Number(S.rep?.mtd      || 0);
 
   const hasTarget = target > 0;
   const p = hasTarget ? pct(mtd, target) : 0;
@@ -636,10 +643,10 @@ function renderRing() {
 // KPIs
 // ═══════════════════════════════════════════════════════
 function renderKPIs() {
-  const d = S.door;
-  const target   = Number(d?.target    || d?.monthly_target    || S.rep?.target    || 0);
-  const timeGone = Number(d?.time_gone || d?.time_gone_target  || S.rep?.timeGone  || 0);
-  const mtd      = Number(d?.mtd       || d?.mtd_sales         || S.rep?.mtd       || 0);
+  // Always use rep-level totals
+  const target   = Number(S.rep?.target   || 0);
+  const timeGone = Number(S.rep?.timeGone || 0);
+  const mtd      = Number(S.rep?.mtd      || 0);
   const hasTarget = target > 0;
   const gap = hasTarget ? Math.max(0, target - mtd) : null;
   const timePct = hasTarget && timeGone > 0 ? pct(timeGone, target) : null;
