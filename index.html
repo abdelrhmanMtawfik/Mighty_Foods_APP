@@ -49,25 +49,42 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);overf
 #scroll-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 #scroll-body::-webkit-scrollbar{display:none}
 
-/* ─── RING ─── */
-.ring-section{padding:18px 14px 12px;display:flex;align-items:center;gap:16px;background:linear-gradient(180deg,rgba(249,115,22,.05) 0%,transparent 100%);border-bottom:1px solid var(--border)}
-.ring-wrap{position:relative;display:inline-flex;flex-shrink:0}
-.ring-svg{transform:rotate(-90deg)}
-.ring-track{fill:none;stroke:var(--border);stroke-width:9}
-.ring-fill{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)}
-.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.ring-pct{font-size:24px;font-weight:900;line-height:1}
-.ring-lbl{font-size:9px;color:var(--sub);margin-top:1px}
-.ring-stats{flex:1;display:flex;flex-direction:column;gap:8px}
-.rstat-row{display:flex;justify-content:space-between;margin-bottom:4px}
-.rstat-lbl{font-size:11px;color:var(--sub)}
-.rstat-val{font-size:11px;font-weight:700}
-.rstat-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
-.rstat-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+/* ─── HERO CARD ─── */
+.hero-section{padding:14px 14px 0;background:linear-gradient(180deg,rgba(249,115,22,.06) 0%,transparent 100%);border-bottom:1px solid var(--border)}
+.hero-card{background:var(--s1);border:1px solid var(--border2);border-radius:18px;padding:16px 16px 14px;position:relative;overflow:hidden;margin-bottom:14px}
+.hero-card::before{content:'';position:absolute;top:0;right:0;width:120px;height:120px;background:radial-gradient(circle at top right,rgba(249,115,22,.12),transparent 70%);pointer-events:none}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.hero-left{flex:1}
+.hero-greeting{font-size:10px;color:var(--sub);font-weight:600;letter-spacing:.6px;text-transform:uppercase;margin-bottom:3px}
+.hero-mtd-val{font-size:30px;font-weight:900;line-height:1;letter-spacing:-1px}
+.hero-mtd-lbl{font-size:10px;color:var(--sub);margin-top:3px}
+.hero-ring-wrap{position:relative;flex-shrink:0}
+.hero-ring-svg{transform:rotate(-90deg);filter:drop-shadow(0 0 8px rgba(249,115,22,.25))}
+.hero-ring-track{fill:none;stroke:var(--border);stroke-width:10}
+.hero-ring-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1),stroke .4s}
+.hero-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.hero-ring-pct{font-size:18px;font-weight:900;line-height:1}
+.hero-ring-lbl{font-size:8px;color:var(--sub);font-weight:600}
+/* metric rows */
+.hero-metrics{display:flex;flex-direction:column;gap:8px}
+.hm-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px}
+.hm-left{display:flex;flex-direction:column;gap:4px}
+.hm-label{font-size:10px;color:var(--sub);font-weight:600}
+.hm-bar-wrap{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.hm-bar-fill{height:100%;border-radius:3px;transition:width 1.3s cubic-bezier(.4,0,.2,1)}
+.hm-val{font-size:13px;font-weight:800;white-space:nowrap;text-align:left}
+.hero-divider{height:1px;background:var(--border);margin:10px 0 8px}
+.hero-gap-row{display:flex;justify-content:space-between;align-items:center}
+.hero-gap-lbl{font-size:10px;color:var(--sub)}
+.hero-gap-val{font-size:13px;font-weight:900}
+.hero-no-target{text-align:center;padding:8px 0 4px;font-size:11px;color:var(--sub);background:rgba(255,255,255,.02);border-radius:8px}
 
 /* ─── KPI GRID ─── */
-.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 8px}
-.kpi-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 14px 8px}
+.kpi-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px;position:relative;overflow:hidden}
+.kpi-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;border-radius:0 0 var(--r) var(--r)}
+.kpi-card.gap::after{background:var(--red)}.kpi-card.time::after{background:var(--yellow)}.kpi-card.doors::after{background:var(--blue)}.kpi-card.best::after{background:var(--green)}
+.kpi-icon{font-size:16px;margin-bottom:5px}
 .kpi-lbl{font-size:9px;color:var(--sub);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
 .kpi-val{font-size:20px;font-weight:900;margin-top:4px;line-height:1}
 .kpi-sub{font-size:9px;color:var(--sub);margin-top:3px}
@@ -86,13 +103,22 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);overf
 .section-title{font-size:10px;font-weight:800;color:var(--sub);letter-spacing:1.2px;text-transform:uppercase;padding:14px 0 8px;border-bottom:1px solid var(--border);margin-bottom:8px}
 
 /* ─── DOOR CARDS ─── */
-.door-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:7px;cursor:pointer;transition:border-color .2s}
+.door-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .2s,transform .15s;position:relative;overflow:hidden}
+.door-card::before{content:'';position:absolute;right:0;top:0;bottom:0;width:4px;border-radius:0 var(--r) var(--r) 0}
+.door-card.ach-high::before{background:var(--green)}.door-card.ach-mid::before{background:var(--accent)}.door-card.ach-warn::before{background:var(--yellow)}.door-card.ach-low::before{background:var(--red)}
 .door-card.current{border-color:var(--accent)}
-.door-card-name{font-size:13px;font-weight:700}
+.door-card:active{transform:scale(.98)}
+.door-card-name{font-size:13px;font-weight:700;line-height:1.4}
 .door-card-ch{font-size:10px;color:var(--sub);margin-top:2px}
-.door-pct{font-size:11px;margin-top:6px;display:flex;justify-content:space-between}
-.door-prog{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:5px}
-.door-prog-fill{height:100%;border-radius:2px;background:var(--green);transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.door-card-row{display:flex;justify-content:space-between;align-items:flex-end;margin-top:8px}
+.door-card-nums{display:flex;flex-direction:column;gap:2px}
+.door-num-item{font-size:10px;color:var(--sub)}
+.door-num-item span{font-weight:700;color:var(--text)}
+.door-pct-badge{font-size:20px;font-weight:900;line-height:1;text-align:left}
+.door-pct-sub{font-size:9px;color:var(--sub);text-align:left;margin-top:1px}
+.door-prog{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:8px}
+.door-prog-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.door-no-target{font-size:10px;color:var(--muted);padding:4px 0 2px;font-style:italic}
 
 /* ─── MSL TABLE ─── */
 .msl-controls{padding:12px 0 8px;display:flex;flex-direction:column;gap:8px}
@@ -278,56 +304,63 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);overf
   <!-- SCROLLABLE BODY -->
   <div id="scroll-body">
 
-    <!-- RING HERO -->
-    <div class="ring-section" id="ring-section">
-      <div class="ring-wrap">
-        <svg class="ring-svg" width="96" height="96" viewBox="0 0 96 96">
-          <circle class="ring-track" cx="48" cy="48" r="39"/>
-          <circle class="ring-fill" id="ring-fill" cx="48" cy="48" r="39" stroke="var(--accent)"
-                  stroke-dasharray="245" stroke-dashoffset="245"/>
-        </svg>
-        <div class="ring-center">
-          <div class="ring-pct c-a" id="ring-pct">0%</div>
-          <div class="ring-lbl">إنجاز</div>
+    <!-- HERO CARD -->
+    <div class="hero-section">
+      <div class="hero-card">
+        <div class="hero-top">
+          <div class="hero-left">
+            <div class="hero-greeting">إنجاز الشهر</div>
+            <div class="hero-mtd-val c-g" id="hero-mtd">—</div>
+            <div class="hero-mtd-lbl">المحقق حتى الآن (MTD)</div>
+          </div>
+          <div class="hero-ring-wrap">
+            <svg class="hero-ring-svg" width="88" height="88" viewBox="0 0 88 88">
+              <circle class="hero-ring-track" cx="44" cy="44" r="35"/>
+              <circle class="hero-ring-fill" id="hero-ring-fill" cx="44" cy="44" r="35"
+                      stroke="var(--accent)" stroke-dasharray="220" stroke-dashoffset="220"/>
+            </svg>
+            <div class="hero-ring-center">
+              <div class="hero-ring-pct c-a" id="hero-pct">0%</div>
+              <div class="hero-ring-lbl">إنجاز</div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="ring-stats">
-        <div class="rstat">
-          <div class="rstat-row"><span class="rstat-lbl">الهدف الشهري</span><span class="rstat-val" id="rs-target">-</span></div>
-          <div class="rstat-bar"><div class="rstat-fill" id="rs-target-bar" style="width:0%;background:var(--accent)"></div></div>
+        <div class="hero-metrics" id="hero-metrics">
+          <!-- filled by JS -->
         </div>
-        <div class="rstat">
-          <div class="rstat-row"><span class="rstat-lbl">هدف الوقت</span><span class="rstat-val c-y" id="rs-time">-</span></div>
-          <div class="rstat-bar"><div class="rstat-fill" id="rs-time-bar" style="width:0%;background:var(--yellow)"></div></div>
-        </div>
-        <div class="rstat">
-          <div class="rstat-row"><span class="rstat-lbl">المحقق (MTD)</span><span class="rstat-val c-g" id="rs-mtd">-</span></div>
-          <div class="rstat-bar"><div class="rstat-fill" id="rs-mtd-bar" style="width:0%;background:var(--green)"></div></div>
+        <div class="hero-divider"></div>
+        <div class="hero-gap-row">
+          <span class="hero-gap-lbl">الفجوة المتبقية</span>
+          <span class="hero-gap-val c-r" id="hero-gap">—</span>
         </div>
       </div>
     </div>
 
     <!-- KPI GRID -->
     <div class="kpi-grid">
-      <div class="kpi-card fade-up d1">
+      <div class="kpi-card gap fade-up d1">
+        <div class="kpi-icon">🎯</div>
         <div class="kpi-lbl">الفجوة</div>
-        <div class="kpi-val c-r" id="kpi-gap">-</div>
+        <div class="kpi-val c-r" id="kpi-gap">—</div>
         <div class="kpi-sub">لإتمام الهدف</div>
       </div>
-      <div class="kpi-card fade-up d2">
+      <div class="kpi-card time fade-up d2">
+        <div class="kpi-icon">⏱</div>
         <div class="kpi-lbl">نسبة الوقت</div>
-        <div class="kpi-val c-y" id="kpi-time-pct">-</div>
+        <div class="kpi-val c-y" id="kpi-time-pct">—</div>
         <div class="kpi-sub">من الشهر انقضى</div>
       </div>
-      <div class="kpi-card fade-up d3">
+      <div class="kpi-card doors fade-up d3">
+        <div class="kpi-icon">🏪</div>
         <div class="kpi-lbl">عدد المحلات</div>
-        <div class="kpi-val c-b" id="kpi-doors">-</div>
+        <div class="kpi-val c-b" id="kpi-doors">—</div>
         <div class="kpi-sub">في مسار اليوم</div>
       </div>
-      <div class="kpi-card fade-up d4">
+      <div class="kpi-card best fade-up d4">
+        <div class="kpi-icon">🏆</div>
         <div class="kpi-lbl">أفضل محل</div>
-        <div class="kpi-val" id="kpi-best" style="font-size:13px;margin-top:6px">-</div>
-        <div class="kpi-sub" id="kpi-best-pct">-</div>
+        <div class="kpi-val c-g" id="kpi-best" style="font-size:13px;margin-top:6px">—</div>
+        <div class="kpi-sub" id="kpi-best-pct">—</div>
       </div>
     </div>
 
@@ -543,27 +576,60 @@ function renderTopBar() {
 }
 
 // ═══════════════════════════════════════════════════════
-// RING
+// HERO
 // ═══════════════════════════════════════════════════════
 function renderRing() {
   const d = S.door;
-  const target   = Number(d?.target    || d?.monthly_target    || S.rep?.target    || 0) || 1;
+  const target   = Number(d?.target    || d?.monthly_target    || S.rep?.target    || 0);
   const timeGone = Number(d?.time_gone || d?.time_gone_target  || S.rep?.timeGone  || 0);
   const mtd      = Number(d?.mtd       || d?.mtd_sales         || S.rep?.mtd       || 0);
-  const p = pct(mtd, target);
-  const circ = 245;
-  document.getElementById('ring-fill').style.strokeDashoffset = circ - (circ * p / 100);
-  document.getElementById('ring-pct').textContent = p + '%';
+
+  const hasTarget = target > 0;
+  const p = hasTarget ? pct(mtd, target) : 0;
   const color = p >= 100 ? 'var(--green)' : p >= 70 ? 'var(--accent)' : p >= 40 ? 'var(--yellow)' : 'var(--red)';
-  document.getElementById('ring-fill').style.stroke = color;
-  document.getElementById('ring-pct').style.color = color;
-  document.getElementById('rs-target').textContent = fmt(target);
-  document.getElementById('rs-target-bar').style.width = '100%';
-  document.getElementById('rs-time').textContent = fmt(timeGone);
-  document.getElementById('rs-time-bar').style.width = pct(timeGone, target) + '%';
-  document.getElementById('rs-mtd').textContent = fmt(mtd);
-  document.getElementById('rs-mtd-bar').style.width = p + '%';
-  document.getElementById('rs-mtd-bar').style.background = color;
+  const noTargetColor = 'var(--sub)';
+
+  // Ring
+  const circ = 220;
+  const fill = document.getElementById('hero-ring-fill');
+  fill.style.strokeDashoffset = hasTarget ? circ - (circ * p / 100) : circ;
+  fill.style.stroke = hasTarget ? color : noTargetColor;
+
+  const pctEl = document.getElementById('hero-pct');
+  pctEl.textContent = hasTarget ? p + '%' : '—';
+  pctEl.style.color = hasTarget ? color : 'var(--sub)';
+
+  // MTD big number
+  const mtdEl = document.getElementById('hero-mtd');
+  mtdEl.textContent = mtd > 0 ? fmt(mtd) : '—';
+  mtdEl.style.color = hasTarget ? color : (mtd > 0 ? 'var(--text)' : 'var(--sub)');
+
+  // Gap
+  const gap = hasTarget ? Math.max(0, target - mtd) : null;
+  document.getElementById('hero-gap').textContent = gap !== null ? fmt(gap) : '—';
+
+  // Metric rows
+  const metricsEl = document.getElementById('hero-metrics');
+  if (!hasTarget) {
+    metricsEl.innerHTML = `<div class="hero-no-target">⚠️ لا يوجد هدف مُحدد لهذا المحل في الشيت</div>`;
+    return;
+  }
+
+  const rows = [
+    { label: 'الهدف الشهري', val: fmt(target), barPct: 100, color: 'var(--accent)' },
+    { label: 'هدف الوقت', val: fmt(timeGone), barPct: timeGone > 0 ? pct(timeGone, target) : 0, color: 'var(--yellow)' },
+    { label: 'المحقق (MTD)', val: fmt(mtd), barPct: p, color },
+  ];
+
+  metricsEl.innerHTML = rows.map(r => `
+    <div class="hm-row">
+      <div class="hm-left">
+        <span class="hm-label">${r.label}</span>
+        <div class="hm-bar-wrap"><div class="hm-bar-fill" style="width:${r.barPct}%;background:${r.color}"></div></div>
+      </div>
+      <span class="hm-val" style="color:${r.color}">${r.val}</span>
+    </div>
+  `).join('');
 }
 
 // ═══════════════════════════════════════════════════════
@@ -571,19 +637,25 @@ function renderRing() {
 // ═══════════════════════════════════════════════════════
 function renderKPIs() {
   const d = S.door;
-  const target   = Number(d?.target    || d?.monthly_target    || S.rep?.target    || 0) || 1;
+  const target   = Number(d?.target    || d?.monthly_target    || S.rep?.target    || 0);
   const timeGone = Number(d?.time_gone || d?.time_gone_target  || S.rep?.timeGone  || 0);
   const mtd      = Number(d?.mtd       || d?.mtd_sales         || S.rep?.mtd       || 0);
-  const gap = Math.max(0, target - mtd);
-  const timePct = pct(timeGone, target);
-  document.getElementById('kpi-gap').textContent = fmt(gap);
-  document.getElementById('kpi-time-pct').textContent = timePct + '%';
+  const hasTarget = target > 0;
+  const gap = hasTarget ? Math.max(0, target - mtd) : null;
+  const timePct = hasTarget && timeGone > 0 ? pct(timeGone, target) : null;
+  document.getElementById('kpi-gap').textContent = gap !== null ? fmt(gap) : '—';
+  document.getElementById('kpi-time-pct').textContent = timePct !== null ? timePct + '%' : '—';
   document.getElementById('kpi-doors').textContent = S.doors.length;
-  const best = [...S.doors].sort((a,b) => pct(Number(b.mtd||b.mtd_sales||0),Number(b.target||b.monthly_target||1)) - pct(Number(a.mtd||a.mtd_sales||0),Number(a.target||a.monthly_target||1)))[0];
+  const best = [...S.doors]
+    .filter(x => Number(x.target||x.monthly_target||0) > 0)
+    .sort((a,b) => pct(Number(b.mtd||b.mtd_sales||0),Number(b.target||b.monthly_target||1)) - pct(Number(a.mtd||a.mtd_sales||0),Number(a.target||a.monthly_target||1)))[0];
   if (best) {
-    const name = best.door_name.split('_')[0].replace(/\s.*/,'');
+    const name = best.door_name.split('_')[0].replace(/[\s_].*/,'').slice(0,6);
     document.getElementById('kpi-best').textContent = name;
     document.getElementById('kpi-best-pct').textContent = pct(Number(best.mtd||best.mtd_sales||0), Number(best.target||best.monthly_target||1)) + '% إنجاز';
+  } else {
+    document.getElementById('kpi-best').textContent = '—';
+    document.getElementById('kpi-best-pct').textContent = 'لا بيانات';
   }
 }
 
@@ -593,25 +665,35 @@ function renderKPIs() {
 function renderHome() {
   const el = document.getElementById('home-doors');
   el.innerHTML = S.doors.map((d,i) => {
-    const p = pct(Number(d.mtd||d.mtd_sales||0), Number(d.target||d.monthly_target||1));
-    const isCur = d.door_id === S.door?.door_id;
-    const col = p>=100?'var(--green)':p>=70?'var(--accent)':p>=40?'var(--yellow)':'var(--red)';
-    return `<div class="door-card fade-up ${isCur?'current':''} d${Math.min(i+1,5)}" onclick="selectDoor('${d.door_id}')">
+    const target = Number(d.target||d.monthly_target||0);
+    const mtd    = Number(d.mtd||d.mtd_sales||0);
+    const tg     = Number(d.time_gone||d.time_gone_target||0);
+    const hasT   = target > 0;
+    const p      = hasT ? pct(mtd, target) : 0;
+    const isCur  = d.door_id === S.door?.door_id;
+    const col    = hasT ? (p>=100?'var(--green)':p>=70?'var(--accent)':p>=40?'var(--yellow)':'var(--red)') : 'var(--muted)';
+    const achClass= hasT ? (p>=100?'ach-high':p>=70?'ach-mid':p>=40?'ach-warn':'ach-low') : '';
+    return `<div class="door-card ${achClass} fade-up ${isCur?'current':''} d${Math.min(i+1,5)}" onclick="selectDoor('${d.door_id}')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div>
+        <div style="flex:1;min-width:0">
           <div class="door-card-name">${d.door_name}</div>
           <div class="door-card-ch">${d.channel}</div>
         </div>
-        <div style="text-align:left">
-          <div style="font-size:18px;font-weight:900;color:${col}">${p}%</div>
-          <div style="font-size:9px;color:var(--sub)">إنجاز</div>
+        <div style="text-align:left;flex-shrink:0;padding-right:8px">
+          <div class="door-pct-badge" style="color:${col}">${hasT ? p+'%' : '—'}</div>
+          <div class="door-pct-sub">إنجاز</div>
         </div>
       </div>
-      <div class="door-pct">
-        <span style="color:var(--sub)">MTD: <span style="color:var(--text);font-weight:700">${fmt(d.mtd||d.mtd_sales||0)}</span></span>
-        <span style="color:var(--sub)">الهدف: <span style="color:var(--text);font-weight:700">${fmt(d.target||d.monthly_target||0)}</span></span>
+      ${hasT ? `
+      <div class="door-card-row">
+        <div class="door-card-nums">
+          <div class="door-num-item">MTD: <span>${fmt(mtd)}</span></div>
+          ${tg>0?`<div class="door-num-item">هدف الوقت: <span style="color:var(--yellow)">${fmt(tg)}</span></div>`:''}
+        </div>
+        <div class="door-num-item">الهدف: <span>${fmt(target)}</span></div>
       </div>
       <div class="door-prog"><div class="door-prog-fill" style="width:${p}%;background:${col}"></div></div>
+      ` : `<div class="door-no-target">لا يوجد هدف مُعيَّن — MTD: ${mtd>0?fmt(mtd):'—'}</div>`}
     </div>`;
   }).join('');
 }
