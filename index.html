@@ -1498,20 +1498,19 @@ async function aiSend() {
 
   try {
     const systemPrompt = buildAIContext();
+    const AI_WEBHOOK = 'https://vmi3102625.contaboserver.net/webhook/ai-assistant';
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch(AI_WEBHOOK, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
         system: systemPrompt,
         messages: AI.history.map(m => ({ role: m.role, content: m.content }))
       })
     });
 
     const data = await response.json();
-    const reply = data.content?.[0]?.text || 'عذراً، لم أتمكن من الإجابة. حاول مرة أخرى.';
+    const reply = data.reply || 'عذراً، لم أتمكن من الإجابة. حاول مرة أخرى.';
 
     aiRemoveTyping();
     aiAddMessage('bot', reply);
