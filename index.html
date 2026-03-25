@@ -263,6 +263,40 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);overf
 @keyframes fadeup{to{opacity:1;transform:translateY(0)}}
 .d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}.d4{animation-delay:.2s}.d5{animation-delay:.25s}
 .pb{height:80px}
+
+/* ─── AI ASSISTANT ─── */
+.ai-panel{display:flex;flex-direction:column;height:100%;padding:0}
+.ai-messages{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.ai-msg{display:flex;flex-direction:column;gap:4px;animation:fadeup .3s ease forwards;opacity:0}
+.ai-msg.user{align-items:flex-end}
+.ai-msg.bot{align-items:flex-start}
+.ai-bubble{max-width:88%;padding:10px 13px;border-radius:16px;font-size:12.5px;line-height:1.7;word-break:break-word}
+.ai-msg.user .ai-bubble{background:linear-gradient(135deg,var(--accent),#c2410c);color:#fff;border-radius:16px 16px 4px 16px}
+.ai-msg.bot .ai-bubble{background:var(--s2);border:1px solid var(--border2);color:var(--text);border-radius:16px 16px 16px 4px}
+.ai-bubble ul{padding-right:16px;margin:4px 0}
+.ai-bubble li{margin-bottom:3px}
+.ai-bubble strong{color:var(--accent2)}
+.ai-msg-time{font-size:9px;color:var(--muted)}
+.ai-typing{display:flex;gap:5px;align-items:center;padding:10px 14px}
+.ai-typing-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 1.2s ease-in-out infinite}
+.ai-typing-dot:nth-child(2){animation-delay:.2s}
+.ai-typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.ai-input-area{padding:8px 14px 10px;background:rgba(8,11,18,.95);backdrop-filter:blur(14px);border-top:1px solid var(--border);flex-shrink:0}
+.ai-quick-chips{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:7px}
+.ai-quick-chips::-webkit-scrollbar{display:none}
+.ai-quick-chip{flex-shrink:0;font-size:10px;font-weight:700;padding:5px 11px;border-radius:20px;background:var(--s2);border:1px solid var(--border2);color:var(--sub);cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s}
+.ai-quick-chip:active{transform:scale(.95);background:rgba(249,115,22,.12);border-color:var(--accent);color:var(--accent)}
+.ai-input-row{display:flex;gap:8px;align-items:flex-end}
+.ai-textarea{flex:1;background:var(--s1);border:1.5px solid var(--border);border-radius:12px;padding:9px 12px;font-family:'Cairo',sans-serif;font-size:12px;color:var(--text);outline:none;resize:none;min-height:38px;max-height:90px;line-height:1.5;overflow-y:auto}
+.ai-textarea:focus{border-color:var(--accent)}
+.ai-send-btn{width:38px;height:38px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent),#c2410c);color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 3px 12px rgba(249,115,22,.35)}
+.ai-send-btn:active{transform:scale(.93)}
+.ai-send-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.ai-welcome{text-align:center;padding:24px 16px 12px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.ai-welcome-icon{font-size:36px;animation:pulse 2s ease-in-out infinite}
+.ai-welcome-title{font-size:14px;font-weight:900;color:var(--text)}
+.ai-welcome-sub{font-size:11px;color:var(--sub);line-height:1.6}
 </style>
 </head>
 <body>
@@ -378,6 +412,7 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);overf
       <div class="tab" id="tab-hist" onclick="switchTab('hist')">📈 التاريخ</div>
       <div class="tab" id="tab-zero" onclick="switchTab('zero')">🔴 الصفر <span class="tab-badge" id="zero-cnt" style="display:none">0</span></div>
       <div class="tab" id="tab-promo" onclick="switchTab('promo')">🎁 العروض <span class="tab-badge" id="promo-cnt" style="display:none;background:var(--accent)">0</span></div>
+      <div class="tab" id="tab-ai" onclick="switchTab('ai')">🤖 مساعد ذكي</div>
     </div>
 
     <!-- PANEL: HOME -->
@@ -423,6 +458,31 @@ body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);overf
     <!-- PANEL: PROMO -->
     <div class="panel" id="panel-promo">
       <div id="promo-body"><div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل العروض...</div></div></div>
+    </div>
+
+    <!-- PANEL: AI ASSISTANT -->
+    <div class="panel" id="panel-ai" style="padding:0;display:flex;flex-direction:column;height:calc(100vh - 195px)">
+      <div class="ai-messages" id="ai-messages">
+        <div class="ai-welcome" id="ai-welcome">
+          <div class="ai-welcome-icon">🤖</div>
+          <div class="ai-welcome-title">مساعد Mighty Foods الذكي</div>
+          <div class="ai-welcome-sub">اسألني عن أداء مبيعاتك، منتجات الصفر،<br>كميات الطلب، والعروض النشطة</div>
+        </div>
+      </div>
+      <div class="ai-input-area">
+        <div class="ai-quick-chips" id="ai-quick-chips">
+          <div class="ai-quick-chip" onclick="aiQuickSend('كيف أداء مبيعاتي هذا الشهر؟')">📊 تحليل الأداء</div>
+          <div class="ai-quick-chip" onclick="aiQuickSend('ما هي منتجات الصفر في هذا المحل وكيف أعالجها؟')">🔴 منتجات الصفر</div>
+          <div class="ai-quick-chip" onclick="aiQuickSend('اقترح كميات الطلب المناسبة لهذا المحل')">📋 اقتراح طلب</div>
+          <div class="ai-quick-chip" onclick="aiQuickSend('ما هي العروض النشطة ومتى تنتهي؟')">🎁 العروض</div>
+          <div class="ai-quick-chip" onclick="aiQuickSend('ما الفجوة المتبقية لتحقيق الهدف وكيف أغلقها؟')">🎯 إغلاق الهدف</div>
+          <div class="ai-quick-chip" onclick="aiQuickSend('أيهم أفضل محل لتركيز جهدي اليوم؟')">🏪 أولوية المحلات</div>
+        </div>
+        <div class="ai-input-row">
+          <textarea class="ai-textarea" id="ai-input" placeholder="اكتب سؤالك هنا..." rows="1" oninput="aiAutoResize(this)" onkeydown="aiKeyDown(event)"></textarea>
+          <button class="ai-send-btn" id="ai-send-btn" onclick="aiSend()">➤</button>
+        </div>
+      </div>
     </div>
 
   </div><!-- /scroll-body -->
@@ -777,6 +837,8 @@ function switchTab(name) {
   if (name === 'hist' && c.hist) renderHistory(c.hist);
   if (name === 'zero' && c.zero) renderZero(c.zero);
   if (name === 'promo' && c.promo) renderPromo(c.promo);
+  // AI panel — just scroll to bottom
+  if (name === 'ai') setTimeout(aiScrollBottom, 50);
 }
 
 // ═══════════════════════════════════════════════════════
@@ -1244,6 +1306,230 @@ function preloadBadges() {
 
 // after app starts, preload badges silently
 setTimeout(preloadBadges, 2000);
+
+// ═══════════════════════════════════════════════════════
+// AI ASSISTANT — POWERED BY CLAUDE
+// ═══════════════════════════════════════════════════════
+const AI = {
+  history: [],       // { role, content } for API
+  isLoading: false
+};
+
+// Build rich context from current S state
+function buildAIContext() {
+  const rep = S.rep || {};
+  const door = S.door || {};
+  const doorId = door.door_id;
+  const cache = doorId ? (S.cache[doorId] || {}) : {};
+
+  const mtdPct = rep.target > 0 ? Math.round(rep.mtd / rep.target * 100) : null;
+  const gap = rep.target > 0 ? Math.max(0, rep.target - rep.mtd) : null;
+
+  let ctx = `أنت مساعد مبيعات ذكي متخصص لشركة Mighty Foods — شركة FMCG مصرية تعمل في Modern Trade, General Trade, HoReCa, E-Commerce.
+تتحدث دائماً بالعربية بأسلوب مختصر ومباشر ومفيد للمندوب الميداني.
+استخدم الأرقام والبيانات في إجاباتك وأعطِ توصيات عملية قابلة للتنفيذ.
+
+=== بيانات المندوب ===
+الاسم: ${rep.name || 'مندوب'}
+الهدف الشهري: ${rep.target > 0 ? rep.target.toLocaleString('en') + ' ج' : 'غير محدد'}
+هدف الوقت: ${rep.timeGone > 0 ? rep.timeGone.toLocaleString('en') + ' ج' : '-'}
+المحقق (MTD): ${rep.mtd > 0 ? rep.mtd.toLocaleString('en') + ' ج' : '0'}
+نسبة الإنجاز: ${mtdPct !== null ? mtdPct + '%' : 'لا هدف'}
+الفجوة المتبقية: ${gap !== null ? gap.toLocaleString('en') + ' ج' : '-'}
+
+=== المحل الحالي ===
+${door.door_name ? `الاسم: ${door.door_name}
+القناة: ${door.channel || '-'}
+الهدف: ${door.target > 0 ? Number(door.target).toLocaleString('en') + ' ج' : 'غير محدد'}
+MTD المحل: ${door.mtd > 0 ? Number(door.mtd).toLocaleString('en') + ' ج' : '0'}` : 'لم يتم اختيار محل'}
+
+=== كل المحلات (${S.doors.length} محل) ===
+${S.doors.map(d => {
+  const t = Number(d.target || 0);
+  const m = Number(d.mtd || 0);
+  const p = t > 0 ? Math.round(m / t * 100) : null;
+  return `- ${d.door_name} (${d.channel}): MTD=${m.toLocaleString('en')} ج, هدف=${t > 0 ? t.toLocaleString('en') + ' ج' : 'لا هدف'}${p !== null ? ', إنجاز=' + p + '%' : ''}`;
+}).join('\n')}`;
+
+  // MSL items
+  if (cache.msl && cache.msl.length > 0) {
+    const zeroItems = cache.msl.filter(x => x.is_zero_sale);
+    const promoItems = cache.msl.filter(x => x.promo);
+    const outOfStock = cache.msl.filter(x => (x.stock_units || 0) === 0);
+    ctx += `\n\n=== قائمة MSL للمحل الحالي (${cache.msl.length} منتج) ===
+منتجات صفر مبيعات: ${zeroItems.length} (${zeroItems.map(x => x.sku_name).join(' | ')})
+منتجات بعرض: ${promoItems.length} (${promoItems.map(x => x.sku_name + ' بخصم ' + Math.round(x.promo.discount * 100) + '%').join(' | ')})
+منتجات رصيد صفر: ${outOfStock.length} (${outOfStock.map(x => x.sku_name).join(' | ')})
+تفاصيل المنتجات: ${cache.msl.slice(0, 12).map(x => `[${x.sku_name}: آخر طلب=${x.last_order_qty || 0} كرتونة, رصيد=${x.stock_units || 0} وحدة]`).join(', ')}`;
+  }
+
+  // History
+  if (cache.hist) {
+    const tops = cache.hist.top_items || [];
+    const stopped = cache.hist.stopped_items || [];
+    if (tops.length) ctx += `\n\n=== الأكثر مبيعاً ===\n${tops.map(x => `- ${x.sku_name}: متوسط ${x.avg_monthly} كرتونة/شهر, آخر طلب ${x.last_qty} كرتونة (${x.last_date || ''})`).join('\n')}`;
+    if (stopped.length) ctx += `\n\n=== منتجات توقفت ===\n${stopped.map(x => `- ${x.sku_name}: متوقف ${x.days_stopped} يوم`).join('\n')}`;
+  }
+
+  // Zero sales
+  if (cache.zero && cache.zero.items && cache.zero.items.length) {
+    ctx += `\n\n=== منتجات الصفر (${cache.zero.items.length} منتج) ===\n${cache.zero.items.map(x => `- ${x.sku_name} (${x.category || '-'}) — آخر تدقيق: ${x.audit_date || '-'}`).join('\n')}`;
+  }
+
+  // Promos
+  if (cache.promo && cache.promo.items && cache.promo.items.length) {
+    const today = new Date();
+    ctx += `\n\n=== العروض النشطة (${cache.promo.items.length}) ===\n${cache.promo.items.map(x => {
+      const daysLeft = Math.ceil((new Date(x.expires) - today) / 86400000);
+      return `- ${x.sku_name}: خصم ${Math.round(x.discount * 100)}%, السعر من ${x.price_before} إلى ${x.price_after} ج, ينتهي بعد ${daysLeft} يوم, للعميل: ${x.customer_group || 'الكل'}`;
+    }).join('\n')}`;
+  }
+
+  // Current order
+  const orderedItems = Object.entries(S.qty).filter(([, q]) => q > 0);
+  if (orderedItems.length > 0) {
+    const totalQty = Object.values(S.qty).reduce((a, b) => a + b, 0);
+    ctx += `\n\n=== الطلب الحالي الذي أدخله المندوب ===
+إجمالي الكراتين: ${totalQty}
+${orderedItems.map(([skuId, qty]) => {
+  const item = (cache.msl || []).find(x => String(x.sku_id) === String(skuId));
+  return `- ${item ? item.sku_name : skuId}: ${qty} كرتونة`;
+}).join('\n')}`;
+  }
+
+  return ctx;
+}
+
+function aiScrollBottom() {
+  const el = document.getElementById('ai-messages');
+  if (el) el.scrollTop = el.scrollHeight;
+}
+
+function aiTime() {
+  const now = new Date();
+  return `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+}
+
+function aiAddMessage(role, text) {
+  const welcome = document.getElementById('ai-welcome');
+  if (welcome) welcome.remove();
+
+  const el = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = `ai-msg ${role}`;
+  div.innerHTML = `
+    <div class="ai-bubble">${role === 'bot' ? mdToHtml(text) : escapeHtml(text)}</div>
+    <div class="ai-msg-time">${aiTime()}</div>
+  `;
+  el.appendChild(div);
+  aiScrollBottom();
+  return div;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function mdToHtml(text) {
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/^[-•]\s(.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>[\s\S]+?<\/li>)/g,'<ul>$1</ul>')
+    .replace(/<\/ul>\s*<ul>/g,'')
+    .replace(/\n{2,}/g,'</p><p>')
+    .replace(/\n/g,'<br>')
+    .replace(/^(.)/,'<p>$1').replace(/(.)$/, '$1</p>');
+}
+
+function aiShowTyping() {
+  const el = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.id = 'ai-typing';
+  div.className = 'ai-msg bot';
+  div.innerHTML = `<div class="ai-bubble"><div class="ai-typing"><div class="ai-typing-dot"></div><div class="ai-typing-dot"></div><div class="ai-typing-dot"></div></div></div>`;
+  el.appendChild(div);
+  aiScrollBottom();
+}
+
+function aiRemoveTyping() {
+  const el = document.getElementById('ai-typing');
+  if (el) el.remove();
+}
+
+function aiAutoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 90) + 'px';
+}
+
+function aiKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    aiSend();
+  }
+}
+
+function aiQuickSend(text) {
+  const input = document.getElementById('ai-input');
+  input.value = text;
+  aiSend();
+}
+
+async function aiSend() {
+  if (AI.isLoading) return;
+  const input = document.getElementById('ai-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('ai-send-btn').disabled = true;
+  AI.isLoading = true;
+
+  // Add user message to UI
+  aiAddMessage('user', text);
+
+  // Add to history
+  AI.history.push({ role: 'user', content: text });
+
+  // Show typing indicator
+  aiShowTyping();
+
+  try {
+    const systemPrompt = buildAIContext();
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: AI.history.map(m => ({ role: m.role, content: m.content }))
+      })
+    });
+
+    const data = await response.json();
+    const reply = data.content?.[0]?.text || 'عذراً، لم أتمكن من الإجابة. حاول مرة أخرى.';
+
+    aiRemoveTyping();
+    aiAddMessage('bot', reply);
+
+    // Keep history (max last 10 turns)
+    AI.history.push({ role: 'assistant', content: reply });
+    if (AI.history.length > 20) AI.history = AI.history.slice(-20);
+
+  } catch (err) {
+    aiRemoveTyping();
+    aiAddMessage('bot', '⚠️ تعذر الاتصال بالمساعد. تحقق من الاتصال وحاول مجدداً.');
+    AI.history.pop(); // remove failed user message from history
+  }
+
+  AI.isLoading = false;
+  document.getElementById('ai-send-btn').disabled = false;
+  aiScrollBottom();
+}
 
 </script>
 </body>
