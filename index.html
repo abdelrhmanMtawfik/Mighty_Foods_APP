@@ -1,908 +1,1622 @@
-
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0a0e1a">
-<title>Mighty Foods — Rep Performance</title>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,800&family=Manrope:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mighty Foods | Sales Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
-  :root {
-    --bg-0: #0a0e1a;
-    --bg-1: #111727;
-    --bg-2: #1a2236;
-    --line: rgba(255,255,255,0.08);
-    --line-2: rgba(255,255,255,0.14);
-    --ink: #f4f6fb;
-    --ink-dim: #94a3b8;
-    --ink-faint: #64748b;
-    --accent: #c5f547;          /* lime — primary brand */
-    --accent-soft: rgba(197,245,71,0.12);
-    --accent-glow: rgba(197,245,71,0.35);
-    --warn: #fb923c;
-    --bad: #f87171;
-    --good: #4ade80;
-    --serif: 'Fraunces', 'Tajawal', Georgia, serif;
-    --sans:  'Manrope', 'Tajawal', system-ui, sans-serif;
-    --ar:    'Tajawal', 'Manrope', sans-serif;
-    --radius: 22px;
-    --radius-sm: 14px;
-    --shadow-glow: 0 0 60px -10px var(--accent-glow);
-  }
+:root {
+  --brand:#1443C8;--brand2:#1e54e8;--brand3:rgba(20,67,200,0.15);
+  --accent:#FF6B00;--success:#00C47A;--danger:#FF3B5C;--warning:#FFB800;
+  --bg:#080C18;--bg2:#0D1425;--bg3:#121A2E;
+  --card:#111827;--card2:#1a2338;
+  --border:rgba(255,255,255,0.07);--border2:rgba(20,67,200,0.3);
+  --text:#F0F4FF;--text2:#8B9DC3;--text3:#4A5A7A;
+  --r:16px;--rs:10px;--shadow:0 8px 32px rgba(0,0,0,0.4);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 
-  html[dir="rtl"] { font-family: var(--ar); }
-  html[dir="rtl"] .serif { font-family: 'Tajawal', serif; font-weight: 800; }
+/* SCREENS */
+.screen{display:none;min-height:100vh}
+.screen.active{display:block}
 
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+/* ── SETUP SCREEN ── */
+#setup-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,rgba(20,67,200,0.18) 0%,transparent 60%),var(--bg)}
+.setup-box{background:var(--card);border:1px solid var(--border2);border-radius:24px;padding:40px;width:100%;max-width:480px;margin:20px}
+.setup-logo{text-align:center;margin-bottom:28px}
+.setup-logo .logo{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;color:var(--brand2)}
+.setup-logo .sub{font-size:11px;color:var(--text3);letter-spacing:4px;text-transform:uppercase;margin-top:4px}
+.setup-title{font-size:18px;font-weight:700;margin-bottom:6px}
+.setup-sub{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.6}
+.step-list{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
+.step-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:14px 16px;font-size:13px;color:var(--text2)}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--brand);border-radius:50%;font-size:11px;font-weight:700;color:white;margin-left:8px;flex-shrink:0}
 
-  html, body {
-    margin: 0;
-    background: var(--bg-0);
-    color: var(--ink);
-    font-family: var(--sans);
-    font-size: 16px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    min-height: 100vh;
-    min-height: 100dvh;
-  }
+/* ── LOGIN SCREEN ── */
+#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,rgba(20,67,200,0.18) 0%,transparent 60%),var(--bg)}
+.login-box{background:var(--card);border:1px solid var(--border2);border-radius:24px;padding:44px 38px;width:100%;max-width:400px;margin:20px}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo .logo{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:900;color:var(--brand2);letter-spacing:2px}
+.login-logo .sub{font-size:11px;color:var(--text3);letter-spacing:4px;text-transform:uppercase;margin-top:4px}
+.login-title{font-size:20px;font-weight:700;text-align:center;margin-bottom:24px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px}
+.field input,.field select{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;font-family:'Cairo',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;direction:rtl}
+.field input:focus,.field select:focus{border-color:var(--brand2);box-shadow:0 0 0 3px rgba(20,67,200,.2)}
+.field select option{background:var(--bg2)}
+.btn{width:100%;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;border-radius:var(--rs);padding:14px;font-family:'Cairo',sans-serif;font-size:15px;font-weight:700;color:white;cursor:pointer;transition:all .2s;margin-top:6px}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(20,67,200,.4)}
+.btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.err-msg{background:rgba(255,59,92,.1);border:1px solid rgba(255,59,92,.3);border-radius:var(--rs);padding:10px 14px;font-size:13px;color:var(--danger);margin-top:10px;display:none;text-align:center}
 
-  /* atmospheric background — subtle radial mesh + grain */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 80% 50% at 80% 0%, rgba(197,245,71,0.08), transparent 60%),
-      radial-gradient(ellipse 60% 40% at 0% 80%, rgba(99,102,241,0.06), transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
-    opacity: 0.04;
-    mix-blend-mode: overlay;
-    pointer-events: none;
-    z-index: 1;
-  }
+/* ── TOP BAR ── */
+.topbar{position:sticky;top:0;z-index:100;background:rgba(8,12,24,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:60px}
+.topbar-logo{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--brand2);letter-spacing:1px}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.user-badge{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:40px;padding:5px 12px 5px 7px}
+.avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--brand),var(--brand2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.uname{font-size:13px;font-weight:600}
+.urole{font-size:10px;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.btn-sm{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--text2);font-family:'Cairo',sans-serif;font-size:12px;cursor:pointer;transition:all .2s}
+.btn-sm:hover{border-color:var(--danger);color:var(--danger)}
+.btn-sm.blue:hover{border-color:var(--brand2);color:var(--brand2)}
 
-  .app {
-    position: relative;
-    z-index: 2;
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 24px 20px 60px;
-    min-height: 100vh;
-    min-height: 100dvh;
-  }
+/* ── NAV ── */
+.nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 12px;gap:2px}
+.ntab{display:flex;align-items:center;gap:7px;padding:13px 16px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;user-select:none}
+.ntab:hover{color:var(--text)}
+.ntab.active{color:var(--brand2);border-bottom-color:var(--brand2)}
+.ntab .badge-count{background:var(--danger);color:white;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
 
-  /* ========== TOPBAR ========== */
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 28px;
-    animation: slideDown .7s ease both;
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: var(--serif);
-    font-weight: 800;
-    font-size: 18px;
-    letter-spacing: -0.02em;
-  }
-  .brand-mark {
-    width: 32px;
-    height: 32px;
-    border-radius: 9px;
-    background: var(--accent);
-    color: var(--bg-0);
-    display: grid;
-    place-items: center;
-    font-weight: 800;
-    font-family: var(--sans);
-    font-size: 16px;
-    box-shadow: var(--shadow-glow);
-  }
-  .lang-toggle {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid var(--line);
-    color: var(--ink-dim);
-    border-radius: 999px;
-    padding: 7px 14px;
-    font-family: var(--sans);
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    transition: all .25s ease;
-  }
-  .lang-toggle:hover { color: var(--ink); border-color: var(--line-2); }
+/* ── CONTENT ── */
+.content{padding:20px;max-width:1400px;margin:0 auto}
+.page-h{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:14px}
+.page-title{font-size:24px;font-weight:900;letter-spacing:-.5px}
+.page-sub{font-size:13px;color:var(--text2);margin-top:3px}
+.actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 
-  /* ========== SIGN IN ========== */
-  .signin {
-    margin-top: 40px;
-    text-align: center;
-    animation: fadeIn .8s ease both;
-  }
-  .signin .eyebrow {
-    font-family: var(--sans);
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 16px;
-  }
-  .signin h1 {
-    font-family: var(--serif);
-    font-weight: 400;
-    font-size: 38px;
-    line-height: 1.05;
-    letter-spacing: -0.03em;
-    margin: 0 0 14px;
-  }
-  .signin h1 em {
-    font-style: italic;
-    color: var(--accent);
-    font-weight: 300;
-  }
-  .signin p {
-    color: var(--ink-dim);
-    font-size: 14px;
-    margin: 0 0 32px;
-    max-width: 320px;
-    margin-inline: auto;
-  }
-  .input-wrap {
-    position: relative;
-    margin: 0 auto 16px;
-    max-width: 320px;
-  }
-  .input-wrap input {
-    width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 16px 18px;
-    color: var(--ink);
-    font-family: var(--sans);
-    font-size: 15px;
-    letter-spacing: 0.02em;
-    outline: none;
-    transition: all .25s ease;
-  }
-  .input-wrap input:focus {
-    border-color: var(--accent);
-    background: rgba(197,245,71,0.05);
-    box-shadow: 0 0 0 4px rgba(197,245,71,0.1);
-  }
-  .btn-primary {
-    width: 100%;
-    max-width: 320px;
-    background: var(--accent);
-    color: var(--bg-0);
-    border: none;
-    border-radius: 14px;
-    padding: 16px;
-    font-family: var(--sans);
-    font-weight: 700;
-    font-size: 15px;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    transition: all .25s ease;
-    box-shadow: var(--shadow-glow);
-  }
-  .btn-primary:hover { transform: translateY(-1px); }
-  .btn-primary:active { transform: translateY(0); }
-  .btn-primary:disabled { opacity: 0.5; cursor: wait; }
+/* ── DOOR SELECTOR ── */
+.door-panel{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:18px;margin-bottom:22px}
+.door-panel-title{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.door-search{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:9px 14px;font-family:'Cairo',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%;margin-bottom:12px;transition:border-color .2s;direction:rtl}
+.door-search:focus{border-color:var(--brand2)}
+.door-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;max-height:200px;overflow-y:auto}
+.door-btn{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .2s;text-align:right}
+.door-btn:hover{border-color:var(--brand2);color:var(--brand2)}
+.door-btn.active{background:var(--brand3);border-color:var(--brand2);color:var(--brand2)}
+.door-btn .door-code{font-size:10px;color:var(--text3);display:block;margin-top:2px}
 
-  .signin .hint {
-    color: var(--ink-faint);
-    font-size: 12px;
-    margin-top: 24px;
-  }
+/* ── KPI GRID ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:22px}
+.kcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 18px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.kcard:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.kcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.kcard.blue::before{background:linear-gradient(90deg,var(--brand),var(--brand2))}
+.kcard.orange::before{background:linear-gradient(90deg,var(--accent),#FF9500)}
+.kcard.green::before{background:linear-gradient(90deg,#00C47A,#00E5A0)}
+.kcard.red::before{background:linear-gradient(90deg,var(--danger),#FF6B7A)}
+.kcard.purple::before{background:linear-gradient(90deg,#7C3AED,#A855F7)}
+.klabel{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:9px}
+.kval{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:700;line-height:1;margin-bottom:5px}
+.kmeta{font-size:12px;color:var(--text2)}
 
-  /* ========== HERO ========== */
-  .hero {
-    margin-bottom: 28px;
-    animation: slideUp .8s .1s ease both;
-  }
-  .hero .greeting {
-    font-size: 12px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 10px;
-    font-weight: 600;
-  }
-  .hero .name {
-    font-family: var(--serif);
-    font-weight: 400;
-    font-size: 40px;
-    line-height: 1.0;
-    letter-spacing: -0.03em;
-    margin: 0 0 14px;
-  }
-  .hero .name em {
-    font-style: italic;
-    color: var(--accent);
-    font-weight: 300;
-  }
-  .hero .meta {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--accent-soft);
-    color: var(--accent);
-    border: 1px solid rgba(197,245,71,0.25);
-    border-radius: 999px;
-    padding: 6px 12px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .badge.muted {
-    background: rgba(255,255,255,0.04);
-    color: var(--ink-dim);
-    border-color: var(--line);
-  }
-  .badge .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 8px var(--accent);
-  }
+/* ── PROGRESS BAR ── */
+.pbar-wrap{display:flex;align-items:center;gap:8px;min-width:100px}
+.pbar{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.pbar-fill{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.pbar-fill.g{background:linear-gradient(90deg,#00C47A,#00E5A0)}
+.pbar-fill.o{background:linear-gradient(90deg,var(--warning),#FF9500)}
+.pbar-fill.r{background:linear-gradient(90deg,var(--danger),#FF6B7A)}
+.pbar-fill.b{background:linear-gradient(90deg,var(--brand),var(--brand2))}
+.ppct{font-size:12px;font-weight:700;min-width:34px}
 
-  /* ========== RING CARDS ========== */
-  .rings {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin-bottom: 16px;
-    animation: slideUp .8s .25s ease both;
-  }
-  .ring-card {
-    background: linear-gradient(180deg, var(--bg-1), var(--bg-2));
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 22px 18px 20px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .ring-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 100%;
-    background: radial-gradient(ellipse at center top, rgba(197,245,71,0.08), transparent 60%);
-    pointer-events: none;
-  }
-  .ring-card .label {
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    font-weight: 600;
-    position: relative;
-  }
-  .ring {
-    position: relative;
-    width: 130px;
-    height: 130px;
-    margin: 14px auto 8px;
-  }
-  .ring svg { transform: rotate(-90deg); width: 100%; height: 100%; }
-  .ring .track { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 10; }
-  .ring .progress {
-    fill: none;
-    stroke: var(--accent);
-    stroke-width: 10;
-    stroke-linecap: round;
-    transition: stroke-dashoffset 1.4s cubic-bezier(.2,.85,.3,1);
-    filter: drop-shadow(0 0 8px var(--accent-glow));
-  }
-  .ring.warn .progress { stroke: var(--warn); filter: drop-shadow(0 0 8px rgba(251,146,60,0.4)); }
-  .ring.bad  .progress { stroke: var(--bad);  filter: drop-shadow(0 0 8px rgba(248,113,113,0.4)); }
-  .ring .center {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    flex-direction: column;
-  }
-  .ring .pct {
-    font-family: var(--serif);
-    font-weight: 400;
-    font-size: 32px;
-    line-height: 1;
-    letter-spacing: -0.02em;
-  }
-  .ring-card .sub {
-    font-size: 12px;
-    color: var(--ink-dim);
-    position: relative;
-    margin-top: 6px;
-  }
-  .ring-card .sub b {
-    color: var(--ink);
-    font-weight: 700;
-  }
+/* ── TABLE ── */
+.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:22px}
+.tbl-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
+.tbl-title{font-size:15px;font-weight:700}
+.tbl-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.tbl-count{font-size:12px;color:var(--text2);background:var(--bg2);padding:3px 10px;border-radius:20px}
+.search{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:8px 12px;font-family:'Cairo',sans-serif;font-size:12px;color:var(--text);outline:none;width:180px;transition:border-color .2s;direction:rtl}
+.search:focus{border-color:var(--brand2)}
+.fsel{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:7px 12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;outline:none;cursor:pointer;direction:rtl}
+.fsel option{background:var(--bg2)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--bg2);padding:11px 14px;text-align:right;font-size:10px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
+.td-b{color:var(--text);font-weight:600}
 
-  /* ========== STAT GRID ========== */
-  .stat-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
-    animation: slideUp .8s .35s ease both;
-  }
-  .stat {
-    background: var(--bg-1);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
-    padding: 16px;
-  }
-  .stat .label {
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-  .stat .value {
-    font-family: var(--serif);
-    font-weight: 400;
-    font-size: 26px;
-    line-height: 1;
-    letter-spacing: -0.02em;
-    color: var(--ink);
-  }
-  .stat .delta {
-    margin-top: 6px;
-    font-size: 11px;
-    color: var(--ink-dim);
-  }
-  .stat.wide { grid-column: 1 / -1; }
-  .stat.accent { background: linear-gradient(135deg, var(--accent-soft), transparent); border-color: rgba(197,245,71,0.2); }
-  .stat.accent .value { color: var(--accent); }
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
+.bs{background:rgba(0,196,122,.15);color:var(--success)}
+.bd{background:rgba(255,59,92,.15);color:var(--danger)}
+.bw{background:rgba(255,184,0,.15);color:var(--warning)}
+.bi{background:rgba(20,67,200,.2);color:#6B9FFF}
+.bn{background:rgba(255,255,255,.06);color:var(--text2)}
 
-  /* ========== POSITION CARD (rank) ========== */
-  .position-card {
-    background: var(--bg-1);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 18px 20px;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    animation: slideUp .8s .45s ease both;
-  }
-  .position-card .left .label {
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-  .position-card .left .category {
-    font-family: var(--serif);
-    font-style: italic;
-    font-size: 22px;
-    color: var(--ink);
-  }
-  .position-card .rank {
-    font-family: var(--serif);
-    font-size: 48px;
-    line-height: 1;
-    color: var(--accent);
-    font-weight: 400;
-    letter-spacing: -0.04em;
-  }
-  .position-card .rank sup {
-    font-size: 18px;
-    color: var(--ink-dim);
-    font-weight: 400;
-    vertical-align: top;
-    margin-inline-start: 2px;
-  }
+/* ── RING ── */
+.ring-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:20px}
+.ring-svg{transform:rotate(-90deg)}
+.ring-track{fill:none;stroke:var(--bg3);stroke-width:8}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)}
 
-  /* ========== FOOTER ========== */
-  .footer {
-    text-align: center;
-    color: var(--ink-faint);
-    font-size: 11px;
-    margin-top: 24px;
-    animation: fadeIn 1s .6s ease both;
-  }
-  .footer button {
-    background: none;
-    border: 1px solid var(--line);
-    color: var(--ink-dim);
-    border-radius: 999px;
-    padding: 6px 14px;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: all .25s ease;
-    font-family: inherit;
-  }
-  .footer button:hover { color: var(--ink); border-color: var(--line-2); }
-  .footer .updated { display: block; margin-top: 4px; }
+/* ── MODAL ── */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-ov.open{display:flex}
+.modal-box{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:28px;width:100%;max-width:580px;max-height:88vh;overflow-y:auto}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:6px}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:22px}
+.mfield{margin-bottom:13px}
+.mfield label{display:block;font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.mfield input,.mfield select{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-family:'Cairo',sans-serif;font-size:13px;color:var(--text);outline:none;direction:rtl;transition:border-color .2s}
+.mfield input:focus,.mfield select:focus{border-color:var(--brand2)}
+.mfield .mhint{font-size:11px;color:var(--text3);margin-top:4px}
+.modal-acts{display:flex;gap:10px;margin-top:20px}
+.btn-cancel{flex:1;background:none;border:1px solid var(--border);border-radius:8px;padding:11px;color:var(--text2);font-family:'Cairo',sans-serif;font-size:13px;cursor:pointer;transition:all .2s}
+.btn-cancel:hover{border-color:var(--text2);color:var(--text)}
+.btn-save{flex:2;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;border-radius:8px;padding:11px;color:white;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-save:hover{box-shadow:0 4px 16px rgba(20,67,200,.4)}
 
-  /* ========== STATES ========== */
-  .skeleton {
-    background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-    background-size: 200% 100%;
-    animation: shimmer 1.4s infinite;
-    border-radius: 8px;
-    color: transparent;
-  }
-  @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
+/* ── UPLOAD BOX ── */
+.upload-box{border:2px dashed var(--border2);border-radius:var(--r);padding:32px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+.upload-box:hover,.upload-box.drag{border-color:var(--brand2);background:var(--brand3)}
+.upload-box input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-icon{font-size:32px;margin-bottom:10px}
+.upload-text{font-size:14px;font-weight:600;margin-bottom:4px}
+.upload-sub{font-size:12px;color:var(--text2)}
+.preview-table{max-height:220px;overflow-y:auto;border-radius:var(--rs);border:1px solid var(--border);margin-top:14px}
 
-  .error-card {
-    background: rgba(248,113,113,0.08);
-    border: 1px solid rgba(248,113,113,0.25);
-    border-radius: var(--radius-sm);
-    padding: 16px 18px;
-    color: var(--bad);
-    font-size: 13px;
-    margin-bottom: 16px;
-  }
-  .error-card b { color: #fecaca; }
+/* ── ADMIN SECTIONS ── */
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:22px}
+.admin-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;cursor:pointer;transition:all .2s}
+.admin-card:hover{border-color:var(--brand2);transform:translateY(-2px)}
+.admin-icon{font-size:28px;margin-bottom:12px}
+.admin-card-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.admin-card-sub{font-size:12px;color:var(--text2)}
 
-  /* ========== ANIMATIONS ========== */
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
+/* ── TOAST ── */
+.toast-cont{position:fixed;bottom:20px;left:20px;z-index:9999;display:flex;flex-direction:column;gap:7px}
+.toast{background:var(--card2);border:1px solid var(--border2);border-radius:12px;padding:11px 15px;font-size:13px;font-weight:600;min-width:220px;box-shadow:var(--shadow);animation:tin .3s ease}
+@keyframes tin{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
-  .hidden { display: none !important; }
-
-  /* RTL adjustments */
-  html[dir="rtl"] .hero .name,
-  html[dir="rtl"] .signin h1 { letter-spacing: 0; }
-  html[dir="rtl"] .position-card .rank sup { margin-inline-end: 2px; margin-inline-start: 0; }
+/* ── UTILS ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+.loading-row{text-align:center;padding:40px;color:var(--text3)}
+.empty-st{text-align:center;padding:50px 20px;color:var(--text3)}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.empty-txt{font-size:14px;color:var(--text2);margin-bottom:5px}
+.sep{border:none;border-top:1px solid var(--border);margin:20px 0}
+.rep-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:20px}
+.rep-bar label{font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap}
+.rep-pill{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:none;color:var(--text2);font-family:'Cairo',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+.rep-pill:hover{border-color:var(--brand2);color:var(--brand2)}
+.rep-pill.active{background:var(--brand);border-color:var(--brand);color:white}
+.firebase-cfg{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:14px;font-size:12px;color:var(--text2);direction:ltr;font-family:monospace;line-height:1.8;margin-bottom:14px}
+@media(max-width:768px){.two-col{grid-template-columns:1fr}.content{padding:14px}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 
-<div class="app">
-
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="brand">
-      <div class="brand-mark">M</div>
-      <span>Mighty Foods</span>
+<!-- ════ FIREBASE SETUP SCREEN ════ -->
+<div id="setup-screen" class="screen active">
+  <div class="setup-box">
+    <div class="setup-logo">
+      <div class="logo">⚡ MIGHTY FOODS</div>
+      <div class="sub">Sales Portal Setup</div>
     </div>
-    <button class="lang-toggle" id="langBtn">العربية</button>
+    <div class="setup-title">إعداد Firebase</div>
+    <div class="setup-sub">أدخل بيانات مشروع Firebase الخاص بك. بعد الإعداد، كل البيانات ستُحفظ في Firestore Database.</div>
+
+    <div class="mfield"><label>API Key</label><input id="s-apiKey" placeholder="AIzaSy..." style="direction:ltr;font-family:monospace"></div>
+    <div class="mfield"><label>Auth Domain</label><input id="s-authDomain" placeholder="your-project.firebaseapp.com" style="direction:ltr;font-family:monospace"></div>
+    <div class="mfield"><label>Project ID</label><input id="s-projectId" placeholder="your-project-id" style="direction:ltr;font-family:monospace"></div>
+    <div class="mfield"><label>Storage Bucket</label><input id="s-storageBucket" placeholder="your-project.appspot.com" style="direction:ltr;font-family:monospace"></div>
+    <div class="mfield"><label>Messaging Sender ID</label><input id="s-messagingSenderId" placeholder="123456789" style="direction:ltr;font-family:monospace"></div>
+    <div class="mfield"><label>App ID</label><input id="s-appId" placeholder="1:123456789:web:abc..." style="direction:ltr;font-family:monospace"></div>
+
+    <div style="background:rgba(20,67,200,.1);border:1px solid var(--border2);border-radius:var(--rs);padding:13px;font-size:12px;color:var(--text2);margin-bottom:18px">
+      💡 <strong style="color:var(--text)">خطوات سريعة:</strong><br>
+      1. اذهب إلى <a href="https://console.firebase.google.com" target="_blank" style="color:var(--brand2)">console.firebase.google.com</a><br>
+      2. أنشئ مشروع جديد → أضف Web App<br>
+      3. فعّل Authentication (Email/Password) + Firestore Database<br>
+      4. الصق الـ config هنا واضغط اتصال
+    </div>
+
+    <button class="btn" onclick="initFirebase()">اتصال وإعداد قاعدة البيانات</button>
+    <div class="err-msg" id="setup-err"></div>
+
+    <div style="text-align:center;margin-top:16px">
+      <button class="btn-sm blue" onclick="useDemoMode()" style="font-size:13px;padding:10px 20px;border-radius:var(--rs)">
+        تجربة Demo (بدون Firebase)
+      </button>
+    </div>
   </div>
-
-  <!-- SIGN IN -->
-  <section class="signin" id="signinScreen">
-    <div class="eyebrow" data-i18n="welcome_kicker">YOUR PERFORMANCE</div>
-    <h1 data-i18n="signin_title">Track every <em>visit.</em><br>Hit every <em>target.</em></h1>
-    <p data-i18n="signin_sub">Enter your access token to view your daily progress, monthly targets, and team ranking.</p>
-
-    <div class="input-wrap">
-      <input type="text" id="tokenInput" placeholder="Access token" autocomplete="off" autocapitalize="off" spellcheck="false">
-    </div>
-    <button class="btn-primary" id="signinBtn" data-i18n="signin_btn">View My Dashboard</button>
-
-    <div class="hint" data-i18n="signin_hint">Get your token from the Mighty Foods Telegram bot</div>
-  </section>
-
-  <!-- DASHBOARD -->
-  <section id="dashboard" class="hidden">
-
-    <div id="errorBox"></div>
-
-    <!-- HERO -->
-    <div class="hero">
-      <div class="greeting" data-i18n="greeting">GOOD WORK TODAY</div>
-      <h1 class="name serif" id="repName">—</h1>
-      <div class="meta">
-        <span class="badge"><span class="dot"></span><span id="liveLabel" data-i18n="live">LIVE</span></span>
-        <span class="badge muted" id="repCode">—</span>
-      </div>
-    </div>
-
-    <!-- RINGS -->
-    <div class="rings">
-      <div class="ring-card">
-        <div class="label" data-i18n="visits_label">VISITS</div>
-        <div class="ring" id="ringVisits">
-          <svg viewBox="0 0 120 120">
-            <circle class="track" cx="60" cy="60" r="52"></circle>
-            <circle class="progress" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"></circle>
-          </svg>
-          <div class="center"><div class="pct" id="visitsPct">0%</div></div>
-        </div>
-        <div class="sub"><b id="visitsActual">0</b> <span data-i18n="of">of</span> <b id="visitsTarget">0</b></div>
-      </div>
-
-      <div class="ring-card">
-        <div class="label" data-i18n="time_label">TIME</div>
-        <div class="ring" id="ringTime">
-          <svg viewBox="0 0 120 120">
-            <circle class="track" cx="60" cy="60" r="52"></circle>
-            <circle class="progress" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"></circle>
-          </svg>
-          <div class="center"><div class="pct" id="timePct">0%</div></div>
-        </div>
-        <div class="sub"><b id="timeActual">0:00</b> / <b id="timeTarget">0:00</b></div>
-      </div>
-    </div>
-
-    <!-- POSITION -->
-    <div class="position-card">
-      <div class="left">
-        <div class="label" data-i18n="position_label">POSITION</div>
-        <div class="category" id="positionCategory">—</div>
-      </div>
-      <div class="rank"><span id="rankNum">—</span><sup id="rankSuffix"></sup></div>
-    </div>
-
-    <!-- STATS -->
-    <div class="stat-grid">
-      <div class="stat accent wide">
-        <div class="label" data-i18n="monthly_target">MONTHLY TARGET</div>
-        <div class="value" id="monthlyTarget">—</div>
-        <div class="delta" data-i18n="to_hit_100">to hit 100% this month</div>
-      </div>
-
-      <div class="stat">
-        <div class="label" data-i18n="daily_visit_target">DAILY VISIT TARGET</div>
-        <div class="value" id="dailyVisitTarget">—</div>
-      </div>
-
-      <div class="stat">
-        <div class="label" data-i18n="daily_time_target">DAILY TIME TARGET</div>
-        <div class="value" id="dailyTimeTarget">—</div>
-      </div>
-
-      <div class="stat">
-        <div class="label" data-i18n="visits_done">VISITS DONE</div>
-        <div class="value" id="visitsDone">—</div>
-      </div>
-
-      <div class="stat">
-        <div class="label" data-i18n="time_done">TIME DONE</div>
-        <div class="value" id="timeDone">—</div>
-      </div>
-    </div>
-
-    <div class="footer">
-      <span class="updated" id="updatedAt">—</span>
-      <button id="refreshBtn" data-i18n="refresh">Refresh</button>
-      <button id="signoutBtn" data-i18n="signout">Sign out</button>
-    </div>
-
-  </section>
-
 </div>
 
+<!-- ════ LOGIN SCREEN ════ -->
+<div id="login-screen" class="screen">
+  <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,rgba(20,67,200,.18) 0%,transparent 60%),var(--bg)">
+    <div class="login-box">
+      <div class="login-logo">
+        <div class="logo">⚡ MIGHTY FOODS</div>
+        <div class="sub">Sales Portal</div>
+      </div>
+      <div class="login-title">تسجيل الدخول</div>
+      <div class="field"><label>البريد الإلكتروني</label><input type="email" id="l-email" placeholder="email@mightyfoods.com" style="direction:ltr"></div>
+      <div class="field"><label>كلمة المرور</label><input type="password" id="l-pass" placeholder="••••••••"></div>
+      <button class="btn" id="login-btn" onclick="doLogin()">دخول</button>
+      <div class="err-msg" id="login-err"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MAIN APP ════ -->
+<div id="app-screen" class="screen">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">⚡ MIGHTY FOODS</div>
+    <div class="topbar-right">
+      <div class="user-badge">
+        <div class="avatar" id="top-av">M</div>
+        <div><div class="uname" id="top-name">User</div><div class="urole" id="top-role">Rep</div></div>
+      </div>
+      <button class="btn-sm" onclick="logout()">خروج</button>
+    </div>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav">
+    <div class="ntab active" data-tab="dashboard" onclick="goTab('dashboard')">📊 الرئيسية</div>
+    <div class="ntab" data-tab="targets" onclick="goTab('targets')">🎯 الأهداف</div>
+    <div class="ntab" data-tab="msl" onclick="goTab('msl')">📋 MSL</div>
+    <div class="ntab" data-tab="visits" onclick="goTab('visits')">📍 الزيارات</div>
+    <div class="ntab" data-tab="zero" onclick="goTab('zero')">⚠️ Zero Sales</div>
+    <div class="ntab mgr-tab" id="tab-admin" data-tab="admin" onclick="goTab('admin')" style="display:none">⚙️ الإدارة</div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-h">
+        <div><div class="page-title" id="dash-title">لوحة التحكم</div><div class="page-sub" id="dash-sub">اختر door لعرض تفاصيله</div></div>
+        <div class="actions">
+          <select class="fsel" id="dash-month" onchange="loadDashboard()">
+            <option value="">الشهر الحالي</option>
+          </select>
+          <button class="btn-sm blue" onclick="loadDashboard()">↻ تحديث</button>
+        </div>
+      </div>
+
+      <!-- Manager rep bar -->
+      <div class="rep-bar" id="mgr-rep-bar" style="display:none">
+        <label>المندوب:</label>
+        <div id="mgr-rep-btns" style="display:flex;gap:7px;flex-wrap:wrap"></div>
+      </div>
+
+      <!-- Door selector -->
+      <div class="door-panel">
+        <div class="door-panel-title">🚪 اختر الـ Door (العميل)</div>
+        <input class="door-search" id="door-search" placeholder="ابحث باسم العميل أو الكود..." oninput="filterDoors()">
+        <div class="door-grid" id="door-grid">
+          <div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text3)">جاري تحميل العملاء...</div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-grid" id="dash-kpis">
+        <div class="kcard blue"><div class="klabel">المبيعات الفعلية</div><div class="kval" id="d-sales">—</div><div class="kmeta" id="d-sales-m">اختر Door أولاً</div></div>
+        <div class="kcard orange"><div class="klabel">الهدف الشهري</div><div class="kval" id="d-target">—</div><div class="kmeta" id="d-target-m">—</div></div>
+        <div class="kcard green"><div class="klabel">نسبة الإنجاز</div><div class="kval" id="d-ach">—%</div><div class="kmeta" id="d-ach-m">—</div></div>
+        <div class="kcard red"><div class="klabel">Zero Sales MSL</div><div class="kval" id="d-zero">—</div><div class="kmeta">SKU مفقود من الـ MSL</div></div>
+      </div>
+
+      <div class="two-col">
+        <!-- Achievement Ring -->
+        <div class="ring-wrap">
+          <svg width="110" height="110" class="ring-svg">
+            <circle class="ring-track" cx="55" cy="55" r="46"/>
+            <circle class="ring-fill" id="dash-ring" cx="55" cy="55" r="46" stroke="url(#rg)" stroke-dasharray="289.0" stroke-dashoffset="289.0"/>
+            <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#1443C8"/><stop offset="100%" stop-color="#FF6B00"/></linearGradient></defs>
+            <text x="55" y="55" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="Barlow Condensed,sans-serif" font-size="17" font-weight="700" transform="rotate(90,55,55)" id="ring-txt">0%</text>
+          </svg>
+          <div>
+            <div style="font-size:16px;font-weight:700;margin-bottom:5px">إنجاز الـ Door</div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:10px" id="ring-door-name">لم يتم اختيار Door</div>
+            <div style="font-size:13px;color:var(--text2)">الهدف: <span id="ring-t" style="color:var(--text);font-weight:700">—</span></div>
+            <div style="font-size:13px;color:var(--text2);margin-top:3px">المحقق: <span id="ring-a" style="color:var(--success);font-weight:700">—</span></div>
+            <div style="font-size:13px;color:var(--text2);margin-top:3px">الفجوة: <span id="ring-g" style="color:var(--danger);font-weight:700">—</span></div>
+          </div>
+        </div>
+
+        <!-- MSL Status for selected door -->
+        <div class="tbl-wrap" style="margin-bottom:0">
+          <div class="tbl-head"><div class="tbl-title">MSL الـ Door المحدد</div><span class="tbl-count" id="door-msl-count">—</span></div>
+          <div style="max-height:230px;overflow-y:auto">
+            <table>
+              <thead><tr><th>المنتج</th><th>الحالة</th><th>آخر بيع</th></tr></thead>
+              <tbody id="door-msl-body"><tr><td colspan="3" class="loading-row">اختر Door أولاً</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ TARGETS ══ -->
+    <div id="page-targets" class="page" style="display:none">
+      <div class="page-h">
+        <div><div class="page-title">الأهداف</div><div class="page-sub">Target لكل Door لكل مندوب</div></div>
+        <div class="actions">
+          <select class="fsel" id="tgt-month" onchange="loadTargets()"><option value="">الشهر الحالي</option></select>
+          <button class="btn-sm blue" onclick="loadTargets()">↻ تحديث</button>
+        </div>
+      </div>
+
+      <div class="rep-bar" id="tgt-rep-bar" style="display:none">
+        <label>المندوب:</label><div id="tgt-rep-btns" style="display:flex;gap:7px;flex-wrap:wrap"></div>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-head">
+          <div><div class="tbl-title">الأهداف لكل Door</div></div>
+          <div class="tbl-right">
+            <span class="tbl-count" id="tgt-count">0 هدف</span>
+            <input class="search" id="tgt-search" placeholder="بحث..." oninput="filterTargetsTable()">
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>الـ Door</th><th>الكود</th><th>الـ Channel</th><th>الهدف</th><th>المحقق</th><th>نسبة الإنجاز</th><th>الفجوة</th><th>الحالة</th></tr></thead>
+            <tbody id="tgt-tbody"><tr><td colspan="8" class="loading-row">جاري التحميل...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MSL ══ -->
+    <div id="page-msl" class="page" style="display:none">
+      <div class="page-h">
+        <div><div class="page-title">قائمة MSL</div><div class="page-sub">Must Stock List — لكل Door على حدة</div></div>
+        <div class="actions"><button class="btn-sm blue" onclick="loadMSL()">↻ تحديث</button></div>
+      </div>
+
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kcard green"><div class="klabel">متوافر</div><div class="kval" id="msl-ok">—</div><div class="kmeta">SKU حاضر</div></div>
+        <div class="kcard red"><div class="klabel">غير متوافر</div><div class="kval" id="msl-miss">—</div><div class="kmeta">SKU مفقود</div></div>
+        <div class="kcard orange"><div class="klabel">Compliance</div><div class="kval" id="msl-pct">—%</div><div class="kmeta">نسبة الامتثال</div></div>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-head">
+          <div class="tbl-title">تفاصيل MSL</div>
+          <div class="tbl-right">
+            <select class="fsel" id="msl-door-filter" onchange="filterMSLTable()"><option value="">كل الـ Doors</option></select>
+            <select class="fsel" id="msl-status-filter" onchange="filterMSLTable()"><option value="">كل الحالات</option><option value="present">متوافر</option><option value="missing">مفقود</option></select>
+            <input class="search" id="msl-search" placeholder="بحث..." oninput="filterMSLTable()">
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>الـ Door</th><th>Channel</th><th>كود SKU</th><th>اسم المنتج</th><th>الحالة</th><th>آخر بيع</th><th>ملاحظة</th></tr></thead>
+            <tbody id="msl-tbody"><tr><td colspan="7" class="loading-row">جاري التحميل...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ VISITS ══ -->
+    <div id="page-visits" class="page" style="display:none">
+      <div class="page-h">
+        <div><div class="page-title">الزيارات</div><div class="page-sub">Check-in / Check-out</div></div>
+        <div class="actions">
+          <input type="date" class="fsel" id="visit-date" onchange="loadVisits()">
+          <button class="btn-sm blue" onclick="loadVisits()">↻ تحديث</button>
+        </div>
+      </div>
+
+      <div class="rep-bar" id="vis-rep-bar" style="display:none">
+        <label>المندوب:</label><div id="vis-rep-btns" style="display:flex;gap:7px;flex-wrap:wrap"></div>
+      </div>
+
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kcard green"><div class="klabel">إجمالي الزيارات</div><div class="kval" id="v-total">—</div><div class="kmeta">اليوم</div></div>
+        <div class="kcard blue"><div class="klabel">متوسط المدة</div><div class="kval" id="v-avg">—</div><div class="kmeta">دقيقة</div></div>
+        <div class="kcard orange"><div class="klabel">Doors تمت زيارتها</div><div class="kval" id="v-doors">—</div><div class="kmeta">عميل مختلف</div></div>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-head">
+          <div class="tbl-title">سجل الزيارات</div>
+          <div class="tbl-right">
+            <input class="search" id="vis-search" placeholder="بحث عميل..." oninput="filterVisitsTable()">
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>الوقت</th><th>الـ Door</th><th>الكود</th><th>Check-in</th><th>Check-out</th><th>المدة (د)</th><th>الحالة</th></tr></thead>
+            <tbody id="vis-tbody"><tr><td colspan="7" class="loading-row">جاري التحميل...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ZERO SALES ══ -->
+    <div id="page-zero" class="page" style="display:none">
+      <div class="page-h">
+        <div><div class="page-title">Zero Sales</div><div class="page-sub">منتجات MSL بدون مبيعات</div></div>
+        <div class="actions">
+          <select class="fsel" id="zero-period" onchange="loadZero()">
+            <option value="month">هذا الشهر</option>
+            <option value="week">هذا الأسبوع</option>
+          </select>
+          <button class="btn-sm blue" onclick="loadZero()">↻ تحديث</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="kcard red"><div class="klabel">Zero Items</div><div class="kval" id="z-count">—</div><div class="kmeta">SKU بدون مبيعات</div></div>
+        <div class="kcard orange"><div class="klabel">Doors متأثرة</div><div class="kval" id="z-doors">—</div><div class="kmeta">—</div></div>
+        <div class="kcard blue"><div class="klabel">% من MSL</div><div class="kval" id="z-pct">—%</div><div class="kmeta">نسبة الـ Zero</div></div>
+      </div>
+
+      <div class="tbl-wrap">
+        <div class="tbl-head">
+          <div class="tbl-title">تفاصيل Zero Sales</div>
+          <div class="tbl-right">
+            <select class="fsel" id="z-door-filter" onchange="filterZeroTable()"><option value="">كل الـ Doors</option></select>
+            <input class="search" id="z-search" placeholder="بحث..." oninput="filterZeroTable()">
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>الـ Door</th><th>Channel</th><th>كود SKU</th><th>اسم المنتج</th><th>آخر بيع</th><th>أيام بدون بيع</th><th>الأولوية</th></tr></thead>
+            <tbody id="z-tbody"><tr><td colspan="7" class="loading-row">جاري التحميل...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ADMIN ══ -->
+    <div id="page-admin" class="page" style="display:none">
+      <div class="page-h">
+        <div><div class="page-title">لوحة الإدارة</div><div class="page-sub">إدارة البيانات الأساسية</div></div>
+      </div>
+
+      <div class="admin-grid">
+        <div class="admin-card" onclick="openModal('modal-user')">
+          <div class="admin-icon">👤</div>
+          <div class="admin-card-title">إضافة مستخدم</div>
+          <div class="admin-card-sub">إضافة مندوب جديد بإيميل وكلمة سر</div>
+        </div>
+        <div class="admin-card" onclick="openModal('modal-door')">
+          <div class="admin-icon">🚪</div>
+          <div class="admin-card-title">إضافة Door</div>
+          <div class="admin-card-sub">إضافة عميل / outlet جديد</div>
+        </div>
+        <div class="admin-card" onclick="openModal('modal-sku')">
+          <div class="admin-icon">📦</div>
+          <div class="admin-card-title">إضافة SKU</div>
+          <div class="admin-card-sub">إضافة منتج جديد</div>
+        </div>
+        <div class="admin-card" onclick="openModal('modal-target')">
+          <div class="admin-icon">🎯</div>
+          <div class="admin-card-title">تحديد Target</div>
+          <div class="admin-card-sub">Target لـ Door معين لمندوب معين</div>
+        </div>
+        <div class="admin-card" onclick="openModal('modal-msl')">
+          <div class="admin-icon">📋</div>
+          <div class="admin-card-title">تحديد MSL</div>
+          <div class="admin-card-sub">ربط SKU بـ Door</div>
+        </div>
+        <div class="admin-card" onclick="openModal('modal-sale')">
+          <div class="admin-icon">💰</div>
+          <div class="admin-card-title">إدخال مبيعات</div>
+          <div class="admin-card-sub">إدخال invoice لـ Door + SKU</div>
+        </div>
+        <div class="admin-card" onclick="openModal('modal-visit')">
+          <div class="admin-icon">📍</div>
+          <div class="admin-card-title">إدخال زيارة</div>
+          <div class="admin-card-sub">تسجيل check-in / check-out</div>
+        </div>
+        <div class="admin-card" onclick="openModal('modal-import')">
+          <div class="admin-icon">📁</div>
+          <div class="admin-card-title">استيراد Excel</div>
+          <div class="admin-card-sub">رفع بيانات مبيعات / targets / MSL</div>
+        </div>
+      </div>
+
+      <!-- Quick data tables -->
+      <div class="two-col">
+        <div class="tbl-wrap" style="margin-bottom:0">
+          <div class="tbl-head"><div class="tbl-title">الـ Doors</div><span class="tbl-count" id="admin-doors-count">—</span></div>
+          <div style="max-height:260px;overflow-y:auto">
+            <table><thead><tr><th>الاسم</th><th>الكود</th><th>Channel</th><th>المندوب</th></tr></thead>
+            <tbody id="admin-doors-body"><tr><td colspan="4" class="loading-row">جاري التحميل...</td></tr></tbody></table>
+          </div>
+        </div>
+        <div class="tbl-wrap" style="margin-bottom:0">
+          <div class="tbl-head"><div class="tbl-title">المستخدمون</div><span class="tbl-count" id="admin-users-count">—</span></div>
+          <div style="max-height:260px;overflow-y:auto">
+            <table><thead><tr><th>الاسم</th><th>الإيميل</th><th>الدور</th></tr></thead>
+            <tbody id="admin-users-body"><tr><td colspan="3" class="loading-row">جاري التحميل...</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /app-screen -->
+
+<!-- ════ MODALS ════ -->
+
+<!-- Add User -->
+<div class="modal-ov" id="modal-user">
+  <div class="modal-box">
+    <div class="modal-title">👤 إضافة مستخدم جديد</div>
+    <div class="modal-sub">يُنشأ مستخدم في Firebase Auth + Firestore</div>
+    <div class="mfield"><label>الاسم</label><input id="mu-name" placeholder="أحمد محمود"></div>
+    <div class="mfield"><label>البريد الإلكتروني</label><input id="mu-email" type="email" placeholder="ahmed@mightyfoods.com" style="direction:ltr"></div>
+    <div class="mfield"><label>كلمة المرور</label><input id="mu-pass" type="password" placeholder="6+ حروف"></div>
+    <div class="mfield"><label>الدور</label>
+      <select id="mu-role"><option value="rep">مندوب مبيعات</option><option value="manager">مدير</option></select>
+    </div>
+    <div class="mfield"><label>الـ Doors المخصصة (اختياري)</label>
+      <select id="mu-doors" multiple style="height:100px"><option value="">سيتم تحديدها لاحقاً</option></select>
+      <div class="mhint">Ctrl+Click لاختيار أكثر من Door</div>
+    </div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeModal('modal-user')">إلغاء</button>
+      <button class="btn-save" onclick="addUser()">إضافة المستخدم</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Door -->
+<div class="modal-ov" id="modal-door">
+  <div class="modal-box">
+    <div class="modal-title">🚪 إضافة Door جديد</div>
+    <div class="modal-sub">عميل / outlet</div>
+    <div class="mfield"><label>اسم الـ Door</label><input id="md-name" placeholder="Carrefour - Maadi"></div>
+    <div class="mfield"><label>كود الـ Door</label><input id="md-code" placeholder="CAR-001" style="direction:ltr"></div>
+    <div class="mfield"><label>Channel</label>
+      <select id="md-channel">
+        <option>Modern Trade</option><option>General Trade</option><option>HoReCa</option><option>Pharmacy</option><option>Online</option>
+      </select>
+    </div>
+    <div class="mfield"><label>المنطقة / العنوان</label><input id="md-area" placeholder="القاهرة - المعادي"></div>
+    <div class="mfield"><label>المندوب المسؤول</label><select id="md-rep"><option value="">اختر مندوب...</option></select></div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeModal('modal-door')">إلغاء</button>
+      <button class="btn-save" onclick="addDoor()">إضافة الـ Door</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add SKU -->
+<div class="modal-ov" id="modal-sku">
+  <div class="modal-box">
+    <div class="modal-title">📦 إضافة SKU</div>
+    <div class="modal-sub">منتج جديد</div>
+    <div class="mfield"><label>كود SKU</label><input id="ms-code" placeholder="MF-001" style="direction:ltr"></div>
+    <div class="mfield"><label>اسم المنتج</label><input id="ms-name" placeholder="Mighty Chips Classic"></div>
+    <div class="mfield"><label>الفئة / Brand</label><input id="ms-brand" placeholder="Chips"></div>
+    <div class="mfield"><label>سعر البيع (ج.م)</label><input id="ms-price" type="number" placeholder="0.00"></div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeModal('modal-sku')">إلغاء</button>
+      <button class="btn-save" onclick="addSKU()">إضافة المنتج</button>
+    </div>
+  </div>
+</div>
+
+<!-- Set Target -->
+<div class="modal-ov" id="modal-target">
+  <div class="modal-box">
+    <div class="modal-title">🎯 تحديد Target</div>
+    <div class="modal-sub">هدف لـ Door معين لمندوب معين في شهر محدد</div>
+    <div class="mfield"><label>المندوب</label><select id="mt-rep"><option value="">اختر...</option></select></div>
+    <div class="mfield"><label>الـ Door</label><select id="mt-door"><option value="">اختر...</option></select></div>
+    <div class="mfield"><label>الشهر</label><input id="mt-month" type="month"></div>
+    <div class="mfield"><label>الهدف (ج.م)</label><input id="mt-val" type="number" placeholder="50000"></div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeModal('modal-target')">إلغاء</button>
+      <button class="btn-save" onclick="setTarget()">حفظ الـ Target</button>
+    </div>
+  </div>
+</div>
+
+<!-- Set MSL -->
+<div class="modal-ov" id="modal-msl">
+  <div class="modal-box">
+    <div class="modal-title">📋 تحديد MSL</div>
+    <div class="modal-sub">ربط SKU بـ Door (المنتجات الإلزامية)</div>
+    <div class="mfield"><label>الـ Door</label><select id="mm-door"><option value="">اختر...</option></select></div>
+    <div class="mfield"><label>SKU</label><select id="mm-sku"><option value="">اختر...</option></select></div>
+    <div class="mfield"><label>الحالة الحالية</label>
+      <select id="mm-status"><option value="present">✓ متوافر</option><option value="missing">✗ مفقود</option></select>
+    </div>
+    <div class="mfield"><label>ملاحظة</label><input id="mm-note" placeholder="سبب الغياب..."></div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeModal('modal-msl')">إلغاء</button>
+      <button class="btn-save" onclick="setMSL()">حفظ MSL</button>
+    </div>
+  </div>
+</div>
+
+<!-- Enter Sale -->
+<div class="modal-ov" id="modal-sale">
+  <div class="modal-box">
+    <div class="modal-title">💰 إدخال مبيعات</div>
+    <div class="modal-sub">Invoice / أوردر لـ Door + SKU</div>
+    <div class="mfield"><label>المندوب</label><select id="ms2-rep"><option value="">اختر...</option></select></div>
+    <div class="mfield"><label>الـ Door</label><select id="ms2-door"><option value="">اختر...</option></select></div>
+    <div class="mfield"><label>SKU</label><select id="ms2-sku"><option value="">اختر...</option></select></div>
+    <div class="mfield"><label>رقم الفاتورة</label><input id="ms2-inv" placeholder="INV-2024-001" style="direction:ltr"></div>
+    <div class="mfield"><label>الكمية</label><input id="ms2-qty" type="number" placeholder="0"></div>
+    <div class="mfield"><label>القيمة (ج.م)</label><input id="ms2-val" type="number" placeholder="0.00"></div>
+    <div class="mfield"><label>التاريخ</label><input id="ms2-date" type="date"></div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeModal('modal-sale')">إلغاء</button>
+      <button class="btn-save" onclick="addSale()">حفظ الفاتورة</button>
+    </div>
+  </div>
+</div>
+
+<!-- Enter Visit -->
+<div class="modal-ov" id="modal-visit">
+  <div class="modal-box">
+    <div class="modal-title">📍 تسجيل زيارة</div>
+    <div class="modal-sub">Check-in / Check-out</div>
+    <div class="mfield"><label>المندوب</label><select id="mv-rep"><option value="">اختر...</option></select></div>
+    <div class="mfield"><label>الـ Door</label><select id="mv-door"><option value="">اختر...</option></select></div>
+    <div class="mfield"><label>التاريخ</label><input id="mv-date" type="date"></div>
+    <div class="mfield"><label>وقت الدخول</label><input id="mv-in" type="time"></div>
+    <div class="mfield"><label>وقت الخروج</label><input id="mv-out" type="time"></div>
+    <div class="mfield"><label>الحالة</label>
+      <select id="mv-status"><option value="completed">مكتملة</option><option value="in-progress">جارية</option><option value="skipped">لم تتم</option></select>
+    </div>
+    <div class="modal-acts">
+      <button class="btn-cancel" onclick="closeModal('modal-visit')">إلغاء</button>
+      <button class="btn-save" onclick="addVisit()">حفظ الزيارة</button>
+    </div>
+  </div>
+</div>
+
+<!-- Excel Import -->
+<div class="modal-ov" id="modal-import">
+  <div class="modal-box">
+    <div class="modal-title">📁 استيراد Excel</div>
+    <div class="modal-sub">ارفع ملف Excel وسيُستورد تلقائياً إلى Firebase</div>
+    <div class="mfield">
+      <label>نوع البيانات</label>
+      <select id="imp-type" onchange="updateImportTemplate()">
+        <option value="sales">مبيعات (Sales Transactions)</option>
+        <option value="targets">أهداف (Targets)</option>
+        <option value="msl">MSL</option>
+        <option value="doors">عملاء (Doors)</option>
+        <option value="visits">زيارات (Visits)</option>
+      </select>
+    </div>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;font-size:12px;color:var(--text2);margin-bottom:14px" id="imp-template">
+      الأعمدة المطلوبة: rep_email, door_code, sku_code, qty, value, date, invoice_no
+    </div>
+    <div class="upload-box" id="upload-box">
+      <input type="file" accept=".xlsx,.xls,.csv" onchange="handleFileUpload(event)">
+      <div class="upload-icon">📂</div>
+      <div class="upload-text">اسحب الملف هنا أو اضغط للاختيار</div>
+      <div class="upload-sub">.xlsx / .xls / .csv</div>
+    </div>
+    <div id="import-preview" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;margin-bottom:8px">
+        <span style="font-size:13px;font-weight:700" id="preview-count">0 سطر للاستيراد</span>
+        <button class="btn-save" style="width:auto;padding:8px 18px;border-radius:8px" onclick="doImport()">استيراد الآن</button>
+      </div>
+      <div class="preview-table" id="preview-table-wrap"></div>
+    </div>
+    <div class="modal-acts" style="margin-top:14px">
+      <button class="btn-cancel" onclick="closeModal('modal-import')">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-cont" id="toasts"></div>
+
 <script>
-// =====================================================================
-//  CONFIG
-// =====================================================================
-const WEBHOOK_BASE = 'https://vmi3102625.contaboserver.net/webhook';
-const REP_PROGRESS_ENDPOINT = WEBHOOK_BASE + '/rep-progress';
+// ════════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════════
+let DB = null, AUTH = null;
+let currentUser = null, userProfile = null;
+let DEMO = false;
 
-// Demo data fallback — used if no real webhook is reachable yet.
-// Mirrors the exact data shape your n8n node should return.
-const DEMO_PAYLOAD = {
-  rep: {
-    name: 'Youssef Mohamed Negm Eldin',
-    code: '150421',
-    position_label: 'Time'
-  },
-  visits: {
-    actual: 92,
-    target_daily: 88,
-    target_monthly: 880,
-    achievement_pct: 1.05
-  },
-  time: {
-    actual_seconds: 76*3600 + 57*60,   // 76:57:00
-    target_seconds: 88*3600 + 48*60,   // 88:48:00
-    achievement_pct: 0.87
-  },
-  rank: {
-    overall: 3,
-    category: 'Time'
-  },
-  updated_at: new Date().toISOString()
-};
+let allDoors = [], allSKUs = [], allUsers = [], allReps = [];
+let selectedDoor = null, selectedRep = null;
+let targetsData = [], mslData = [], salesData = [], visitsData = [], zeroData = [];
+let importRows = [], importType = 'sales';
 
-// =====================================================================
-//  i18n
-// =====================================================================
-const I18N = {
-  en: {
-    welcome_kicker: 'YOUR PERFORMANCE',
-    signin_title: 'Track every <em>visit.</em><br>Hit every <em>target.</em>',
-    signin_sub: 'Enter your access token to view your daily progress, monthly targets, and team ranking.',
-    signin_btn: 'View My Dashboard',
-    signin_hint: 'Get your token from the Mighty Foods Telegram bot',
-    greeting: 'GOOD WORK TODAY',
-    live: 'LIVE',
-    visits_label: 'VISITS',
-    time_label: 'TIME',
-    of: 'of',
-    position_label: 'POSITION',
-    monthly_target: 'MONTHLY TARGET',
-    to_hit_100: 'to hit 100% this month',
-    daily_visit_target: 'DAILY VISIT TARGET',
-    daily_time_target: 'DAILY TIME TARGET',
-    visits_done: 'VISITS DONE',
-    time_done: 'TIME DONE',
-    refresh: 'Refresh',
-    signout: 'Sign out'
-  },
-  ar: {
-    welcome_kicker: 'أداؤك',
-    signin_title: 'تابع كل <em>زيارة.</em><br>حقق كل <em>هدف.</em>',
-    signin_sub: 'أدخل رمز الدخول لعرض تقدمك اليومي وأهدافك الشهرية وترتيبك في الفريق.',
-    signin_btn: 'عرض لوحتي',
-    signin_hint: 'احصل على الرمز من بوت تليجرام الخاص بمايتي فودز',
-    greeting: 'عمل رائع اليوم',
-    live: 'مباشر',
-    visits_label: 'الزيارات',
-    time_label: 'الوقت',
-    of: 'من',
-    position_label: 'الترتيب',
-    monthly_target: 'الهدف الشهري',
-    to_hit_100: 'لتحقيق ١٠٠٪؜ هذا الشهر',
-    daily_visit_target: 'هدف الزيارات اليومي',
-    daily_time_target: 'هدف الوقت اليومي',
-    visits_done: 'الزيارات المنفذة',
-    time_done: 'الوقت المنفذ',
-    refresh: 'تحديث',
-    signout: 'تسجيل خروج'
-  }
-};
-
-let locale = localStorage.getItem('mf_locale') || 'en';
-
-function applyLocale() {
-  document.documentElement.lang = locale;
-  document.documentElement.dir  = locale === 'ar' ? 'rtl' : 'ltr';
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const k = el.getAttribute('data-i18n');
-    if (I18N[locale][k]) el.innerHTML = I18N[locale][k];
-  });
-  document.getElementById('langBtn').textContent = locale === 'ar' ? 'English' : 'العربية';
-  // Re-render dynamic numbers (rank suffix etc.)
-  if (lastPayload) renderDashboard(lastPayload);
-}
-
-document.getElementById('langBtn').addEventListener('click', () => {
-  locale = locale === 'ar' ? 'en' : 'ar';
-  localStorage.setItem('mf_locale', locale);
-  applyLocale();
-});
-
-// =====================================================================
-//  HELPERS
-// =====================================================================
-function fmtSeconds(s) {
-  if (!s && s !== 0) return '—';
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  return `${h}:${String(m).padStart(2,'0')}`;
-}
-function fmtNum(n) {
-  if (n === null || n === undefined) return '—';
-  return new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-US').format(n);
-}
-function rankSuffix(n) {
-  if (locale === 'ar') return '';
-  const j = n % 10, k = n % 100;
-  if (j === 1 && k !== 11) return 'st';
-  if (j === 2 && k !== 12) return 'nd';
-  if (j === 3 && k !== 13) return 'rd';
-  return 'th';
-}
-function setRing(ringEl, pct) {
-  const circumference = 2 * Math.PI * 52; // r=52
-  const clamped = Math.min(Math.max(pct || 0, 0), 1.5);
-  // Visual fill caps at 100% but pct text shows real value
-  const visual = Math.min(clamped, 1);
-  const offset = circumference * (1 - visual);
-  const progressEl = ringEl.querySelector('.progress');
-  progressEl.setAttribute('stroke-dasharray', circumference);
-  progressEl.setAttribute('stroke-dashoffset', offset);
-
-  ringEl.classList.remove('warn', 'bad');
-  if (clamped < 0.7) ringEl.classList.add('bad');
-  else if (clamped < 0.9) ringEl.classList.add('warn');
-}
-function countUp(el, target, suffix = '') {
-  const start = 0;
-  const duration = 1100;
-  const t0 = performance.now();
-  function step(now) {
-    const p = Math.min((now - t0) / duration, 1);
-    const eased = 1 - Math.pow(1 - p, 3);
-    el.textContent = Math.round(start + (target - start) * eased) + suffix;
-    if (p < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
-}
-
-// =====================================================================
-//  AUTH + DATA FETCH
-// =====================================================================
-function getTokenFromUrl() {
-  const m = location.search.match(/[?&]t=([^&]+)/);
-  return m ? decodeURIComponent(m[1]) : null;
-}
-function getStoredToken() { return localStorage.getItem('mf_token'); }
-function storeToken(t)    { localStorage.setItem('mf_token', t); }
-function clearToken()     { localStorage.removeItem('mf_token'); }
-
-let lastPayload = null;
-
-async function fetchProgress(token) {
+// ════════════════════════════════════════════════════════
+//  FIREBASE INIT
+// ════════════════════════════════════════════════════════
+function initFirebase() {
+  const cfg = {
+    apiKey: id('s-apiKey').value.trim(),
+    authDomain: id('s-authDomain').value.trim(),
+    projectId: id('s-projectId').value.trim(),
+    storageBucket: id('s-storageBucket').value.trim(),
+    messagingSenderId: id('s-messagingSenderId').value.trim(),
+    appId: id('s-appId').value.trim()
+  };
+  if (!cfg.apiKey || !cfg.projectId) { showErr('setup-err','أدخل API Key و Project ID على الأقل'); return; }
   try {
-    const url = `${REP_PROGRESS_ENDPOINT}?t=${encodeURIComponent(token)}`;
-    const res = await fetch(url, { method: 'GET' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    return data;
-  } catch (e) {
-    console.warn('Webhook unavailable, using demo payload:', e.message);
-    // Graceful fallback for first-run / offline preview
-    return { ...DEMO_PAYLOAD, _demo: true };
+    if (!firebase.apps.length) firebase.initializeApp(cfg);
+    AUTH = firebase.auth();
+    DB   = firebase.firestore();
+    localStorage.setItem('mf_firebase_cfg', JSON.stringify(cfg));
+    showScreen('login-screen');
+    toast('✓ تم الاتصال بـ Firebase','success');
+    setupAuthListener();
+  } catch(e) { showErr('setup-err', e.message); }
+}
+
+function useDemoMode() {
+  DEMO = true;
+  loadDemoData();
+  showScreen('app-screen');
+  userProfile = { name:'Demo Manager', role:'manager', email:'demo@mf.com' };
+  currentUser = { email:'demo@mf.com' };
+  setUserUI();
+  goTab('dashboard');
+  toast('تعمل بوضع Demo — لا يوجد حفظ حقيقي','warning');
+}
+
+window.onload = () => {
+  const saved = localStorage.getItem('mf_firebase_cfg');
+  if (saved) {
+    try {
+      const cfg = JSON.parse(saved);
+      if (!firebase.apps.length) firebase.initializeApp(cfg);
+      AUTH = firebase.auth();
+      DB   = firebase.firestore();
+      showScreen('login-screen');
+      setupAuthListener();
+      Object.entries(cfg).forEach(([k,v]) => { const el = id('s-'+k); if(el) el.value = v; });
+    } catch(e) { showScreen('setup-screen'); }
+  } else { showScreen('setup-screen'); }
+  populateMonthFilters();
+  id('visit-date').value = todayStr();
+  id('ms2-date').value = todayStr();
+  id('mv-date').value  = todayStr();
+  id('mt-month').value = new Date().toISOString().slice(0,7);
+};
+
+function setupAuthListener() {
+  AUTH.onAuthStateChanged(async u => {
+    if (u) {
+      currentUser = u;
+      await loadUserProfile();
+      showScreen('app-screen');
+      setUserUI();
+      await loadMasterData();
+      goTab('dashboard');
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════
+//  AUTH
+// ════════════════════════════════════════════════════════
+async function doLogin() {
+  const email = id('l-email').value.trim();
+  const pass  = id('l-pass').value;
+  const btn   = id('login-btn');
+  id('login-err').style.display='none';
+  btn.disabled=true; btn.textContent='جاري الدخول...';
+  try {
+    await AUTH.signInWithEmailAndPassword(email, pass);
+  } catch(e) {
+    showErr('login-err', e.code==='auth/user-not-found'||e.code==='auth/wrong-password'?'بيانات غير صحيحة':e.message);
+  }
+  btn.disabled=false; btn.textContent='دخول';
+}
+
+async function logout() {
+  if (!DEMO) await AUTH.signOut();
+  currentUser=null; userProfile=null;
+  showScreen('login-screen');
+}
+
+async function loadUserProfile() {
+  if (DEMO) return;
+  try {
+    const doc = await DB.collection('users').doc(currentUser.uid).get();
+    if (doc.exists) userProfile = doc.data();
+    else userProfile = { name: currentUser.email, role:'rep', email:currentUser.email };
+  } catch(e) { userProfile = { name:currentUser.email, role:'rep' }; }
+}
+
+function setUserUI() {
+  const p = userProfile || {};
+  id('top-name').textContent = p.name || p.email || 'User';
+  id('top-role').textContent = p.role==='manager'?'Manager':'Sales Rep';
+  id('top-av').textContent   = (p.name||'U').charAt(0);
+  if (p.role==='manager') {
+    id('tab-admin').style.display='flex';
+    id('mgr-rep-bar').style.display='flex';
+    id('tgt-rep-bar').style.display='flex';
+    id('vis-rep-bar').style.display='flex';
   }
 }
 
-// =====================================================================
-//  RENDER
-// =====================================================================
-function renderDashboard(p) {
-  lastPayload = p;
-  const errBox = document.getElementById('errorBox');
-  errBox.innerHTML = p._demo
-    ? `<div class="error-card"><b>${locale==='ar'?'وضع العرض التجريبي':'Demo mode'}</b> — ${locale==='ar'?'webhook غير متاح. تم عرض بيانات تجريبية.':'webhook unreachable. Showing sample data.'}</div>`
-    : '';
+// ════════════════════════════════════════════════════════
+//  MASTER DATA
+// ════════════════════════════════════════════════════════
+async function loadMasterData() {
+  if (DEMO) { buildRepBars(); buildDoorGrid(); populateSelects(); return; }
+  try {
+    const [doorsSnap, skusSnap, usersSnap] = await Promise.all([
+      DB.collection('doors').get(),
+      DB.collection('skus').get(),
+      DB.collection('users').get()
+    ]);
+    allDoors = doorsSnap.docs.map(d=>({id:d.id,...d.data()}));
+    allSKUs  = skusSnap.docs.map(d=>({id:d.id,...d.data()}));
+    allUsers = usersSnap.docs.map(d=>({id:d.id,...d.data()}));
+    allReps  = allUsers.filter(u=>u.role==='rep');
 
-  // Hero
-  document.getElementById('repName').innerHTML = p.rep?.name?.replace(/( \w+)$/, ' <em>$1</em>') || '—';
-  document.getElementById('repCode').textContent = '#' + (p.rep?.code || '—');
+    // Filter doors for rep
+    if (userProfile?.role==='rep') {
+      allDoors = allDoors.filter(d=>d.repId===currentUser.uid || d.repEmail===currentUser.email);
+    }
+    buildRepBars(); buildDoorGrid(); populateSelects();
+    loadAdminTables();
+  } catch(e) { toast('خطأ في تحميل البيانات الأساسية','error'); }
+}
 
-  // Visits ring + numbers
-  const vPct = p.visits?.achievement_pct || 0;
-  const vEl  = document.getElementById('ringVisits');
-  setRing(vEl, vPct);
-  countUp(document.getElementById('visitsPct'), Math.round(vPct * 100), '%');
-  document.getElementById('visitsActual').textContent = fmtNum(p.visits?.actual);
-  document.getElementById('visitsTarget').textContent = fmtNum(p.visits?.target_daily);
+// ════════════════════════════════════════════════════════
+//  DEMO DATA
+// ════════════════════════════════════════════════════════
+function loadDemoData() {
+  allReps = [
+    {id:'r1',name:'أحمد محمود',email:'ahmed@mf.com',role:'rep'},
+    {id:'r2',name:'سارة خالد',email:'sara@mf.com',role:'rep'},
+  ];
+  allUsers = [...allReps, {id:'m1',name:'Demo Manager',email:'demo@mf.com',role:'manager'}];
+  allDoors = [
+    {id:'d1',name:'Carrefour Maadi',code:'CAR-001',channel:'Modern Trade',area:'المعادي',repId:'r1'},
+    {id:'d2',name:'Spinneys Zamalek',code:'SPN-001',channel:'Modern Trade',area:'الزمالك',repId:'r1'},
+    {id:'d3',name:'Seoudi Heliopolis',code:'SEO-001',channel:'Modern Trade',area:'مصر الجديدة',repId:'r1'},
+    {id:'d4',name:'Hyper One 5th',code:'HYP-001',channel:'Modern Trade',area:'التجمع الخامس',repId:'r2'},
+    {id:'d5',name:'Metro Market',code:'MET-001',channel:'Modern Trade',area:'الجيزة',repId:'r2'},
+    {id:'d6',name:'Flamingo Market',code:'FLM-001',channel:'Modern Trade',area:'المهندسين',repId:'r2'},
+  ];
+  allSKUs = [
+    {id:'s1',code:'MF-001',name:'Mighty Chips Classic',brand:'Chips',price:7},
+    {id:'s2',code:'MF-002',name:'Kettle Chips Original',brand:'Chips',price:12},
+    {id:'s3',code:'MF-003',name:'TOYBOX Jelly Mix',brand:'Candy',price:5},
+    {id:'s4',code:'MF-004',name:'Hay Hay Cocoa Biscuit',brand:'Biscuit',price:9},
+    {id:'s5',code:'MF-005',name:'Mighty Crisp BBQ',brand:'Chips',price:8},
+    {id:'s6',code:'MF-006',name:'Trolli Gummies',brand:'Candy',price:15},
+    {id:'s7',code:'MF-007',name:'SLIM Gofrette',brand:'Wafer',price:6},
+  ];
+  targetsData = [
+    {doorId:'d1',repId:'r1',month:'2025-04',target:120000,actual:87500},
+    {doorId:'d2',repId:'r1',month:'2025-04',target:95000,actual:91000},
+    {doorId:'d3',repId:'r1',month:'2025-04',target:75000,actual:42000},
+    {doorId:'d4',repId:'r2',month:'2025-04',target:110000,actual:115000},
+    {doorId:'d5',repId:'r2',month:'2025-04',target:80000,actual:55000},
+    {doorId:'d6',repId:'r2',month:'2025-04',target:60000,actual:61000},
+  ];
+  mslData = [
+    {doorId:'d1',skuId:'s1',status:'present',lastSale:'2025-04-10'},{doorId:'d1',skuId:'s2',status:'missing',lastSale:'2025-03-15'},{doorId:'d1',skuId:'s3',status:'present',lastSale:'2025-04-09'},
+    {doorId:'d2',skuId:'s1',status:'present',lastSale:'2025-04-11'},{doorId:'d2',skuId:'s4',status:'missing',lastSale:'2025-03-20'},{doorId:'d2',skuId:'s5',status:'present',lastSale:'2025-04-08'},
+    {doorId:'d3',skuId:'s2',status:'present',lastSale:'2025-04-10'},{doorId:'d3',skuId:'s6',status:'missing',lastSale:'2025-04-01'},{doorId:'d3',skuId:'s7',status:'present',lastSale:'2025-04-09'},
+    {doorId:'d4',skuId:'s1',status:'present',lastSale:'2025-04-11'},{doorId:'d4',skuId:'s3',status:'present',lastSale:'2025-04-10'},{doorId:'d4',skuId:'s5',status:'present',lastSale:'2025-04-11'},
+    {doorId:'d5',skuId:'s2',status:'missing',lastSale:'2025-03-01'},{doorId:'d5',skuId:'s4',status:'present',lastSale:'2025-04-09'},{doorId:'d5',skuId:'s6',status:'missing',lastSale:'2025-03-10'},
+    {doorId:'d6',skuId:'s1',status:'present',lastSale:'2025-04-10'},{doorId:'d6',skuId:'s7',status:'present',lastSale:'2025-04-08'},
+  ];
+  visitsData = [
+    {repId:'r1',doorId:'d1',date:'2025-04-11',checkin:'09:15',checkout:'09:50',status:'completed'},
+    {repId:'r1',doorId:'d2',date:'2025-04-11',checkin:'10:30',checkout:'11:10',status:'completed'},
+    {repId:'r1',doorId:'d3',date:'2025-04-11',checkin:'11:50',checkout:'12:25',status:'completed'},
+    {repId:'r2',doorId:'d4',date:'2025-04-11',checkin:'09:00',checkout:'09:45',status:'completed'},
+    {repId:'r2',doorId:'d5',date:'2025-04-11',checkin:'10:15',checkout:null,status:'in-progress'},
+  ];
+}
 
-  // Time ring + numbers
-  const tPct = p.time?.achievement_pct || 0;
-  const tEl  = document.getElementById('ringTime');
-  setRing(tEl, tPct);
-  countUp(document.getElementById('timePct'), Math.round(tPct * 100), '%');
-  document.getElementById('timeActual').textContent = fmtSeconds(p.time?.actual_seconds);
-  document.getElementById('timeTarget').textContent = fmtSeconds(p.time?.target_seconds);
-
-  // Position
-  document.getElementById('positionCategory').textContent = p.rank?.category || p.rep?.position_label || '—';
-  document.getElementById('rankNum').textContent = p.rank?.overall ?? '—';
-  document.getElementById('rankSuffix').textContent = p.rank?.overall ? rankSuffix(p.rank.overall) : '';
-
-  // Stats grid
-  document.getElementById('monthlyTarget').textContent    = fmtNum(p.visits?.target_monthly);
-  document.getElementById('dailyVisitTarget').textContent = fmtNum(p.visits?.target_daily);
-  document.getElementById('dailyTimeTarget').textContent  = fmtSeconds(p.time?.target_seconds);
-  document.getElementById('visitsDone').textContent       = fmtNum(p.visits?.actual);
-  document.getElementById('timeDone').textContent         = fmtSeconds(p.time?.actual_seconds);
-
-  // Updated at
-  if (p.updated_at) {
-    const d = new Date(p.updated_at);
-    const fmt = new Intl.DateTimeFormat(locale === 'ar' ? 'ar-EG' : 'en-GB', {
-      dateStyle: 'medium', timeStyle: 'short'
+// ════════════════════════════════════════════════════════
+//  UI BUILDERS
+// ════════════════════════════════════════════════════════
+function buildRepBars() {
+  if (userProfile?.role !== 'manager') return;
+  ['mgr-rep-btns','tgt-rep-btns','vis-rep-btns'].forEach(bid => {
+    const el = id(bid); if(!el) return;
+    el.innerHTML = `<button class="rep-pill active" data-rep="all" onclick="selectRep('all','${bid}')">الكل</button>`;
+    allReps.forEach(r => {
+      el.innerHTML += `<button class="rep-pill" data-rep="${r.id}" onclick="selectRep('${r.id}','${bid}')">${r.name}</button>`;
     });
-    document.getElementById('updatedAt').textContent =
-      (locale === 'ar' ? 'آخر تحديث: ' : 'Updated ') + fmt.format(d);
+  });
+}
+
+function selectRep(repId, bid) {
+  selectedRep = repId==='all' ? null : repId;
+  document.querySelectorAll(`#${bid} .rep-pill`).forEach(b=>b.classList.toggle('active',b.dataset.rep===repId));
+  buildDoorGrid();
+  const curTab = document.querySelector('.ntab.active')?.dataset.tab;
+  if (curTab) loadTabData(curTab);
+}
+
+function buildDoorGrid() {
+  const doors = selectedRep ? allDoors.filter(d=>d.repId===selectedRep) : allDoors;
+  const grid = id('door-grid');
+  if (!doors.length) { grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text3)">لا توجد Doors</div>'; return; }
+  grid.innerHTML = doors.map(d=>`
+    <button class="door-btn ${selectedDoor?.id===d.id?'active':''}" onclick="selectDoor('${d.id}')">
+      ${d.name}
+      <span class="door-code">${d.code} · ${d.channel}</span>
+    </button>`).join('');
+}
+
+function filterDoors() {
+  const q = id('door-search').value.toLowerCase();
+  const doors = (selectedRep ? allDoors.filter(d=>d.repId===selectedRep) : allDoors)
+    .filter(d => d.name.toLowerCase().includes(q) || d.code.toLowerCase().includes(q));
+  const grid = id('door-grid');
+  grid.innerHTML = doors.map(d=>`
+    <button class="door-btn ${selectedDoor?.id===d.id?'active':''}" onclick="selectDoor('${d.id}')">
+      ${d.name}
+      <span class="door-code">${d.code} · ${d.channel}</span>
+    </button>`).join('') || '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text3)">لا نتائج</div>';
+}
+
+function selectDoor(doorId) {
+  selectedDoor = allDoors.find(d=>d.id===doorId);
+  document.querySelectorAll('.door-btn').forEach(b=>b.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  loadDashboard();
+}
+
+function populateSelects() {
+  // Populate rep selects in modals
+  ['mu-doors','md-rep','mt-rep','ms2-rep','mv-rep'].forEach(sid => {
+    const el = id(sid); if(!el) return;
+    if (sid==='mu-doors') {
+      el.innerHTML = allDoors.map(d=>`<option value="${d.id}">${d.name} (${d.code})</option>`).join('');
+    } else {
+      el.innerHTML = '<option value="">اختر مندوب...</option>' + allReps.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+    }
+  });
+  // Door selects
+  const dHtml = '<option value="">اختر Door...</option>' + allDoors.map(d=>`<option value="${d.id}">${d.name} (${d.code})</option>`).join('');
+  ['mt-door','mm-door','ms2-door','mv-door','msl-door-filter','z-door-filter'].forEach(sid=>{
+    const el=id(sid); if(el) el.innerHTML=(sid.includes('filter')?'<option value="">كل الـ Doors</option>':'')+allDoors.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+  });
+  // SKU selects
+  const sHtml = '<option value="">اختر SKU...</option>' + allSKUs.map(s=>`<option value="${s.id}">${s.name} (${s.code})</option>`).join('');
+  ['mm-sku','ms2-sku'].forEach(sid=>{ const el=id(sid); if(el) el.innerHTML=sHtml; });
+}
+
+// ════════════════════════════════════════════════════════
+//  TABS
+// ════════════════════════════════════════════════════════
+function goTab(tab) {
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.page').forEach(p=>p.style.display='none');
+  const pg = id('page-'+tab); if(pg) pg.style.display='block';
+  loadTabData(tab);
+}
+
+function loadTabData(tab) {
+  if (tab==='dashboard') loadDashboard();
+  else if (tab==='targets') loadTargets();
+  else if (tab==='msl') loadMSL();
+  else if (tab==='visits') loadVisits();
+  else if (tab==='zero') loadZero();
+  else if (tab==='admin') loadAdmin();
+}
+
+// ════════════════════════════════════════════════════════
+//  DASHBOARD
+// ════════════════════════════════════════════════════════
+async function loadDashboard() {
+  const month = id('dash-month').value || currentMonth();
+  let tgtEntry = null, mslItems = [];
+
+  if (selectedDoor) {
+    tgtEntry = targetsData.find(t=>t.doorId===selectedDoor.id && t.month===month);
+    if (!tgtEntry && !DEMO) {
+      try {
+        const snap = await DB.collection('targets')
+          .where('doorId','==',selectedDoor.id)
+          .where('month','==',month).get();
+        if (!snap.empty) { tgtEntry = snap.docs[0].data(); targetsData.push(tgtEntry); }
+      } catch(e){}
+    }
+    mslItems = mslData.filter(m=>m.doorId===selectedDoor.id);
+    if (!mslItems.length && !DEMO) {
+      try {
+        const snap = await DB.collection('msl').where('doorId','==',selectedDoor.id).get();
+        mslItems = snap.docs.map(d=>d.data());
+      } catch(e){}
+    }
+  }
+
+  const target  = tgtEntry?.target  || 0;
+  const actual  = tgtEntry?.actual  || 0;
+  const achPct  = target ? Math.round((actual/target)*100) : 0;
+  const gap     = Math.max(0,target-actual);
+
+  id('dash-title').textContent = selectedDoor ? selectedDoor.name : 'لوحة التحكم';
+  id('dash-sub').textContent   = selectedDoor ? `${selectedDoor.code} · ${selectedDoor.channel} · ${selectedDoor.area||''}` : 'اختر Door من القائمة أدناه';
+  id('d-sales').textContent    = fmt(actual);
+  id('d-target').textContent   = fmt(target);
+  id('d-ach').textContent      = achPct+'%';
+  id('d-ach-m').innerHTML      = `<span class="badge ${achPct>=100?'bs':achPct>=80?'bw':'bd'}">${achPct>=100?'✓ تجاوز':achPct>=80?'قريب':'تأخر'}</span>`;
+  id('d-zero').textContent     = mslItems.filter(m=>m.status==='missing').length;
+  id('d-sales-m').textContent  = `الهدف: ${fmt(target)}`;
+  id('d-target-m').textContent = selectedDoor ? selectedDoor.channel : '—';
+
+  // Ring
+  const circum=289.0;
+  id('dash-ring').style.strokeDashoffset = circum - Math.min(achPct/100,1)*circum;
+  id('ring-txt').textContent = achPct+'%';
+  id('ring-door-name').textContent = selectedDoor ? selectedDoor.name : 'لم يتم اختيار Door';
+  id('ring-t').textContent = fmt(target);
+  id('ring-a').textContent = fmt(actual);
+  id('ring-g').textContent = fmt(gap);
+
+  // Door MSL table
+  id('door-msl-count').textContent = mslItems.length+' SKU';
+  id('door-msl-body').innerHTML = mslItems.length ? mslItems.map(m=>{
+    const sku = allSKUs.find(s=>s.id===m.skuId);
+    const daysAgo = m.lastSale ? daysSince(m.lastSale) : '—';
+    return `<tr>
+      <td class="td-b">${sku?.name||m.skuId}</td>
+      <td><span class="badge ${m.status==='present'?'bs':'bd'}">${m.status==='present'?'✓ متوافر':'✗ مفقود'}</span></td>
+      <td style="font-size:12px">${m.lastSale||'—'}</td>
+    </tr>`;
+  }).join('') : '<tr><td colspan="3" class="loading-row">اختر Door أولاً</td></tr>';
+}
+
+// ════════════════════════════════════════════════════════
+//  TARGETS
+// ════════════════════════════════════════════════════════
+async function loadTargets() {
+  const month = id('tgt-month').value || currentMonth();
+  let data = targetsData;
+
+  if (!DEMO) {
+    try {
+      let q = DB.collection('targets').where('month','==',month);
+      if (selectedRep) q = q.where('repId','==',selectedRep);
+      else if (userProfile?.role==='rep') q = q.where('repId','==',currentUser.uid);
+      const snap = await q.get();
+      data = snap.docs.map(d=>d.data());
+    } catch(e) {}
+  } else {
+    data = selectedRep ? targetsData.filter(t=>t.repId===selectedRep) : targetsData;
+  }
+
+  id('tgt-count').textContent = data.length+' هدف';
+  renderTargetsTable(data);
+}
+
+function renderTargetsTable(data) {
+  id('tgt-tbody').innerHTML = data.map(t=>{
+    const door = allDoors.find(d=>d.id===t.doorId);
+    const pct  = t.target ? Math.round((t.actual/t.target)*100) : 0;
+    const gap  = Math.max(0,t.target-t.actual);
+    const c    = pct>=100?'g':pct>=80?'o':'r';
+    return `<tr>
+      <td class="td-b">${door?.name||t.doorId}</td>
+      <td><code style="font-size:11px;color:var(--text3)">${door?.code||'—'}</code></td>
+      <td><span class="badge bi">${door?.channel||'—'}</span></td>
+      <td class="td-b">${fmt(t.target)}</td>
+      <td style="color:var(--success)">${fmt(t.actual)}</td>
+      <td>
+        <div class="pbar-wrap">
+          <div class="pbar"><div class="pbar-fill ${c}" style="width:${Math.min(pct,100)}%"></div></div>
+          <span class="ppct" style="color:var(--${c==='g'?'success':c==='o'?'warning':'danger'})">${pct}%</span>
+        </div>
+      </td>
+      <td style="color:var(--danger)">${fmt(gap)}</td>
+      <td><span class="badge ${pct>=100?'bs':pct>=80?'bw':'bd'}">${pct>=100?'✓ تجاوز':pct>=80?'قريب':'تأخر'}</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="8" class="loading-row">لا توجد أهداف</td></tr>';
+}
+
+function filterTargetsTable() {
+  const q = id('tgt-search').value.toLowerCase();
+  const data = targetsData.filter(t=>{
+    const door=allDoors.find(d=>d.id===t.doorId);
+    return (door?.name||'').toLowerCase().includes(q)||(door?.code||'').toLowerCase().includes(q);
+  });
+  renderTargetsTable(data);
+}
+
+// ════════════════════════════════════════════════════════
+//  MSL
+// ════════════════════════════════════════════════════════
+async function loadMSL() {
+  let data = mslData;
+  if (!DEMO) {
+    try {
+      let q = DB.collection('msl');
+      if (userProfile?.role==='rep') q = q.where('repId','==',currentUser.uid);
+      const snap = await q.get();
+      data = snap.docs.map(d=>d.data());
+      mslData = data;
+    } catch(e){}
+  }
+  id('msl-ok').textContent   = data.filter(m=>m.status==='present').length;
+  id('msl-miss').textContent = data.filter(m=>m.status==='missing').length;
+  id('msl-pct').textContent  = data.length ? Math.round(data.filter(m=>m.status==='present').length/data.length*100)+'%' : '—%';
+  filterMSLTable(data);
+}
+
+function filterMSLTable(base) {
+  const data = base || mslData;
+  const doorF = id('msl-door-filter').value;
+  const statF = id('msl-status-filter').value;
+  const q     = id('msl-search').value.toLowerCase();
+  const filtered = data.filter(m=>{
+    const sku=allSKUs.find(s=>s.id===m.skuId);
+    const door=allDoors.find(d=>d.id===m.doorId);
+    return (!doorF||m.doorId===doorF)&&(!statF||m.status===statF)&&
+      (!q||(sku?.name||'').toLowerCase().includes(q)||(door?.name||'').toLowerCase().includes(q));
+  });
+  id('msl-tbody').innerHTML = filtered.map(m=>{
+    const sku=allSKUs.find(s=>s.id===m.skuId);
+    const door=allDoors.find(d=>d.id===m.doorId);
+    return `<tr>
+      <td class="td-b">${door?.name||m.doorId}</td>
+      <td><span class="badge bi">${door?.channel||'—'}</span></td>
+      <td><code style="font-size:11px;color:var(--text3)">${sku?.code||m.skuId}</code></td>
+      <td class="td-b">${sku?.name||m.skuId}</td>
+      <td><span class="badge ${m.status==='present'?'bs':'bd'}">${m.status==='present'?'✓ متوافر':'✗ مفقود'}</span></td>
+      <td style="font-size:12px">${m.lastSale||'—'}</td>
+      <td style="font-size:12px;color:var(--text3)">${m.note||'—'}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" class="loading-row">لا توجد بيانات</td></tr>';
+}
+
+// ════════════════════════════════════════════════════════
+//  VISITS
+// ════════════════════════════════════════════════════════
+async function loadVisits() {
+  const date = id('visit-date').value || todayStr();
+  let data = visitsData.filter(v=>v.date===date);
+  if (!DEMO) {
+    try {
+      let q = DB.collection('visits').where('date','==',date);
+      if (selectedRep) q=q.where('repId','==',selectedRep);
+      else if (userProfile?.role==='rep') q=q.where('repId','==',currentUser.uid);
+      const snap = await q.get();
+      data = snap.docs.map(d=>d.data());
+    } catch(e){}
+  } else if (selectedRep) {
+    data = data.filter(v=>v.repId===selectedRep);
+  }
+
+  const done = data.filter(v=>v.status==='completed');
+  const durs = done.map(v=>{
+    if (!v.checkin||!v.checkout) return 0;
+    const [h1,m1]=v.checkin.split(':').map(Number);
+    const [h2,m2]=v.checkout.split(':').map(Number);
+    return (h2*60+m2)-(h1*60+m1);
+  }).filter(d=>d>0);
+  const avg = durs.length ? Math.round(durs.reduce((a,b)=>a+b,0)/durs.length) : 0;
+
+  id('v-total').textContent = data.length;
+  id('v-avg').textContent   = avg;
+  id('v-doors').textContent = new Set(data.map(v=>v.doorId)).size;
+  renderVisitsTable(data);
+}
+
+function renderVisitsTable(data) {
+  id('vis-tbody').innerHTML = data.map(v=>{
+    const door=allDoors.find(d=>d.id===v.doorId);
+    const dur  = v.checkin&&v.checkout ? (()=>{ const [h1,m1]=v.checkin.split(':').map(Number);const [h2,m2]=v.checkout.split(':').map(Number);return (h2*60+m2)-(h1*60+m1); })() : null;
+    return `<tr>
+      <td class="td-b">${v.checkin||'—'}</td>
+      <td class="td-b">${door?.name||v.doorId}</td>
+      <td><code style="font-size:11px;color:var(--text3)">${door?.code||'—'}</code></td>
+      <td>${v.checkin||'—'}</td>
+      <td>${v.checkout||'—'}</td>
+      <td class="td-b">${dur!=null?dur:'—'}</td>
+      <td><span class="badge ${v.status==='completed'?'bs':v.status==='in-progress'?'bw':'bn'}">${v.status==='completed'?'✓ مكتملة':v.status==='in-progress'?'● جارية':'—'}</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" class="loading-row">لا توجد زيارات</td></tr>';
+}
+
+function filterVisitsTable() {
+  const q=id('vis-search').value.toLowerCase();
+  renderVisitsTable(visitsData.filter(v=>{
+    const door=allDoors.find(d=>d.id===v.doorId);
+    return (door?.name||'').toLowerCase().includes(q);
+  }));
+}
+
+// ════════════════════════════════════════════════════════
+//  ZERO SALES
+// ════════════════════════════════════════════════════════
+async function loadZero() {
+  const month = currentMonth();
+  // Zero = MSL items with status missing OR items in MSL but no sales in period
+  let data = mslData.filter(m=>m.status==='missing');
+  if (userProfile?.role==='rep' && !DEMO) data = data.filter(m=>{
+    const door=allDoors.find(d=>d.id===m.doorId);
+    return door?.repId===currentUser.uid;
+  });
+  if (selectedRep) data = data.filter(m=>{
+    const door=allDoors.find(d=>d.id===m.doorId);
+    return door?.repId===selectedRep;
+  });
+
+  id('z-count').textContent = data.length;
+  id('z-doors').textContent = new Set(data.map(m=>m.doorId)).size;
+  id('z-pct').textContent   = mslData.length ? Math.round(data.length/mslData.length*100)+'%' : '—%';
+  zeroData = data;
+  filterZeroTable(data);
+}
+
+function filterZeroTable(base) {
+  const data = base || zeroData;
+  const doorF=id('z-door-filter').value;
+  const q=id('z-search').value.toLowerCase();
+  const filtered=data.filter(m=>{
+    const sku=allSKUs.find(s=>s.id===m.skuId);
+    const door=allDoors.find(d=>d.id===m.doorId);
+    return (!doorF||m.doorId===doorF)&&(!q||(sku?.name||'').toLowerCase().includes(q)||(door?.name||'').toLowerCase().includes(q));
+  });
+  id('z-tbody').innerHTML = filtered.map(m=>{
+    const sku=allSKUs.find(s=>s.id===m.skuId);
+    const door=allDoors.find(d=>d.id===m.doorId);
+    const ds=m.lastSale?daysSince(m.lastSale):'—';
+    const pri=typeof ds==='number'?(ds>30?'high':ds>14?'medium':'low'):'high';
+    return `<tr>
+      <td class="td-b">${door?.name||m.doorId}</td>
+      <td><span class="badge bi">${door?.channel||'—'}</span></td>
+      <td><code style="font-size:11px;color:var(--text3)">${sku?.code||m.skuId}</code></td>
+      <td class="td-b">${sku?.name||m.skuId}</td>
+      <td>${m.lastSale||'—'}</td>
+      <td class="td-b" style="color:${pri==='high'?'var(--danger)':pri==='medium'?'var(--warning)':'var(--text2)'}">${ds} يوم</td>
+      <td><span class="badge ${pri==='high'?'bd':pri==='medium'?'bw':'bs'}">${pri==='high'?'🔴 عالية':pri==='medium'?'🟡 متوسطة':'🟢 منخفضة'}</span></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="7" class="loading-row">✅ لا توجد Zero Sales</td></tr>';
+}
+
+// ════════════════════════════════════════════════════════
+//  ADMIN
+// ════════════════════════════════════════════════════════
+function loadAdmin() {
+  loadAdminTables();
+}
+
+function loadAdminTables() {
+  // Doors table
+  id('admin-doors-count').textContent = allDoors.length+' Door';
+  id('admin-doors-body').innerHTML = allDoors.map(d=>{
+    const rep=allReps.find(r=>r.id===d.repId);
+    return `<tr><td class="td-b">${d.name}</td><td><code style="font-size:11px;color:var(--text3)">${d.code}</code></td><td><span class="badge bi">${d.channel}</span></td><td>${rep?.name||'—'}</td></tr>`;
+  }).join('') || '<tr><td colspan="4" class="loading-row">لا توجد Doors</td></tr>';
+
+  // Users table
+  id('admin-users-count').textContent = allUsers.length+' مستخدم';
+  id('admin-users-body').innerHTML = allUsers.map(u=>`<tr>
+    <td class="td-b">${u.name||'—'}</td>
+    <td style="font-size:12px;direction:ltr">${u.email}</td>
+    <td><span class="badge ${u.role==='manager'?'bw':'bi'}">${u.role==='manager'?'Manager':'Rep'}</span></td>
+  </tr>`).join('') || '<tr><td colspan="3" class="loading-row">لا توجد مستخدمين</td></tr>';
+}
+
+// ════════════════════════════════════════════════════════
+//  CRUD OPERATIONS
+// ════════════════════════════════════════════════════════
+async function addUser() {
+  const name = id('mu-name').value.trim();
+  const email= id('mu-email').value.trim();
+  const pass = id('mu-pass').value;
+  const role = id('mu-role').value;
+  if (!name||!email||!pass) { toast('أكمل جميع الحقول المطلوبة','error'); return; }
+  if (DEMO) { toast('Demo Mode: لا يتم الحفظ الحقيقي','warning'); closeModal('modal-user'); return; }
+  try {
+    const cred = await AUTH.createUserWithEmailAndPassword(email, pass);
+    await DB.collection('users').doc(cred.user.uid).set({ name, email, role, createdAt: new Date().toISOString() });
+    allUsers.push({id:cred.user.uid, name, email, role});
+    if (role==='rep') allReps.push({id:cred.user.uid, name, email, role});
+    buildRepBars(); populateSelects();
+    toast('✓ تم إضافة المستخدم','success'); closeModal('modal-user');
+  } catch(e) { toast(e.message,'error'); }
+}
+
+async function addDoor() {
+  const name=id('md-name').value.trim(), code=id('md-code').value.trim();
+  const channel=id('md-channel').value, area=id('md-area').value.trim();
+  const repId=id('md-rep').value;
+  if (!name||!code) { toast('أدخل الاسم والكود على الأقل','error'); return; }
+  const door = {name,code,channel,area,repId,createdAt:new Date().toISOString()};
+  if (DEMO) { door.id='d'+Date.now(); allDoors.push(door); buildDoorGrid(); populateSelects(); loadAdminTables(); toast('✓ تمت الإضافة (Demo)','success'); closeModal('modal-door'); return; }
+  try {
+    const ref = await DB.collection('doors').add(door);
+    door.id=ref.id; allDoors.push(door);
+    buildDoorGrid(); populateSelects(); loadAdminTables();
+    toast('✓ تمت إضافة الـ Door','success'); closeModal('modal-door');
+  } catch(e) { toast(e.message,'error'); }
+}
+
+async function addSKU() {
+  const code=id('ms-code').value.trim(), name=id('ms-name').value.trim();
+  const brand=id('ms-brand').value.trim(), price=parseFloat(id('ms-price').value)||0;
+  if (!code||!name) { toast('أدخل الكود والاسم','error'); return; }
+  const sku={code,name,brand,price,createdAt:new Date().toISOString()};
+  if (DEMO) { sku.id='s'+Date.now(); allSKUs.push(sku); populateSelects(); toast('✓ تمت الإضافة (Demo)','success'); closeModal('modal-sku'); return; }
+  try {
+    const ref=await DB.collection('skus').add(sku);
+    sku.id=ref.id; allSKUs.push(sku); populateSelects();
+    toast('✓ تمت إضافة المنتج','success'); closeModal('modal-sku');
+  } catch(e) { toast(e.message,'error'); }
+}
+
+async function setTarget() {
+  const repId=id('mt-rep').value, doorId=id('mt-door').value;
+  const month=id('mt-month').value, target=parseFloat(id('mt-val').value)||0;
+  if (!doorId||!month||!target) { toast('أكمل جميع الحقول','error'); return; }
+  const entry={repId,doorId,month,target,actual:0,createdAt:new Date().toISOString()};
+  if (DEMO) {
+    const idx=targetsData.findIndex(t=>t.doorId===doorId&&t.month===month&&t.repId===repId);
+    if (idx>=0) targetsData[idx]={...targetsData[idx],...entry}; else targetsData.push(entry);
+    toast('✓ تم حفظ الـ Target (Demo)','success'); closeModal('modal-target'); return;
+  }
+  try {
+    const key=`${repId}_${doorId}_${month}`;
+    await DB.collection('targets').doc(key).set(entry);
+    const idx=targetsData.findIndex(t=>t.doorId===doorId&&t.month===month&&t.repId===repId);
+    if (idx>=0) targetsData[idx]=entry; else targetsData.push(entry);
+    toast('✓ تم حفظ الـ Target','success'); closeModal('modal-target');
+  } catch(e) { toast(e.message,'error'); }
+}
+
+async function setMSL() {
+  const doorId=id('mm-door').value, skuId=id('mm-sku').value;
+  const status=id('mm-status').value, note=id('mm-note').value.trim();
+  if (!doorId||!skuId) { toast('اختر Door وSKU','error'); return; }
+  const entry={doorId,skuId,status,note,lastSale:status==='present'?todayStr():'',updatedAt:new Date().toISOString()};
+  if (DEMO) {
+    const idx=mslData.findIndex(m=>m.doorId===doorId&&m.skuId===skuId);
+    if (idx>=0) mslData[idx]={...mslData[idx],...entry}; else mslData.push(entry);
+    toast('✓ تم حفظ MSL (Demo)','success'); closeModal('modal-msl'); return;
+  }
+  try {
+    const key=`${doorId}_${skuId}`;
+    await DB.collection('msl').doc(key).set(entry);
+    const idx=mslData.findIndex(m=>m.doorId===doorId&&m.skuId===skuId);
+    if (idx>=0) mslData[idx]=entry; else mslData.push(entry);
+    toast('✓ تم حفظ MSL','success'); closeModal('modal-msl');
+  } catch(e) { toast(e.message,'error'); }
+}
+
+async function addSale() {
+  const repId=id('ms2-rep').value, doorId=id('ms2-door').value, skuId=id('ms2-sku').value;
+  const inv=id('ms2-inv').value.trim(), qty=parseFloat(id('ms2-qty').value)||0;
+  const val=parseFloat(id('ms2-val').value)||0, date=id('ms2-date').value;
+  if (!doorId||!skuId||!date||!val) { toast('أكمل الحقول المطلوبة','error'); return; }
+  const sale={repId,doorId,skuId,invoiceNo:inv,qty,value:val,date,month:date.slice(0,7),createdAt:new Date().toISOString()};
+  if (DEMO) {
+    salesData.push(sale);
+    const tIdx=targetsData.findIndex(t=>t.doorId===doorId&&t.month===sale.month&&t.repId===repId);
+    if (tIdx>=0) targetsData[tIdx].actual=(targetsData[tIdx].actual||0)+val;
+    toast('✓ تم حفظ المبيعات (Demo)','success'); closeModal('modal-sale'); return;
+  }
+  try {
+    await DB.collection('sales').add(sale);
+    // Update actual in target
+    const key=`${repId}_${doorId}_${sale.month}`;
+    await DB.collection('targets').doc(key).update({ actual: firebase.firestore.FieldValue.increment(val) });
+    toast('✓ تم حفظ الفاتورة','success'); closeModal('modal-sale');
+  } catch(e) { toast(e.message,'error'); }
+}
+
+async function addVisit() {
+  const repId=id('mv-rep').value, doorId=id('mv-door').value;
+  const date=id('mv-date').value, checkin=id('mv-in').value, checkout=id('mv-out').value;
+  const status=id('mv-status').value;
+  if (!doorId||!date) { toast('اختر Door والتاريخ','error'); return; }
+  const visit={repId,doorId,date,checkin,checkout,status,createdAt:new Date().toISOString()};
+  if (DEMO) { visitsData.push(visit); toast('✓ تمت إضافة الزيارة (Demo)','success'); closeModal('modal-visit'); return; }
+  try {
+    await DB.collection('visits').add(visit);
+    visitsData.push(visit);
+    toast('✓ تمت إضافة الزيارة','success'); closeModal('modal-visit');
+  } catch(e) { toast(e.message,'error'); }
+}
+
+// ════════════════════════════════════════════════════════
+//  EXCEL IMPORT
+// ════════════════════════════════════════════════════════
+const TEMPLATES = {
+  sales:   'rep_email | door_code | sku_code | qty | value | date (YYYY-MM-DD) | invoice_no',
+  targets: 'rep_email | door_code | month (YYYY-MM) | target',
+  msl:     'door_code | sku_code | status (present/missing) | last_sale | note',
+  doors:   'name | code | channel | area | rep_email',
+  visits:  'rep_email | door_code | date | checkin (HH:MM) | checkout | status',
+};
+
+function updateImportTemplate() {
+  importType = id('imp-type').value;
+  id('imp-template').textContent = 'الأعمدة المطلوبة: ' + TEMPLATES[importType];
+  id('import-preview').style.display='none';
+}
+
+function handleFileUpload(e) {
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload = ev => {
+    const wb = XLSX.read(ev.target.result, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+    importRows = rows;
+    showPreview(rows);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function showPreview(rows) {
+  if (!rows.length) { toast('الملف فارغ','error'); return; }
+  id('preview-count').textContent = rows.length+' سطر للاستيراد';
+  const keys=Object.keys(rows[0]);
+  const preview = rows.slice(0,5);
+  id('preview-table-wrap').innerHTML = `
+    <table style="font-size:11px">
+      <thead><tr>${keys.map(k=>`<th>${k}</th>`).join('')}</tr></thead>
+      <tbody>${preview.map(r=>`<tr>${keys.map(k=>`<td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r[k]}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table>`;
+  id('import-preview').style.display='block';
+}
+
+async function doImport() {
+  if (!importRows.length) return;
+  const type=id('imp-type').value;
+  let ok=0, err=0;
+  toast('جاري الاستيراد... ('+importRows.length+' سطر)','info');
+
+  if (DEMO) {
+    for (const row of importRows) {
+      try { processImportRow(row, type); ok++; } catch(e) { err++; }
+    }
+    toast(`✓ تم استيراد ${ok} سطر${err?' ('+err+' أخطاء)':''}`, err?'warning':'success');
+    closeModal('modal-import'); loadTabData('dashboard'); return;
+  }
+
+  // Firebase batch write
+  const batch = DB.batch();
+  for (const row of importRows) {
+    try {
+      const docData = buildDocFromRow(row, type);
+      if (docData) {
+        const ref = docData.id ? DB.collection(type==='sales'?'sales':type==='targets'?'targets':type==='msl'?'msl':type==='doors'?'doors':'visits').doc(docData.id) : DB.collection(type==='sales'?'sales':'visits').doc();
+        batch.set(ref, docData.data, {merge:true});
+        ok++;
+      }
+    } catch(e) { err++; }
+  }
+  try {
+    await batch.commit();
+    toast(`✓ تم استيراد ${ok} سطر`, 'success');
+    await loadMasterData();
+    closeModal('modal-import');
+  } catch(e) { toast('خطأ: '+e.message,'error'); }
+}
+
+function buildDocFromRow(row, type) {
+  switch(type) {
+    case 'targets': {
+      const door=allDoors.find(d=>d.code===row.door_code);
+      const rep=allReps.find(r=>r.email===row.rep_email);
+      if (!door||!rep) return null;
+      const id2=`${rep.id}_${door.id}_${row.month}`;
+      return {id:id2, data:{repId:rep.id,doorId:door.id,month:row.month,target:parseFloat(row.target)||0,actual:0}};
+    }
+    case 'msl': {
+      const door=allDoors.find(d=>d.code===row.door_code);
+      const sku=allSKUs.find(s=>s.code===row.sku_code);
+      if (!door||!sku) return null;
+      return {id:`${door.id}_${sku.id}`,data:{doorId:door.id,skuId:sku.id,status:row.status||'missing',lastSale:row.last_sale||'',note:row.note||''}};
+    }
+    case 'sales': {
+      const door=allDoors.find(d=>d.code===row.door_code);
+      const sku=allSKUs.find(s=>s.code===row.sku_code);
+      const rep=allReps.find(r=>r.email===row.rep_email);
+      if (!door||!sku) return null;
+      return {id:null,data:{doorId:door.id,skuId:sku?.id||'',repId:rep?.id||'',qty:parseFloat(row.qty)||0,value:parseFloat(row.value)||0,date:row.date||'',month:(row.date||'').slice(0,7),invoiceNo:row.invoice_no||''}};
+    }
+    case 'doors': {
+      const rep=allReps.find(r=>r.email===row.rep_email);
+      return {id:row.code,data:{name:row.name,code:row.code,channel:row.channel||'Modern Trade',area:row.area||'',repId:rep?.id||'',repEmail:row.rep_email||''}};
+    }
+    default: return null;
   }
 }
 
-// =====================================================================
-//  FLOW
-// =====================================================================
-async function showDashboard(token) {
-  document.getElementById('signinScreen').classList.add('hidden');
-  document.getElementById('dashboard').classList.remove('hidden');
-  const data = await fetchProgress(token);
-  renderDashboard(data);
+function processImportRow(row, type) {
+  switch(type) {
+    case 'targets': {
+      const door=allDoors.find(d=>d.code===row.door_code);
+      const rep=allReps.find(r=>r.email===row.rep_email);
+      if (door&&rep) {
+        const idx=targetsData.findIndex(t=>t.doorId===door.id&&t.month===row.month&&t.repId===rep.id);
+        const entry={repId:rep.id,doorId:door.id,month:row.month,target:parseFloat(row.target)||0,actual:0};
+        if (idx>=0) targetsData[idx]=entry; else targetsData.push(entry);
+      }
+      break;
+    }
+    case 'msl': {
+      const door=allDoors.find(d=>d.code===row.door_code);
+      const sku=allSKUs.find(s=>s.code===row.sku_code);
+      if (door&&sku) {
+        const idx=mslData.findIndex(m=>m.doorId===door.id&&m.skuId===sku.id);
+        const entry={doorId:door.id,skuId:sku.id,status:row.status||'missing',lastSale:row.last_sale||''};
+        if (idx>=0) mslData[idx]=entry; else mslData.push(entry);
+      }
+      break;
+    }
+  }
 }
 
-document.getElementById('signinBtn').addEventListener('click', async () => {
-  const token = document.getElementById('tokenInput').value.trim();
-  if (!token) {
-    document.getElementById('tokenInput').focus();
-    return;
-  }
-  storeToken(token);
-  await showDashboard(token);
-});
-document.getElementById('tokenInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('signinBtn').click();
-});
+// ════════════════════════════════════════════════════════
+//  MONTH FILTERS
+// ════════════════════════════════════════════════════════
+function populateMonthFilters() {
+  const now=new Date();
+  ['dash-month','tgt-month'].forEach(sid=>{
+    const el=id(sid); if(!el) return;
+    el.innerHTML='<option value="">الشهر الحالي</option>';
+    for(let i=1;i<=6;i++){
+      const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+      const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+      el.innerHTML+=`<option value="${val}">${d.toLocaleDateString('ar-EG',{month:'long',year:'numeric'})}</option>`;
+    }
+  });
+}
 
-document.getElementById('refreshBtn').addEventListener('click', async () => {
-  const token = getStoredToken();
-  if (token) {
-    const data = await fetchProgress(token);
-    renderDashboard(data);
-  }
-});
-document.getElementById('signoutBtn').addEventListener('click', () => {
-  clearToken();
-  location.reload();
-});
+// ════════════════════════════════════════════════════════
+//  MODAL
+// ════════════════════════════════════════════════════════
+function openModal(mid) {
+  id(mid).classList.add('open');
+  // Pre-fill today's date
+  const md=id(mid);
+  md.querySelectorAll('input[type=date]').forEach(el=>{ if(!el.value) el.value=todayStr(); });
+}
+function closeModal(mid) { id(mid).classList.remove('open'); }
+document.querySelectorAll('.modal-ov').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }));
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&id('l-email')) doLogin(); });
 
-// =====================================================================
-//  BOOT
-// =====================================================================
-(async function init() {
-  applyLocale();
-  // Auto sign-in: ?t=TOKEN in URL → store and proceed
-  const urlToken = getTokenFromUrl();
-  if (urlToken) {
-    storeToken(urlToken);
-    history.replaceState(null, '', location.pathname);
-    await showDashboard(urlToken);
-    return;
-  }
-  const stored = getStoredToken();
-  if (stored) {
-    await showDashboard(stored);
-    return;
-  }
-  // Otherwise show sign-in
-})();
+// ════════════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════════════
+function id(x){ return document.getElementById(x); }
+function showScreen(s){ document.querySelectorAll('.screen').forEach(x=>x.style.display='none'); const el=id(s); if(el){el.style.display='block'; el.classList.add('active');} }
+function showErr(eid,msg){ const el=id(eid); if(el){el.textContent=msg;el.style.display='block';} }
+function fmt(n){ if(!n) return '0'; if(n>=1000000) return (n/1000000).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(1)+'K'; return n.toLocaleString(); }
+function currentMonth(){ return new Date().toISOString().slice(0,7); }
+function todayStr(){ return new Date().toISOString().split('T')[0]; }
+function daysSince(dateStr){ if(!dateStr) return '—'; const d=new Date(dateStr); const now=new Date(); return Math.floor((now-d)/(1000*60*60*24)); }
+function toast(msg,type='info'){
+  const c=id('toasts'), t=document.createElement('div');
+  t.className='toast';
+  t.style.borderColor=type==='success'?'rgba(0,196,122,.4)':type==='error'?'rgba(255,59,92,.4)':type==='warning'?'rgba(255,184,0,.4)':'var(--border2)';
+  t.style.color=type==='success'?'var(--success)':type==='error'?'var(--danger)':type==='warning'?'var(--warning)':'var(--text)';
+  t.textContent=msg; c.appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
 </script>
 </body>
 </html>
