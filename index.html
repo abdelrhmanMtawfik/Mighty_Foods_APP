@@ -659,9 +659,18 @@ const firebaseConfig = {
   appId: "1:757375505363:web:dbcbd7a8985e99e40b1526"
 };
 
-firebase.initializeApp(firebaseConfig);
-const AUTH = firebase.auth();
-const DB   = firebase.firestore();
+let AUTH, DB;
+try {
+  firebase.initializeApp(firebaseConfig);
+  AUTH = firebase.auth();
+  DB   = firebase.firestore();
+  // Enable offline persistence
+  DB.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+} catch(e) {
+  console.error('Firebase init error:', e);
+  document.getElementById('l-err').textContent = 'خطأ في الاتصال: ' + e.message;
+  document.getElementById('l-err').style.display = 'block';
+}
 
 // ════════════════════════════════════════════════════════
 //  STATE
@@ -706,6 +715,7 @@ async function doLogin() {
   const btn   = g('l-btn');
   g('l-err').style.display='none';
   if (!email||!pass) { showErr('l-err','أدخل الإيميل وكلمة السر'); return; }
+  if (!AUTH) { showErr('l-err','Firebase غير متصل — تأكد من فتح الملف عبر HTTPS وليس file://'); return; }
   btn.disabled=true; btn.textContent='جاري الدخول...';
   try {
     await AUTH.signInWithEmailAndPassword(email, pass);
