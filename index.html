@@ -1484,7 +1484,8 @@ function showPreview(rows) {
 async function doImport() {
   if (!importRows.length) return;
   const type=id('imp-type').value;
-  let ok=0, err=0;
+  let ok=0, err=0, skipped=0;
+  const skipReasons=[];
   toast('جاري الاستيراد... ('+importRows.length+' سطر)','info');
 
   if (DEMO) {
@@ -1495,51 +1496,91 @@ async function doImport() {
     closeModal('modal-import'); loadTabData('dashboard'); return;
   }
 
-  // Firebase batch write
-  const batch = DB.batch();
+  // Firebase batch write (max 500 per batch)
+  const colName = type==='targets'?'targets':type==='msl'?'msl':type==='doors'?'doors':type==='visits'?'visits':'sales';
+  let batch = DB.batch();
+  let batchCount = 0;
+
   for (const row of importRows) {
     try {
       const docData = buildDocFromRow(row, type);
       if (docData) {
-        const ref = docData.id ? DB.collection(type==='sales'?'sales':type==='targets'?'targets':type==='msl'?'msl':type==='doors'?'doors':'visits').doc(docData.id) : DB.collection(type==='sales'?'sales':'visits').doc();
+        const col = DB.collection(colName);
+        const ref = docData.id ? col.doc(String(docData.id)) : col.doc();
         batch.set(ref, docData.data, {merge:true});
-        ok++;
+        ok++; batchCount++;
+        // Firestore batch limit = 500
+        if (batchCount===499) {
+          await batch.commit();
+          batch=DB.batch(); batchCount=0;
+        }
+      } else {
+        skipped++;
+        // Collect first 3 skip reasons for debugging
+        if (skipReasons.length<3) {
+          const keys=Object.keys(row).slice(0,3).map(k=>`${k}:${row[k]}`).join(', ');
+          skipReasons.push(keys);
+        }
       }
-    } catch(e) { err++; }
+    } catch(e) { err++; console.error('Import row error:',e,row); }
   }
+
   try {
-    await batch.commit();
-    toast(`✓ تم استيراد ${ok} سطر`, 'success');
+    if (batchCount>0) await batch.commit();
+    let msg=`✓ تم استيراد ${ok} سطر`;
+    if (skipped>0) msg+=` | تجاهل ${skipped}`;
+    if (err>0) msg+=` | أخطاء ${err}`;
+    toast(msg, skipped>0||err>0?'warning':'success');
+    if (skipped>0 && skipReasons.length>0) {
+      setTimeout(()=>toast('تجاهل بسبب: '+skipReasons[0],'warning'),600);
+    }
     await loadMasterData();
     closeModal('modal-import');
-  } catch(e) { toast('خطأ: '+e.message,'error'); }
+  } catch(e) { toast('خطأ Firebase: '+e.message,'error'); console.error(e); }
 }
 
 function buildDocFromRow(row, type) {
   switch(type) {
     case 'targets': {
-      const door=allDoors.find(d=>d.code===row.door_code);
-      const rep=allReps.find(r=>r.email===row.rep_email);
-      if (!door||!rep) return null;
-      const id2=`${rep.id}_${door.id}_${row.month}`;
-      return {id:id2, data:{repId:rep.id,doorId:door.id,month:row.month,target:parseFloat(row.target)||0,actual:0}};
+      const door=allDoors.find(d=>String(d.code)===String(row.door_code));
+      const rep=allUsers.find(r=>r.email===row.rep_email);
+      if (!door) return null; // door must exist
+      const repId=rep?.id||row.rep_email||'';
+      const id2=`${repId}_${door.id}_${row.month}`;
+      return {id:id2, data:{repId,doorId:door.id,month:String(row.month),target:parseFloat(row.target)||0,actual:0}};
     }
     case 'msl': {
-      const door=allDoors.find(d=>d.code===row.door_code);
-      const sku=allSKUs.find(s=>s.code===row.sku_code);
+      const door=allDoors.find(d=>String(d.code)===String(row.door_code));
+      const sku=allSKUs.find(s=>String(s.code)===String(row.sku_code));
       if (!door||!sku) return null;
       return {id:`${door.id}_${sku.id}`,data:{doorId:door.id,skuId:sku.id,status:row.status||'missing',lastSale:row.last_sale||'',note:row.note||''}};
     }
     case 'sales': {
-      const door=allDoors.find(d=>d.code===row.door_code);
-      const sku=allSKUs.find(s=>s.code===row.sku_code);
-      const rep=allReps.find(r=>r.email===row.rep_email);
+      const door=allDoors.find(d=>String(d.code)===String(row.door_code));
+      const sku=allSKUs.find(s=>String(s.code)===String(row.sku_code));
+      const rep=allUsers.find(r=>r.email===row.rep_email);
       if (!door||!sku) return null;
-      return {id:null,data:{doorId:door.id,skuId:sku?.id||'',repId:rep?.id||'',qty:parseFloat(row.qty)||0,value:parseFloat(row.value)||0,date:row.date||'',month:(row.date||'').slice(0,7),invoiceNo:row.invoice_no||''}};
+      return {id:null,data:{doorId:door.id,skuId:sku.id,repId:rep?.id||'',qty:parseFloat(row.qty)||0,value:parseFloat(row.value)||0,date:String(row.date||''),month:String(row.date||'').slice(0,7),invoiceNo:String(row.invoice_no||'')}};
     }
     case 'doors': {
-      const rep=allReps.find(r=>r.email===row.rep_email);
-      return {id:row.code,data:{name:row.name,code:row.code,channel:row.channel||'Modern Trade',area:row.area||'',repId:rep?.id||'',repEmail:row.rep_email||''}};
+      // rep match by email — optional, door still imports even if rep not found
+      const rep=allUsers.find(r=>r.email===String(row.rep_email||'').trim());
+      const code=String(row.code||'').trim();
+      if (!code||!row.name) return null;
+      return {id:code, data:{
+        name:String(row.name||'').trim(),
+        code:code,
+        channel:String(row.channel||'Modern Trade').trim(),
+        area:String(row.area||'').trim(),
+        repId:rep?.id||'',
+        repEmail:String(row.rep_email||'').trim()
+      }};
+    }
+    case 'visits': {
+      const door=allDoors.find(d=>String(d.code)===String(row.door_code));
+      const rep=allUsers.find(r=>r.email===row.rep_email);
+      if (!door) return null;
+      return {id:null,data:{doorId:door.id,repId:rep?.id||'',date:String(row.date||''),checkin:String(row.checkin||''),checkout:String(row.checkout||''),status:String(row.status||'completed')}};
     }
     default: return null;
   }
