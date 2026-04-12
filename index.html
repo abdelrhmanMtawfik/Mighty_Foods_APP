@@ -1489,6 +1489,7 @@ async function doImport() {
   let ok=0, err=0, skipped=0;
   const skipReasons=[];
   toast('جاري الاستيراد... ('+importRows.length+' سطر)','info');
+  if(importRows.length>0) console.log('First row keys:', Object.keys(importRows[0]), '| values:', Object.values(importRows[0]).slice(0,4));
 
   if (DEMO) {
     for (const row of importRows) {
@@ -1599,13 +1600,14 @@ function buildDocFromRow(row, type) {
       return {id:null,data:{doorId:door.id,skuId:sku.id,repId:rep?.id||'',qty:parseFloat(row.qty)||0,value:parseFloat(row.value)||0,date:parseDate(getField(row,'date','Date','DATE')),month:parseMonth(getField(row,'date','Date','DATE')),invoiceNo:String(row.invoice_no||'')}};
     }
     case 'skus': {
-      const code=String(row.code||'').trim();
-      if (!code||!row.name) return null;
+      const code=String(getField(row,'code','Code','CODE')||'').trim();
+      const name=String(getField(row,'name','Name','NAME')||'').trim();
+      if (!code) return null;
       return {id:code, data:{
         code:code,
-        name:String(row.name||'').trim(),
-        brand:String(row.brand||'').trim(),
-        price:parseFloat(row.price)||0
+        name:name||code,
+        brand:String(getField(row,'brand','Brand','BRAND')||'').trim(),
+        price:parseFloat(getField(row,'price','Price','PRICE'))||0
       }};
     }
     case 'doors': {
