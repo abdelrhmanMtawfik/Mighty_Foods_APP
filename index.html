@@ -1542,15 +1542,48 @@ async function doImport() {
   } catch(e) { toast('خطأ Firebase: '+e.message,'error'); console.error(e); }
 }
 
+function parseMonth(val) {
+  if (!val && val!==0) return '';
+  if (val instanceof Date) return val.toISOString().slice(0,7);
+  if (typeof val==='number') {
+    const d=new Date(Math.round((val-25569)*86400*1000));
+    return d.toISOString().slice(0,7);
+  }
+  const s=String(val).trim();
+  // Already YYYY-MM or YYYY-MM-DD
+  if (/^\d{4}-\d{2}/.test(s)) return s.slice(0,7);
+  return s.slice(0,7);
+}
+
+function parseDate(val) {
+  if (!val && val!==0) return '';
+  if (val instanceof Date) return val.toISOString().slice(0,10);
+  if (typeof val==='number') {
+    const d=new Date(Math.round((val-25569)*86400*1000));
+    return d.toISOString().slice(0,10);
+  }
+  return String(val).trim().slice(0,10);
+}
+
+function getField(row, ...keys) {
+  for (const k of keys) {
+    if (row[k]!==undefined && row[k]!==null && row[k]!=='') return row[k];
+  }
+  return '';
+}
+
 function buildDocFromRow(row, type) {
   switch(type) {
     case 'targets': {
       const door=allDoors.find(d=>String(d.code)===String(row.door_code));
       const rep=allUsers.find(r=>r.email===row.rep_email);
-      if (!door) return null; // door must exist
+      if (!door) return null;
       const repId=rep?.id||row.rep_email||'';
-      const id2=`${repId}_${door.id}_${row.month}`;
-      return {id:id2, data:{repId,doorId:door.id,month:String(row.month),target:parseFloat(row.target)||0,actual:0}};
+      // Handle month: could be string '2025-03', number 45000 (Excel date serial), or Date object
+      let month=parseMonth(getField(row,'month','Month','MONTH'));
+      if (!month) return null;
+      const id2=`${repId}_${door.id}_${month}`;
+      return {id:id2, data:{repId,doorId:door.id,month,target:parseFloat(row.target)||0,actual:0}};
     }
     case 'msl': {
       const door=allDoors.find(d=>String(d.code)===String(row.door_code));
@@ -1563,7 +1596,7 @@ function buildDocFromRow(row, type) {
       const sku=allSKUs.find(s=>String(s.code)===String(row.sku_code));
       const rep=allUsers.find(r=>r.email===row.rep_email);
       if (!door||!sku) return null;
-      return {id:null,data:{doorId:door.id,skuId:sku.id,repId:rep?.id||'',qty:parseFloat(row.qty)||0,value:parseFloat(row.value)||0,date:String(row.date||''),month:String(row.date||'').slice(0,7),invoiceNo:String(row.invoice_no||'')}};
+      return {id:null,data:{doorId:door.id,skuId:sku.id,repId:rep?.id||'',qty:parseFloat(row.qty)||0,value:parseFloat(row.value)||0,date:parseDate(getField(row,'date','Date','DATE')),month:parseMonth(getField(row,'date','Date','DATE')),invoiceNo:String(row.invoice_no||'')}};
     }
     case 'skus': {
       const code=String(row.code||'').trim();
@@ -1593,7 +1626,7 @@ function buildDocFromRow(row, type) {
       const door=allDoors.find(d=>String(d.code)===String(row.door_code));
       const rep=allUsers.find(r=>r.email===row.rep_email);
       if (!door) return null;
-      return {id:null,data:{doorId:door.id,repId:rep?.id||'',date:String(row.date||''),checkin:String(row.checkin||''),checkout:String(row.checkout||''),status:String(row.status||'completed')}};
+      return {id:null,data:{doorId:door.id,repId:rep?.id||'',date:parseDate(getField(row,'date','Date','DATE')),checkin:String(row.checkin||row.check_in||''),checkout:String(row.checkout||row.check_out||''),status:String(row.status||'completed')}};
     }
     default: return null;
   }
