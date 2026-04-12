@@ -1499,7 +1499,8 @@ async function doImport() {
   }
 
   // Firebase batch write (max 500 per batch)
-  const colName = type==='targets'?'targets':type==='msl'?'msl':type==='doors'?'doors':type==='visits'?'visits':'sales';
+  const colMap={targets:'targets',msl:'msl',doors:'doors',skus:'skus',visits:'visits',sales:'sales'};
+  const colName=colMap[type]||'sales';
   let batch = DB.batch();
   let batchCount = 0;
 
