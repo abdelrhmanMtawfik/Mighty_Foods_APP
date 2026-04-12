@@ -698,10 +698,11 @@ tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
     <div class="mfield">
       <label>نوع البيانات</label>
       <select id="imp-type" onchange="updateImportTemplate()">
-        <option value="sales">مبيعات (Sales Transactions)</option>
+        <option value="doors">عملاء (Doors)</option>
+        <option value="skus">منتجات (SKUs)</option>
         <option value="targets">أهداف (Targets)</option>
         <option value="msl">MSL</option>
-        <option value="doors">عملاء (Doors)</option>
+        <option value="sales">مبيعات (Sales Transactions)</option>
         <option value="visits">زيارات (Visits)</option>
       </select>
     </div>
@@ -1442,10 +1443,11 @@ async function addVisit() {
 //  EXCEL IMPORT
 // ════════════════════════════════════════════════════════
 const TEMPLATES = {
+  doors:   'name | code | channel | area | rep_email',
+  skus:    'code | name | brand | price',
   sales:   'rep_email | door_code | sku_code | qty | value | date (YYYY-MM-DD) | invoice_no',
   targets: 'rep_email | door_code | month (YYYY-MM) | target',
   msl:     'door_code | sku_code | status (present/missing) | last_sale | note',
-  doors:   'name | code | channel | area | rep_email',
   visits:  'rep_email | door_code | date | checkin (HH:MM) | checkout | status',
 };
 
@@ -1561,6 +1563,16 @@ function buildDocFromRow(row, type) {
       const rep=allUsers.find(r=>r.email===row.rep_email);
       if (!door||!sku) return null;
       return {id:null,data:{doorId:door.id,skuId:sku.id,repId:rep?.id||'',qty:parseFloat(row.qty)||0,value:parseFloat(row.value)||0,date:String(row.date||''),month:String(row.date||'').slice(0,7),invoiceNo:String(row.invoice_no||'')}};
+    }
+    case 'skus': {
+      const code=String(row.code||'').trim();
+      if (!code||!row.name) return null;
+      return {id:code, data:{
+        code:code,
+        name:String(row.name||'').trim(),
+        brand:String(row.brand||'').trim(),
+        price:parseFloat(row.price)||0
+      }};
     }
     case 'doors': {
       // rep match by email — optional, door still imports even if rep not found
