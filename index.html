@@ -565,7 +565,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02);color:var(--tx)}
         <tr><td>code <span class="req">*</span></td><td>10004024</td><td>كود فريد لكل Door</td></tr>
         <tr><td>channel <span class="req">*</span></td><td>Modern Trade</td><td>Modern Trade / WS / General Trade / HoReCa</td></tr>
         <tr><td>area</td><td>Cairo</td><td><span class="opt">اختياري</span></td></tr>
-        <tr><td>rep_email</td><td>omar@mighty-foods.com</td><td><span class="opt">اختياري — إيميل المندوب</span></td></tr>
+        <tr><td>rep_email</td><td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8ee1e3effccee3e7e9e6faf7a3e8e1e1eafda0ede1e3">[email&#160;protected]</a></td><td><span class="opt">اختياري — إيميل المندوب</span></td></tr>
       </tbody></table>
     </div>
 
@@ -581,7 +581,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02);color:var(--tx)}
     <div id="imp-struct-targets" class="imp-struct" style="display:none">
       <table><thead><tr><th>اسم العمود</th><th>مثال</th><th>ملاحظة</th></tr></thead><tbody>
         <tr><td>door_code <span class="req">*</span></td><td>10004024</td><td>كود الـ Door — لازم يكون موجود أولاً</td></tr>
-        <tr><td>rep_email <span class="req">*</span></td><td>omar@mighty-foods.com</td><td>إيميل المندوب المسجل</td></tr>
+        <tr><td>rep_email <span class="req">*</span></td><td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="97f8faf6e5d7fafef0ffe3eebaf1f8f8f3e4b9f4f8fa">[email&#160;protected]</a></td><td>إيميل المندوب المسجل</td></tr>
         <tr><td>month <span class="req">*</span></td><td>2025-03</td><td>صيغة YYYY-MM — خلي العمود نصي Text في Excel</td></tr>
         <tr><td>target <span class="req">*</span></td><td>85000</td><td>الهدف بالجنيه</td></tr>
       </tbody></table>
@@ -603,7 +603,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02);color:var(--tx)}
         <tr><td>sku_code <span class="req">*</span></td><td>103010802</td><td>كود الـ SKU</td></tr>
         <tr><td>value <span class="req">*</span></td><td>12500</td><td>قيمة الفاتورة بالجنيه</td></tr>
         <tr><td>date <span class="req">*</span></td><td>2025-03-15</td><td>تاريخ الفاتورة YYYY-MM-DD</td></tr>
-        <tr><td>rep_email</td><td>omar@mighty-foods.com</td><td><span class="opt">اختياري</span></td></tr>
+        <tr><td>rep_email</td><td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b8d7d5d9caf8d5d1dfd0ccc195ded7d7dccb96dbd7d5">[email&#160;protected]</a></td><td><span class="opt">اختياري</span></td></tr>
         <tr><td>qty</td><td>120</td><td><span class="opt">الكمية — اختياري</span></td></tr>
         <tr><td>invoice_no</td><td>INV-2025-001</td><td><span class="opt">رقم الفاتورة — اختياري</span></td></tr>
       </tbody></table>
@@ -612,7 +612,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02);color:var(--tx)}
     <div id="imp-struct-visits" class="imp-struct" style="display:none">
       <table><thead><tr><th>اسم العمود</th><th>مثال</th><th>ملاحظة</th></tr></thead><tbody>
         <tr><td>door_code <span class="req">*</span></td><td>10004024</td><td>كود الـ Door</td></tr>
-        <tr><td>rep_email <span class="req">*</span></td><td>omar@mighty-foods.com</td><td>إيميل المندوب</td></tr>
+        <tr><td>rep_email <span class="req">*</span></td><td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="77181a1605371a1e101f030e5a11181813045914181a">[email&#160;protected]</a></td><td>إيميل المندوب</td></tr>
         <tr><td>date <span class="req">*</span></td><td>2025-03-15</td><td>تاريخ الزيارة YYYY-MM-DD</td></tr>
         <tr><td>checkin</td><td>09:15</td><td><span class="opt">وقت الدخول HH:MM</span></td></tr>
         <tr><td>checkout</td><td>09:50</td><td><span class="opt">وقت الخروج HH:MM</span></td></tr>
@@ -646,7 +646,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02);color:var(--tx)}
 
 <div class="toasts" id="toasts"></div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ════════════════════════════════════════════════════════
 //  FIREBASE — CONFIG HARDCODED
 // ════════════════════════════════════════════════════════
@@ -1268,7 +1268,19 @@ function pDate(v){
   if(!isNaN(n)&&n>40000){const d=new Date(Math.round((n-25569)*86400*1000));return d.toISOString().slice(0,10);}
   return s;
 }
-function fld(row,...keys){for(const k of keys){const v=row[k];if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim();}return'';}
+function fld(row,...keys){
+  // Normalize row keys once — strip whitespace/tabs from column headers
+  const normRow={};
+  Object.keys(row).forEach(k=>{normRow[k.trim().toLowerCase().replace(/\s+/g,'_')]=String(row[k]).trim();});
+  for(const k of keys){
+    // Try exact, then trimmed original, then normalized
+    let v=row[k];
+    if(v===undefined||v===null||String(v).trim()===''){v=row[k.trim()];}
+    if(v===undefined||v===null||String(v).trim()===''){v=normRow[k.trim().toLowerCase().replace(/\s+/g,'_')];}
+    if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim();
+  }
+  return'';
+}
 
 function buildDoc(row,type){
   switch(type){
@@ -1279,8 +1291,8 @@ function buildDoc(row,type){
       return{id:code,data:{code,name:name||code,brand:fld(row,'brand','Brand','BRAND'),price:parseFloat(fld(row,'price','Price','PRICE'))||0}};
     }
     case 'doors':{
-      const code=fld(row,'code','Code','CODE','door_code');
-      const name=fld(row,'name','Name','NAME');
+      const code=fld(row,'code','Code','CODE','door_code','Door Code');
+      const name=fld(row,'name','Name','NAME','door_name','Door Name');
       if(!code)return null;
       const repEmail=fld(row,'rep_email','Rep Email','REP_EMAIL');
       const rep=USERS.find(u=>u.email===repEmail);
@@ -1375,15 +1387,4 @@ function showErr(eid,msg){const el=g(eid);if(el){el.textContent=msg;el.style.dis
 function fmt(n){if(!n)return'0';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return Math.round(n).toLocaleString();}
 function today(){return new Date().toISOString().split('T')[0];}
 function curMonth(){return new Date().toISOString().slice(0,7);}
-function curMonthLabel(){return new Date().toLocaleDateString('ar-EG',{month:'long',year:'numeric'});}
-function daysSince(d){return Math.floor((new Date()-new Date(d))/(1000*60*60*24));}
-function toast(msg,type='info'){
-  const c=g('toasts'),t=document.createElement('div');
-  t.className='toast';
-  t.style.borderColor=type==='success'?'rgba(0,196,122,.4)':type==='error'?'rgba(255,59,92,.4)':type==='warning'?'rgba(255,184,0,.4)':'var(--bo2)';
-  t.style.color=type==='success'?'var(--ok)':type==='error'?'var(--er)':type==='warning'?'var(--wn)':'var(--tx)';
-  t.textContent=msg;c.appendChild(t);setTimeout(()=>t.remove(),4000);
-}
-</script>
-</body>
-</html>
+function curMonthLabel(){return new Date().toLocaleDa
