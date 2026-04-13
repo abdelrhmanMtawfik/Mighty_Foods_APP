@@ -1188,13 +1188,41 @@ async function addSale() {
     await DB.collection('sales').add(sale);
     // Update target actual — try all possible key formats
     const key=`${repId}_${doorId}_${month}`;
+    // Debug: log what we're searching for
+    console.log('Looking for target:', {doorId, month, repId, key});
     const tSnap=await DB.collection('targets')
-      .where('doorId','==',doorId).where('month','==',month).limit(1).get();
+      .where('doorId','==',doorId).where('month','==',month).get();
+    console.log('Targets found by doorId+month:', tSnap.size);
     if(!tSnap.empty){
-      await tSnap.docs[0].ref.update({actual:firebase.firestore.FieldValue.increment(val)});
+      // Update all matching targets (could be multiple reps)
+      for(const doc of tSnap.docs){
+        console.log('Updating target doc:', doc.id, doc.data());
+        await doc.ref.update({actual:firebase.firestore.FieldValue.increment(val)});
+      }
+      toast('✓ تم حفظ الفاتورة وتحديث الهدف','success');
     } else {
-      // Fallback: try doc key directly
-      await DB.collection('targets').doc(key).update({actual:firebase.firestore.FieldValue.increment(val)}).catch(()=>{});
+      // Fallback: try with repId in key
+      console.warn('No target found by query, trying key:', key);
+      const tDoc = await DB.collection('targets').doc(key).get();
+      if(tDoc.exists){
+        await tDoc.ref.update({actual:firebase.firestore.FieldValue.increment(val)});
+        toast('✓ تم حفظ الفاتورة وتحديث الهدف','success');
+      } else {
+        // Try without repId
+        const tSnap2=await DB.collection('targets').where('doorId','==',doorId).get();
+        console.log('All targets for this door:', tSnap2.size, tSnap2.docs.map(d=>d.data().month));
+        if(!tSnap2.empty){
+          const match=tSnap2.docs.find(d=>d.data().month===month);
+          if(match){
+            await match.ref.update({actual:firebase.firestore.FieldValue.increment(val)});
+            toast('✓ تم حفظ الفاتورة وتحديث الهدف','success');
+          } else {
+            toast('✓ تم حفظ الفاتورة — لم يُوجد target لهذا الـ Door في '+month,'warning');
+          }
+        } else {
+          toast('✓ تم حفظ الفاتورة — لا يوجد target لهذا الـ Door','warning');
+        }
+      }
     }
     // Update MSL last sale
     const mKey=`${doorId}_${skuId}`;
