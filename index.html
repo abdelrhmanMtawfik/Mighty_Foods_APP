@@ -2,654 +2,787 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mighty Foods | Sales Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Mighty Foods</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
-  --br:#1443C8;--br2:#1e54e8;--br3:rgba(20,67,200,.15);
-  --ac:#FF6B00;--ok:#00C47A;--er:#FF3B5C;--wn:#FFB800;
-  --bg:#080C18;--bg2:#0D1425;--bg3:#121A2E;
-  --cd:#111827;--cd2:#1a2338;
-  --bo:rgba(255,255,255,.07);--bo2:rgba(20,67,200,.3);
-  --tx:#F0F4FF;--tx2:#8B9DC3;--tx3:#4A5A7A;
-  --r:14px;--rs:9px;
+  --brand:#1443C8;--brand2:#2155E8;--brand3:rgba(20,67,200,.12);
+  --ok:#00C47A;--er:#FF3B5C;--wn:#FFB800;--ac:#FF6B00;
+  --bg:#060B17;--bg2:#0C1220;--bg3:#111826;
+  --card:#121C2E;--card2:#192436;
+  --bo:rgba(255,255,255,.06);--bo2:rgba(20,67,200,.25);
+  --tx:#EEF2FF;--tx2:#7B92C4;--tx3:#3D5080;
+  --r:16px;--rs:12px;--safe-bottom:env(safe-area-inset-bottom,16px);
 }
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:"Cairo",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden}
-.screen{display:none;min-height:100vh}
-.screen.active{display:flex;flex-direction:column}
+html,body{height:100%;overflow:hidden;font-family:'Cairo',sans-serif;background:var(--bg);color:var(--tx);font-size:15px}
 
-/* LOGIN */
-#s-login{align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 0%,rgba(20,67,200,.2) 0%,transparent 60%),var(--bg)}
-.lbox{background:var(--cd);border:1px solid var(--bo2);border-radius:22px;padding:42px 36px;width:100%;max-width:390px;margin:20px}
-.logo-mark{font-family:"Barlow Condensed",sans-serif;font-size:36px;font-weight:900;color:var(--br2);letter-spacing:2px;text-align:center}
-.logo-sub{font-size:11px;color:var(--tx3);letter-spacing:4px;text-transform:uppercase;text-align:center;margin-top:3px;margin-bottom:28px}
-.ltitle{font-size:19px;font-weight:700;text-align:center;margin-bottom:22px}
-.fl{margin-bottom:13px}
-.fl label{display:block;font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
-.fl input,.fl select{width:100%;background:var(--bg2);border:1px solid var(--bo);border-radius:var(--rs);padding:11px 13px;font-family:"Cairo",sans-serif;font-size:14px;color:var(--tx);outline:none;transition:border-color .2s;direction:rtl}
-.fl input:focus,.fl select:focus{border-color:var(--br2);box-shadow:0 0 0 3px rgba(20,67,200,.15)}
-.fl select option{background:var(--bg2)}
-.btn-main{width:100%;background:linear-gradient(135deg,var(--br),var(--br2));border:none;border-radius:var(--rs);padding:13px;font-family:"Cairo",sans-serif;font-size:15px;font-weight:700;color:white;cursor:pointer;transition:all .2s;margin-top:4px}
-.btn-main:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(20,67,200,.4)}
-.btn-main:disabled{opacity:.6;cursor:not-allowed;transform:none}
-.emsg{background:rgba(255,59,92,.1);border:1px solid rgba(255,59,92,.3);border-radius:var(--rs);padding:9px 13px;font-size:13px;color:var(--er);margin-top:10px;display:none;text-align:center}
+/* ── SCREENS ── */
+.screen{display:none;height:100%;flex-direction:column}
+.screen.active{display:flex}
 
-/* APP */
-#s-app{flex-direction:column}
-.topbar{background:rgba(8,12,24,.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--bo);display:flex;align-items:center;justify-content:space-between;padding:0 18px;height:58px;flex-shrink:0;position:sticky;top:0;z-index:100}
-.tlogo{font-family:"Barlow Condensed",sans-serif;font-size:19px;font-weight:900;color:var(--br2);letter-spacing:1px}
-.ubadge{display:flex;align-items:center;gap:8px;background:var(--cd);border:1px solid var(--bo);border-radius:40px;padding:4px 11px 4px 6px}
-.uav{width:28px;height:28px;background:linear-gradient(135deg,var(--br),var(--br2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
-.uname{font-size:12px;font-weight:700}
-.urole{font-size:9px;color:var(--ac);font-weight:700;text-transform:uppercase;letter-spacing:1px}
-.bsm{background:none;border:1px solid var(--bo);border-radius:7px;padding:5px 11px;color:var(--tx2);font-family:"Cairo",sans-serif;font-size:12px;cursor:pointer;transition:all .2s}
-.bsm:hover{border-color:var(--er);color:var(--er)}
-.bsm.info:hover{border-color:var(--br2);color:var(--br2)}
+/* ── LOGIN ── */
+#s-login{background:var(--bg);align-items:center;justify-content:center;padding:24px}
+.login-wrap{width:100%;max-width:380px}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo-icon{width:64px;height:64px;background:linear-gradient(135deg,var(--brand),var(--brand2));border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 12px}
+.login-logo-name{font-size:22px;font-weight:900;letter-spacing:.5px}
+.login-logo-sub{font-size:12px;color:var(--tx3);margin-top:2px}
+.login-card{background:var(--card);border:1px solid var(--bo2);border-radius:22px;padding:28px 24px}
+.fl{margin-bottom:14px}
+.fl label{display:block;font-size:11px;font-weight:700;color:var(--tx3);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:7px}
+.fl input{width:100%;background:var(--bg2);border:1.5px solid var(--bo);border-radius:var(--rs);padding:14px 16px;font-family:'Cairo',sans-serif;font-size:15px;color:var(--tx);outline:none;transition:border-color .2s;direction:ltr;-webkit-appearance:none}
+.fl input:focus{border-color:var(--brand2)}
+.fl input::placeholder{color:var(--tx3);direction:ltr}
+.btn-login{width:100%;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;border-radius:var(--rs);padding:16px;font-family:'Cairo',sans-serif;font-size:16px;font-weight:700;color:white;cursor:pointer;margin-top:6px;-webkit-appearance:none;transition:opacity .2s}
+.btn-login:active{opacity:.85}
+.btn-login:disabled{opacity:.6}
+.emsg{background:rgba(255,59,92,.1);border:1px solid rgba(255,59,92,.3);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--er);margin-top:10px;display:none;text-align:center}
 
-/* NAV */
-.nav{background:var(--bg2);border-bottom:1px solid var(--bo);display:flex;overflow-x:auto;padding:0 10px;gap:2px;flex-shrink:0}
-.nav::-webkit-scrollbar{display:none}
-.ntab{display:flex;align-items:center;gap:6px;padding:12px 14px;font-size:12px;font-weight:700;color:var(--tx2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;user-select:none}
-.ntab:hover{color:var(--tx)}
-.ntab.active{color:var(--br2);border-bottom-color:var(--br2)}
-.ntab .nc{background:var(--er);color:white;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;min-width:16px;text-align:center}
+/* ── APP SHELL ── */
+#s-app{background:var(--bg)}
 
-/* CONTENT */
-.content{padding:18px;max-width:1400px;margin:0 auto;width:100%}
-.ph{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
-.ptitle{font-size:22px;font-weight:900;letter-spacing:-.5px}
-.psub{font-size:12px;color:var(--tx2);margin-top:3px}
-.pacts{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+/* TOP BAR */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--bo);display:flex;align-items:center;justify-content:space-between;padding:12px 16px;padding-top:calc(12px + env(safe-area-inset-top,0px));flex-shrink:0;position:relative;z-index:50}
+.tb-left{display:flex;align-items:center;gap:10px}
+.tb-logo{font-size:16px;font-weight:900;color:var(--brand2);letter-spacing:.5px}
+.tb-page{font-size:13px;color:var(--tx2);font-weight:600}
+.tb-right{display:flex;align-items:center;gap:8px}
+.tb-avatar{width:34px;height:34px;background:linear-gradient(135deg,var(--brand),var(--brand2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;cursor:pointer}
+.tb-menu-btn{width:34px;height:34px;background:var(--card);border:1px solid var(--bo);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;gap:3px;flex-direction:column}
+.tb-menu-btn span{display:block;width:16px;height:2px;background:var(--tx2);border-radius:2px;transition:all .2s}
 
-/* DOOR PANEL */
-.door-panel{background:var(--cd);border:1px solid var(--bo2);border-radius:var(--r);padding:16px;margin-bottom:20px}
-.dp-title{font-size:12px;font-weight:700;color:var(--tx2);margin-bottom:10px}
-.dp-search{width:100%;background:var(--bg2);border:1px solid var(--bo);border-radius:var(--rs);padding:9px 13px;font-family:"Cairo",sans-serif;font-size:13px;color:var(--tx);outline:none;margin-bottom:10px;transition:border-color .2s;direction:rtl}
-.dp-search:focus{border-color:var(--br2)}
-.door-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:7px;max-height:190px;overflow-y:auto}
-.door-btn{background:var(--bg2);border:1px solid var(--bo);border-radius:var(--rs);padding:9px 11px;font-family:"Cairo",sans-serif;font-size:11px;font-weight:700;color:var(--tx2);cursor:pointer;transition:all .2s;text-align:right;line-height:1.4}
-.door-btn:hover{border-color:var(--br2);color:var(--br2)}
-.door-btn.active{background:var(--br3);border-color:var(--br2);color:var(--br2)}
-.door-code{font-size:10px;color:var(--tx3);display:block;margin-top:2px;font-weight:400}
+/* SCROLL AREA */
+.page-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(80px + var(--safe-bottom))}
+.page-scroll::-webkit-scrollbar{display:none}
 
-/* REP BAR */
-.rep-bar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:var(--cd);border:1px solid var(--bo);border-radius:var(--r);padding:12px;margin-bottom:18px}
-.rep-bar label{font-size:11px;font-weight:700;color:var(--tx2);white-space:nowrap}
-.rpill{padding:5px 13px;border-radius:18px;border:1px solid var(--bo);background:none;color:var(--tx2);font-family:"Cairo",sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap}
-.rpill:hover{border-color:var(--br2);color:var(--br2)}
-.rpill.active{background:var(--br);border-color:var(--br);color:white}
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--bo);display:flex;align-items:stretch;padding-bottom:var(--safe-bottom);z-index:100;flex-shrink:0}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;cursor:pointer;transition:all .15s;position:relative;min-width:0}
+.bnav-item .bi{font-size:22px;line-height:1;margin-bottom:3px;transition:transform .2s}
+.bnav-item .bl{font-size:10px;color:var(--tx3);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:100%;text-align:center}
+.bnav-item.active .bi{transform:scale(1.1)}
+.bnav-item.active .bl{color:var(--brand2)}
+.bnav-item.active::before{content:'';position:absolute;top:0;left:20%;right:20%;height:2px;background:var(--brand2);border-radius:0 0 3px 3px}
+.bnav-badge{position:absolute;top:6px;right:calc(50% - 14px);background:var(--er);color:white;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;min-width:16px;text-align:center}
 
-/* KPI GRID */
-.kgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:13px;margin-bottom:20px}
-.kcard{background:var(--cd);border:1px solid var(--bo);border-radius:var(--r);padding:18px 16px;position:relative;overflow:hidden;transition:transform .2s}
-.kcard:hover{transform:translateY(-2px)}
-.kcard::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
-.kcard.bl::before{background:linear-gradient(90deg,var(--br),var(--br2))}
+/* PAGES */
+.page{display:none;min-height:100%}
+.page.active{display:block}
+
+/* SECTION PADDING */
+.px{padding:0 16px}
+.section{padding:16px}
+
+/* PAGE HEADER */
+.page-header{padding:16px 16px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.page-header-left .ptitle{font-size:20px;font-weight:900;letter-spacing:-.3px}
+.page-header-left .psub{font-size:12px;color:var(--tx2);margin-top:2px}
+.page-header-right{display:flex;gap:8px;align-items:center;flex-shrink:0}
+
+/* MONTH PILL */
+.month-sel{background:var(--card);border:1px solid var(--bo);border-radius:20px;padding:6px 12px;font-family:'Cairo',sans-serif;font-size:12px;color:var(--tx2);outline:none;cursor:pointer;-webkit-appearance:none;direction:rtl}
+.month-sel option{background:var(--bg2)}
+
+/* KPI ROW — horizontal scroll on mobile */
+.kpi-row{display:flex;gap:10px;padding:0 16px 16px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.kpi-row::-webkit-scrollbar{display:none}
+.kcard{flex-shrink:0;width:140px;background:var(--card);border:1px solid var(--bo);border-radius:var(--r);padding:14px 12px;position:relative;overflow:hidden}
+.kcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.kcard.bl::before{background:linear-gradient(90deg,var(--brand),var(--brand2))}
+.kcard.gr::before{background:linear-gradient(90deg,#00C47A,#00E090)}
 .kcard.or::before{background:linear-gradient(90deg,var(--ac),#FF9500)}
-.kcard.gr::before{background:linear-gradient(90deg,#00C47A,#00E5A0)}
 .kcard.re::before{background:linear-gradient(90deg,var(--er),#FF6B7A)}
 .kcard.pu::before{background:linear-gradient(90deg,#7C3AED,#A855F7)}
-.klbl{font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
-.kval{font-family:"Barlow Condensed",sans-serif;font-size:32px;font-weight:700;line-height:1;margin-bottom:4px}
-.kmeta{font-size:11px;color:var(--tx2)}
+.klbl{font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px}
+.kval{font-size:26px;font-weight:900;line-height:1;margin-bottom:3px}
+.kmeta{font-size:10px;color:var(--tx2)}
 
-/* PROGRESS */
-.pb-wrap{display:flex;align-items:center;gap:7px;min-width:90px}
-.pb{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
-.pb-fill{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1)}
-.pb-fill.g{background:linear-gradient(90deg,#00C47A,#00E5A0)}
-.pb-fill.o{background:linear-gradient(90deg,var(--wn),#FF9500)}
-.pb-fill.r{background:linear-gradient(90deg,var(--er),#FF6B7A)}
-.pb-fill.b{background:linear-gradient(90deg,var(--br),var(--br2))}
-.ppct{font-size:11px;font-weight:700;min-width:30px}
+/* DOOR SELECTOR */
+.door-panel{margin:0 16px 16px;background:var(--card);border:1px solid var(--bo2);border-radius:var(--r);overflow:hidden}
+.door-panel-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--bo)}
+.door-panel-title{font-size:13px;font-weight:700;color:var(--tx2)}
+.door-cnt{font-size:11px;color:var(--tx3);background:var(--bg2);padding:2px 8px;border-radius:10px}
+.door-search-wrap{padding:10px 12px;border-bottom:1px solid var(--bo)}
+.door-search{width:100%;background:var(--bg2);border:1px solid var(--bo);border-radius:10px;padding:10px 12px;font-family:'Cairo',sans-serif;font-size:14px;color:var(--tx);outline:none;-webkit-appearance:none}
+.door-search::placeholder{color:var(--tx3)}
+.door-list{max-height:200px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.door-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--bo);cursor:pointer;transition:background .15s;-webkit-user-select:none}
+.door-item:last-child{border-bottom:none}
+.door-item:active{background:var(--bg2)}
+.door-item.active{background:var(--brand3)}
+.door-item-left .door-name{font-size:13px;font-weight:700}
+.door-item-left .door-meta{font-size:11px;color:var(--tx2);margin-top:2px}
+.door-item-right{display:flex;align-items:center;gap:6px}
+.door-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--bo);display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.door-item.active .door-check{background:var(--brand2);border-color:var(--brand2)}
 
-/* TABLE */
-.tw{background:var(--cd);border:1px solid var(--bo);border-radius:var(--r);overflow:hidden;margin-bottom:20px}
-.th{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--bo);flex-wrap:wrap;gap:9px}
-.tt{font-size:14px;font-weight:700}
-.tr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.tcnt{font-size:11px;color:var(--tx2);background:var(--bg2);padding:2px 9px;border-radius:16px}
-.srch{background:var(--bg2);border:1px solid var(--bo);border-radius:var(--rs);padding:7px 11px;font-family:"Cairo",sans-serif;font-size:12px;color:var(--tx);outline:none;width:170px;transition:border-color .2s;direction:rtl}
-.srch:focus{border-color:var(--br2)}
-.fsel{background:var(--cd);border:1px solid var(--bo);border-radius:var(--rs);padding:6px 10px;color:var(--tx);font-family:"Cairo",sans-serif;font-size:12px;outline:none;cursor:pointer;direction:rtl}
-.fsel option{background:var(--bg2)}
-.tscroll{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:12px}
-thead th{background:var(--bg2);padding:10px 13px;text-align:right;font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--bo);white-space:nowrap}
-tbody td{padding:11px 13px;border-bottom:1px solid var(--bo);color:var(--tx2);vertical-align:middle}
-tbody tr:last-child td{border-bottom:none}
-tbody tr:hover td{background:rgba(255,255,255,.02);color:var(--tx)}
-.tdb{color:var(--tx);font-weight:700}
-.lrow{text-align:center;padding:36px;color:var(--tx3)}
+/* ACHIEVEMENT CARD */
+.ach-card{margin:0 16px 16px;background:var(--card);border:1px solid var(--bo);border-radius:var(--r);padding:16px}
+.ach-top{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+.ach-ring-wrap{position:relative;flex-shrink:0}
+.ach-ring-wrap svg{transform:rotate(-90deg)}
+.ach-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ach-pct{font-size:18px;font-weight:900;line-height:1}
+.ach-info{flex:1;min-width:0}
+.ach-door{font-size:13px;font-weight:700;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ach-row{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bo)}
+.ach-row:last-child{border-bottom:none}
+.ach-row-label{font-size:11px;color:var(--tx2)}
+.ach-row-val{font-size:13px;font-weight:700}
+.prog-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:10px}
+.prog-fill{height:100%;border-radius:3px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.prog-fill.g{background:linear-gradient(90deg,#00C47A,#00E090)}
+.prog-fill.o{background:linear-gradient(90deg,var(--wn),#FF9500)}
+.prog-fill.r{background:linear-gradient(90deg,var(--er),#FF7080)}
+
+/* REP BAR */
+.rep-bar{padding:0 16px 12px;display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.rep-bar::-webkit-scrollbar{display:none}
+.rpill{flex-shrink:0;padding:7px 14px;border-radius:20px;border:1px solid var(--bo);background:none;color:var(--tx2);font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;-webkit-appearance:none;white-space:nowrap}
+.rpill.active{background:var(--brand);border-color:var(--brand);color:white}
+
+/* CARD LIST */
+.card-list{padding:0 16px}
+.cl-item{background:var(--card);border:1px solid var(--bo);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.cl-item-hd{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;gap:10px}
+.cl-item-hd-left{flex:1;min-width:0}
+.cl-item-title{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cl-item-sub{font-size:11px;color:var(--tx2);margin-top:2px}
+.cl-item-body{padding:0 14px 12px;display:flex;flex-wrap:wrap;gap:8px}
+.cl-stat{flex:1;min-width:calc(50% - 4px);background:var(--bg2);border-radius:10px;padding:8px 10px}
+.cl-stat-label{font-size:10px;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.cl-stat-val{font-size:15px;font-weight:900}
+.pb-mini-wrap{padding:0 14px 12px}
+.pb-mini-label{display:flex;justify-content:space-between;margin-bottom:5px}
+.pb-mini-label span{font-size:11px;color:var(--tx2)}
+.pb-mini{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+
+/* SECTION TITLE */
+.sec-title{font-size:12px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1.2px;padding:0 16px;margin-bottom:10px}
+
+/* MSL ITEM */
+.msl-item{background:var(--card);border:1px solid var(--bo);border-radius:var(--rs);margin:0 16px 8px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+.msl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.msl-dot.ok{background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.msl-dot.miss{background:var(--er);box-shadow:0 0 6px var(--er)}
+.msl-info{flex:1;min-width:0}
+.msl-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.msl-sub{font-size:11px;color:var(--tx2);margin-top:2px}
+.msl-badge{flex-shrink:0}
+
+/* VISIT ITEM */
+.visit-item{background:var(--card);border:1px solid var(--bo);border-radius:var(--rs);margin:0 16px 8px;padding:12px 14px;display:flex;align-items:center;gap:12px}
+.visit-time-col{text-align:center;min-width:44px;flex-shrink:0}
+.visit-time{font-size:14px;font-weight:900;line-height:1}
+.visit-dur{font-size:10px;color:var(--tx2);margin-top:2px}
+.visit-divider{width:1px;height:32px;background:var(--bo);flex-shrink:0}
+.visit-info{flex:1;min-width:0}
+.visit-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.visit-sub{font-size:11px;color:var(--tx2);margin-top:2px}
 
 /* BADGES */
-.bg{display:inline-flex;align-items:center;padding:2px 8px;border-radius:16px;font-size:10px;font-weight:700;white-space:nowrap}
+.bg{display:inline-flex;align-items:center;padding:3px 9px;border-radius:12px;font-size:10px;font-weight:700;white-space:nowrap}
 .bg-s{background:rgba(0,196,122,.15);color:var(--ok)}
 .bg-d{background:rgba(255,59,92,.15);color:var(--er)}
 .bg-w{background:rgba(255,184,0,.15);color:var(--wn)}
-.bg-i{background:rgba(20,67,200,.2);color:#6B9FFF}
+.bg-i{background:rgba(20,67,200,.2);color:#7AA8FF}
 .bg-n{background:rgba(255,255,255,.06);color:var(--tx2)}
 
-/* RING */
-.ring-wrap{background:var(--cd);border:1px solid var(--bo);border-radius:var(--r);padding:20px;display:flex;align-items:center;gap:18px}
+/* BOTTOM SHEET MODAL */
+.bsheet-ov{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:none;align-items:flex-end}
+.bsheet-ov.open{display:flex}
+.bsheet{background:var(--bg2);border-radius:22px 22px 0 0;width:100%;max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:var(--safe-bottom);animation:bsup .3s cubic-bezier(.32,0,.67,0)}
+@keyframes bsup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.bsheet-handle{width:36px;height:4px;background:var(--bo2);border-radius:2px;margin:10px auto 6px}
+.bsheet-title{font-size:17px;font-weight:700;padding:8px 20px 4px;display:flex;align-items:center;gap:10px}
+.bsheet-sub{font-size:12px;color:var(--tx2);padding:0 20px 16px}
+.bsheet-body{padding:0 16px}
+.bfl{margin-bottom:12px}
+.bfl label{display:block;font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.bfl input,.bfl select,.bfl textarea{width:100%;background:var(--bg3);border:1.5px solid var(--bo);border-radius:var(--rs);padding:13px 14px;font-family:'Cairo',sans-serif;font-size:14px;color:var(--tx);outline:none;-webkit-appearance:none;direction:rtl;transition:border-color .2s}
+.bfl input:focus,.bfl select:focus{border-color:var(--brand2)}
+.bfl select option{background:var(--bg2)}
+.bfl input[type=date],.bfl input[type=time],.bfl input[type=month],.bfl input[type=email],.bfl input[type=number],.bfl input[type=password]{direction:ltr;text-align:left}
+.bfl-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bsheet-actions{display:flex;gap:10px;padding:16px;border-top:1px solid var(--bo);margin-top:8px}
+.bcnl{flex:1;background:none;border:1.5px solid var(--bo);border-radius:var(--rs);padding:13px;color:var(--tx2);font-family:'Cairo',sans-serif;font-size:14px;cursor:pointer}
+.bsav{flex:2;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;border-radius:var(--rs);padding:13px;color:white;font-family:'Cairo',sans-serif;font-size:14px;font-weight:700;cursor:pointer}
+.bsav:active{opacity:.85}
+.bsav:disabled{opacity:.6}
 
-/* TWO COL */
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
-@media(max-width:700px){.two-col{grid-template-columns:1fr}}
-
-/* MODAL */
-.mov{position:fixed;inset:0;background:rgba(0,0,0,.78);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:16px}
-.mov.open{display:flex}
-.mbox{background:var(--cd);border:1px solid var(--bo2);border-radius:18px;padding:26px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto}
-.mtitle{font-size:17px;font-weight:700;margin-bottom:5px}
-.msub{font-size:12px;color:var(--tx2);margin-bottom:20px}
-.mfl{margin-bottom:12px}
-.mfl label{display:block;font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
-.mfl input,.mfl select,.mfl textarea{width:100%;background:var(--bg2);border:1px solid var(--bo);border-radius:8px;padding:9px 12px;font-family:"Cairo",sans-serif;font-size:13px;color:var(--tx);outline:none;direction:rtl;transition:border-color .2s}
-.mfl input:focus,.mfl select:focus,.mfl textarea:focus{border-color:var(--br2)}
-.mfl select option{background:var(--bg2)}
-.mfl .hint{font-size:10px;color:var(--tx3);margin-top:3px}
-.macts{display:flex;gap:9px;margin-top:18px}
-.bcnl{flex:1;background:none;border:1px solid var(--bo);border-radius:8px;padding:10px;color:var(--tx2);font-family:"Cairo",sans-serif;font-size:13px;cursor:pointer;transition:all .2s}
-.bcnl:hover{border-color:var(--tx2);color:var(--tx)}
-.bsav{flex:2;background:linear-gradient(135deg,var(--br),var(--br2));border:none;border-radius:8px;padding:10px;color:white;font-family:"Cairo",sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
-.bsav:hover{box-shadow:0 4px 16px rgba(20,67,200,.4)}
-.bsav:disabled{opacity:.6;cursor:not-allowed}
+/* ADMIN GRID */
+.adm-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
+.adm-card{background:var(--card);border:1px solid var(--bo);border-radius:var(--r);padding:16px 12px;cursor:pointer;-webkit-user-select:none;transition:all .15s;text-align:center}
+.adm-card:active{background:var(--card2);transform:scale(.97)}
+.adm-icon{font-size:28px;margin-bottom:8px}
+.adm-t{font-size:13px;font-weight:700;margin-bottom:3px}
+.adm-s{font-size:11px;color:var(--tx2);line-height:1.4}
 
 /* IMPORT */
-.imp-struct{background:var(--bg2);border:1px solid var(--bo);border-radius:var(--rs);overflow:hidden;margin-bottom:14px}
-.imp-struct table{width:100%;border-collapse:collapse;font-size:11px}
-.imp-struct thead th{background:var(--bg3);padding:8px 10px;text-align:right;font-size:10px;color:var(--tx3);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--bo);white-space:nowrap}
-.imp-struct tbody td{padding:7px 10px;border-bottom:1px solid var(--bo);color:var(--tx2);direction:ltr}
-.imp-struct tbody tr:last-child td{border-bottom:none}
-.req{color:var(--er);font-weight:700;margin-right:3px}
-.opt{color:var(--tx3);font-size:9px}
-.upload-zone{border:2px dashed var(--bo2);border-radius:var(--r);padding:28px;text-align:center;cursor:pointer;transition:all .2s;position:relative;margin-bottom:12px}
-.upload-zone:hover,.upload-zone.drag{border-color:var(--br2);background:var(--br3)}
+.imp-type-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:0 16px;margin-bottom:14px}
+.imp-type-btn{background:var(--card);border:1.5px solid var(--bo);border-radius:var(--rs);padding:10px 6px;text-align:center;cursor:pointer;-webkit-user-select:none;transition:all .15s}
+.imp-type-btn:active{opacity:.8}
+.imp-type-btn.active{border-color:var(--brand2);background:var(--brand3)}
+.imp-type-btn .iti{font-size:20px;margin-bottom:4px}
+.imp-type-btn .itl{font-size:10px;font-weight:700;color:var(--tx2)}
+.imp-type-btn.active .itl{color:var(--brand2)}
+.struct-card{margin:0 16px 14px;background:var(--bg3);border:1px solid var(--bo);border-radius:var(--rs);overflow:hidden}
+.struct-row{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;border-bottom:1px solid var(--bo)}
+.struct-row:last-child{border-bottom:none}
+.struct-col{font-size:11px;font-family:monospace;color:var(--brand2);font-weight:700;min-width:100px}
+.struct-ex{font-size:11px;color:var(--tx2);flex:1}
+.struct-req{color:var(--er);font-size:10px;margin-right:3px}
+.upload-zone{margin:0 16px;border:2px dashed var(--bo2);border-radius:var(--r);padding:28px 20px;text-align:center;cursor:pointer;position:relative;-webkit-user-select:none}
 .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.prev-wrap{max-height:200px;overflow-y:auto;border-radius:var(--rs);border:1px solid var(--bo);margin-bottom:12px}
+.upload-zone:active{background:var(--brand3)}
+.upload-icon{font-size:36px;margin-bottom:8px}
+.upload-text{font-size:14px;font-weight:700;margin-bottom:4px}
+.upload-sub{font-size:11px;color:var(--tx2)}
+.prev-scroll{overflow-x:auto;margin:12px 16px 0;border-radius:var(--rs);border:1px solid var(--bo)}
+.prev-scroll table{white-space:nowrap;font-size:11px;border-collapse:collapse;min-width:100%}
+.prev-scroll thead th{background:var(--bg3);padding:8px 10px;text-align:right;color:var(--tx3);font-size:10px;font-weight:700;border-bottom:1px solid var(--bo)}
+.prev-scroll tbody td{padding:7px 10px;border-bottom:1px solid var(--bo);color:var(--tx2)}
+.prev-scroll tbody tr:last-child td{border-bottom:none}
 
-/* ADMIN CARDS */
-.adm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:20px}
-.adm-card{background:var(--cd);border:1px solid var(--bo);border-radius:var(--r);padding:18px;cursor:pointer;transition:all .2s}
-.adm-card:hover{border-color:var(--br2);transform:translateY(-2px)}
-.adm-icon{font-size:26px;margin-bottom:10px}
-.adm-t{font-size:14px;font-weight:700;margin-bottom:3px}
-.adm-s{font-size:11px;color:var(--tx2)}
+/* FILTER BAR */
+.filter-bar{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-pill{flex-shrink:0;padding:7px 12px;background:var(--card);border:1px solid var(--bo);border-radius:20px;font-family:'Cairo',sans-serif;font-size:11px;color:var(--tx2);outline:none;cursor:pointer;-webkit-appearance:none}
+.filter-pill option{background:var(--bg2)}
+.filter-search{flex:1;min-width:150px;background:var(--card);border:1px solid var(--bo);border-radius:20px;padding:7px 14px;font-family:'Cairo',sans-serif;font-size:12px;color:var(--tx);outline:none;-webkit-appearance:none}
+.filter-search::placeholder{color:var(--tx3)}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 24px;color:var(--tx3)}
+.empty-icon{font-size:44px;margin-bottom:12px}
+.empty-txt{font-size:14px;color:var(--tx2);margin-bottom:6px;font-weight:600}
+.empty-sub{font-size:12px}
+
+/* USER SHEET */
+.user-sheet-info{padding:16px 20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--bo)}
+.us-avatar{width:48px;height:48px;background:linear-gradient(135deg,var(--brand),var(--brand2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0}
+.us-name{font-size:16px;font-weight:700}
+.us-email{font-size:12px;color:var(--tx2);margin-top:2px}
+.us-role{font-size:10px;color:var(--ac);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+.us-action{padding:12px 16px;border-bottom:1px solid var(--bo);display:flex;align-items:center;gap:12px;cursor:pointer;-webkit-user-select:none}
+.us-action:active{background:var(--bg3)}
+.us-action-icon{font-size:18px;width:36px;text-align:center}
+.us-action-text{font-size:14px;font-weight:600}
 
 /* TOAST */
-.toasts{position:fixed;bottom:18px;left:18px;z-index:9999;display:flex;flex-direction:column;gap:6px}
-.toast{background:var(--cd2);border:1px solid var(--bo2);border-radius:10px;padding:10px 14px;font-size:12px;font-weight:700;min-width:210px;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:tin .3s ease}
-@keyframes tin{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:640px){.content{padding:12px}.kgrid{grid-template-columns:repeat(2,1fr)}.ntab{padding:10px 10px;font-size:11px}}
+.toasts{position:fixed;top:calc(env(safe-area-inset-top,0px) + 16px);left:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:var(--card2);border:1px solid var(--bo2);border-radius:14px;padding:12px 16px;font-size:13px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.4);animation:tin .3s ease;pointer-events:auto;display:flex;align-items:center;gap:10px}
+.toast-icon{font-size:16px;flex-shrink:0}
+@keyframes tin{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+
+/* UTILS */
+.hidden{display:none!important}
+.divider{height:1px;background:var(--bo);margin:8px 0}
+.load-row{text-align:center;padding:32px;color:var(--tx3);font-size:13px}
 </style>
 </head>
 <body>
 
 <!-- LOGIN -->
-<div id="s-login" class="screen active">
-  <div class="lbox">
-    <div class="logo-mark">MIGHTY FOODS</div>
-    <div class="logo-sub">Sales Portal</div>
-    <div class="ltitle">تسجيل الدخول</div>
-    <div class="fl"><label>البريد الإلكتروني</label><input type="email" id="l-email" placeholder="email@mighty-foods.com" style="direction:ltr" autocomplete="email"></div>
-    <div class="fl"><label>كلمة المرور</label><input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password"></div>
-    <button class="btn-main" id="l-btn" >دخول</button>
-    <div class="emsg" id="l-err"></div>
+<div id="s-login" class="screen">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <div class="login-logo-icon">⚡</div>
+      <div class="login-logo-name">Mighty Foods</div>
+      <div class="login-logo-sub">Sales Portal</div>
+    </div>
+    <div class="login-card">
+      <div class="fl">
+        <label>البريد الإلكتروني</label>
+        <input type="email" id="l-email" placeholder="email@mighty-foods.com" autocomplete="email" inputmode="email">
+      </div>
+      <div class="fl">
+        <label>كلمة المرور</label>
+        <input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn-login" id="l-btn">دخول</button>
+      <div class="emsg" id="l-err"></div>
+    </div>
   </div>
 </div>
 
 <!-- APP -->
 <div id="s-app" class="screen">
   <div class="topbar">
-    <div class="tlogo">MIGHTY FOODS</div>
-    <div style="display:flex;align-items:center;gap:10px">
-      <div class="ubadge">
-        <div class="uav" id="t-av">M</div>
-        <div><div class="uname" id="t-name">—</div><div class="urole" id="t-role">—</div></div>
-      </div>
-      <button class="bsm" onclick="logout()">خروج</button>
+    <div class="tb-left">
+      <div class="tb-logo">⚡ MF</div>
+      <div class="tb-page" id="tb-page">الرئيسية</div>
+    </div>
+    <div class="tb-right">
+      <div class="tb-avatar" id="tb-av" onclick="openUserSheet()">M</div>
     </div>
   </div>
 
-  <div class="nav">
-    <div class="ntab active" data-tab="dash" onclick="goTab(this)">📊 الرئيسية</div>
-    <div class="ntab" data-tab="targets" onclick="goTab(this)">🎯 الأهداف</div>
-    <div class="ntab" data-tab="msl" onclick="goTab(this)">📋 MSL</div>
-    <div class="ntab" data-tab="visits" onclick="goTab(this)">📍 الزيارات</div>
-    <div class="ntab" data-tab="zero" onclick="goTab(this)">⚠️ Zero Sales</div>
-    <div class="ntab" data-tab="admin" id="tab-admin" onclick="goTab(this)" style="display:none">⚙️ الإدارة</div>
-  </div>
-
-  <div class="content">
+  <div class="page-scroll" id="page-scroll">
 
     <!-- DASHBOARD -->
-    <div id="p-dash" class="page">
-      <div class="ph">
-        <div><div class="ptitle" id="d-title">لوحة التحكم</div><div class="psub" id="d-sub">اختر Door لعرض بياناته</div></div>
-        <div class="pacts">
-          <select class="fsel" id="d-month" onchange="loadDash()"></select>
-          <button class="bsm info" onclick="loadDash()">↻ تحديث</button>
+    <div id="p-dash" class="page active">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="ptitle" id="d-title">الرئيسية</div>
+          <div class="psub" id="d-sub">مرحباً 👋</div>
+        </div>
+        <div class="page-header-right">
+          <select class="month-sel" id="d-month" onchange="loadDash()"></select>
         </div>
       </div>
-      <div class="rep-bar" id="mgr-bar" style="display:none">
-        <label>المندوب:</label><div id="mgr-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+
+      <!-- Rep bar (manager only) -->
+      <div id="mgr-bar" class="rep-bar hidden"></div>
+
+      <!-- KPI row -->
+      <div class="kpi-row">
+        <div class="kcard bl"><div class="klbl">المبيعات</div><div class="kval" id="d-sales">—</div><div class="kmeta" id="d-sales-m">اختر Door</div></div>
+        <div class="kcard or"><div class="klbl">الهدف</div><div class="kval" id="d-tgt">—</div><div class="kmeta" id="d-tgt-m">شهري</div></div>
+        <div class="kcard gr"><div class="klbl">الإنجاز</div><div class="kval" id="d-ach">—%</div><div class="kmeta" id="d-ach-m">—</div></div>
+        <div class="kcard re"><div class="klbl">Zero MSL</div><div class="kval" id="d-zero">—</div><div class="kmeta">SKU مفقود</div></div>
       </div>
+
+      <!-- Achievement card -->
+      <div class="ach-card">
+        <div class="ach-top">
+          <div class="ach-ring-wrap">
+            <svg width="90" height="90">
+              <circle fill="none" stroke="var(--bg3)" stroke-width="8" cx="45" cy="45" r="37"/>
+              <circle fill="none" stroke="url(#rg)" stroke-width="8" stroke-linecap="round"
+                cx="45" cy="45" r="37" stroke-dasharray="232.5" stroke-dashoffset="232.5"
+                id="d-ring" style="transition:stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)"/>
+              <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#1443C8"/><stop offset="100%" stop-color="#FF6B00"/>
+              </linearGradient></defs>
+              <text x="45" y="45" text-anchor="middle" dominant-baseline="middle"
+                fill="white" font-family="Cairo,sans-serif" font-size="14" font-weight="700"
+                transform="rotate(90,45,45)" id="ring-txt">0%</text>
+            </svg>
+          </div>
+          <div class="ach-info">
+            <div class="ach-door" id="ring-door">اختر Door</div>
+            <div class="ach-row"><span class="ach-row-label">الهدف</span><span class="ach-row-val" id="ring-t">—</span></div>
+            <div class="ach-row"><span class="ach-row-label">المحقق</span><span class="ach-row-val" style="color:var(--ok)" id="ring-a">—</span></div>
+            <div class="ach-row"><span class="ach-row-label">الفجوة</span><span class="ach-row-val" style="color:var(--er)" id="ring-g">—</span></div>
+          </div>
+        </div>
+        <div class="prog-bar"><div class="prog-fill g" id="ring-bar" style="width:0%"></div></div>
+      </div>
+
+      <!-- Door selector -->
       <div class="door-panel">
-        <div class="dp-title">اختر الـ Door / العميل</div>
-        <input class="dp-search" id="dp-srch" placeholder="ابحث بالاسم أو الكود..." oninput="filterDoors()">
-        <div class="door-grid" id="door-grid"><div class="lrow" style="grid-column:1/-1">جاري التحميل...</div></div>
-      </div>
-      <div class="kgrid">
-        <div class="kcard bl"><div class="klbl">المبيعات الفعلية</div><div class="kval" id="d-sales">—</div><div class="kmeta" id="d-sales-m">—</div></div>
-        <div class="kcard or"><div class="klbl">الهدف الشهري</div><div class="kval" id="d-tgt">—</div><div class="kmeta" id="d-tgt-m">—</div></div>
-        <div class="kcard gr"><div class="klbl">نسبة الإنجاز</div><div class="kval" id="d-ach">—%</div><div class="kmeta" id="d-ach-m">—</div></div>
-        <div class="kcard re"><div class="klbl">Zero MSL Items</div><div class="kval" id="d-zero">—</div><div class="kmeta">SKU مفقود</div></div>
-      </div>
-      <div class="two-col">
-        <div class="ring-wrap">
-          <svg width="110" height="110" style="transform:rotate(-90deg)">
-            <circle fill="none" stroke="var(--bg3)" stroke-width="8" cx="55" cy="55" r="46"/>
-            <circle fill="none" stroke="url(#rg)" stroke-width="8" stroke-linecap="round" cx="55" cy="55" r="46"
-              stroke-dasharray="289" stroke-dashoffset="289" id="d-ring" style="transition:stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)"/>
-            <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#1443C8"/><stop offset="100%" stop-color="#FF6B00"/></linearGradient></defs>
-            <text x="55" y="55" text-anchor="middle" dominant-baseline="middle" fill="white"
-              font-family="Barlow Condensed,sans-serif" font-size="17" font-weight="700"
-              transform="rotate(90,55,55)" id="ring-txt">0%</text>
-          </svg>
-          <div>
-            <div style="font-size:15px;font-weight:700;margin-bottom:4px">إنجاز الـ Door</div>
-            <div style="font-size:11px;color:var(--tx2);margin-bottom:10px" id="ring-door">لم يتم الاختيار</div>
-            <div style="font-size:12px;color:var(--tx2)">الهدف: <span id="ring-t" style="color:var(--tx);font-weight:700">—</span></div>
-            <div style="font-size:12px;color:var(--tx2);margin-top:3px">المحقق: <span id="ring-a" style="color:var(--ok);font-weight:700">—</span></div>
-            <div style="font-size:12px;color:var(--tx2);margin-top:3px">الفجوة: <span id="ring-g" style="color:var(--er);font-weight:700">—</span></div>
-          </div>
+        <div class="door-panel-hd">
+          <div class="door-panel-title">اختر الـ Door</div>
+          <span class="door-cnt" id="door-cnt">0</span>
         </div>
-        <div class="tw" style="margin:0">
-          <div class="th"><div class="tt">MSL الـ Door المحدد</div><span class="tcnt" id="dmsl-cnt">—</span></div>
-          <div style="max-height:220px;overflow-y:auto">
-            <table><thead><tr><th>المنتج</th><th>الحالة</th><th>آخر بيع</th></tr></thead>
-            <tbody id="dmsl-body"><tr><td colspan="3" class="lrow">اختر Door أولاً</td></tr></tbody></table>
-          </div>
+        <div class="door-search-wrap">
+          <input class="door-search" id="dp-srch" placeholder="🔍  ابحث بالاسم أو الكود..." oninput="filterDoors()">
+        </div>
+        <div class="door-list" id="door-list">
+          <div class="load-row">جاري التحميل...</div>
         </div>
       </div>
+
+      <!-- MSL for selected door -->
+      <div class="sec-title" id="dmsl-title" style="display:none">MSL — <span id="dmsl-door-name"></span></div>
+      <div id="dmsl-list"></div>
+      <div style="height:8px"></div>
     </div>
 
     <!-- TARGETS -->
-    <div id="p-targets" class="page" style="display:none">
-      <div class="ph">
-        <div><div class="ptitle">الأهداف</div><div class="psub">Target لكل Door — لكل مندوب — لكل شهر</div></div>
-        <div class="pacts">
-          <select class="fsel" id="tgt-month" onchange="loadTargets()"></select>
-          <button class="bsm info" onclick="loadTargets()">↻ تحديث</button>
+    <div id="p-targets" class="page">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="ptitle">الأهداف</div>
+          <div class="psub">Target لكل Door</div>
+        </div>
+        <div class="page-header-right">
+          <select class="month-sel" id="tgt-month" onchange="loadTargets()"></select>
         </div>
       </div>
-      <div class="rep-bar" id="tgt-rep-bar" style="display:none">
-        <label>المندوب:</label><div id="tgt-rep-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      <div id="tgt-rep-bar" class="rep-bar hidden"></div>
+      <div class="kpi-row">
+        <div class="kcard bl"><div class="klbl">إجمالي الهدف</div><div class="kval" id="tgt-total">—</div><div class="kmeta">ج.م</div></div>
+        <div class="kcard gr"><div class="klbl">المحقق</div><div class="kval" id="tgt-actual">—</div><div class="kmeta">ج.م</div></div>
+        <div class="kcard or"><div class="klbl">متوسط الإنجاز</div><div class="kval" id="tgt-avg">—%</div><div class="kmeta">—</div></div>
+        <div class="kcard re"><div class="klbl">تحت الهدف</div><div class="kval" id="tgt-under">—</div><div class="kmeta">Door</div></div>
       </div>
-      <div class="kgrid" style="grid-template-columns:repeat(4,1fr)">
-        <div class="kcard bl"><div class="klbl">إجمالي الأهداف</div><div class="kval" id="tgt-total">—</div><div class="kmeta">ج.م</div></div>
-        <div class="kcard gr"><div class="klbl">إجمالي المحقق</div><div class="kval" id="tgt-actual">—</div><div class="kmeta">ج.م</div></div>
-        <div class="kcard or"><div class="klbl">متوسط الإنجاز</div><div class="kval" id="tgt-avg">—%</div><div class="kmeta">على كل الـ Doors</div></div>
-        <div class="kcard re"><div class="klbl">Doors تحت الهدف</div><div class="kval" id="tgt-under">—</div><div class="kmeta">أقل من 80%</div></div>
+      <div class="filter-bar">
+        <input class="filter-search" id="tgt-srch" placeholder="بحث..." oninput="renderTgt(TARGETS)">
       </div>
-      <div class="tw">
-        <div class="th">
-          <div class="tt">تفاصيل الأهداف</div>
-          <div class="tr"><span class="tcnt" id="tgt-cnt">0</span><input class="srch" id="tgt-srch" placeholder="بحث..." oninput="filterTbl('tgt')"></div>
-        </div>
-        <div class="tscroll">
-          <table><thead><tr><th>الـ Door</th><th>الكود</th><th>Channel</th><th>المندوب</th><th>الهدف</th><th>المحقق</th><th>الإنجاز</th><th>الفجوة</th><th>الحالة</th></tr></thead>
-          <tbody id="tgt-body"><tr><td colspan="9" class="lrow">جاري التحميل...</td></tr></tbody></table>
-        </div>
-      </div>
+      <div id="tgt-list" class="card-list"><div class="load-row">جاري التحميل...</div></div>
     </div>
 
     <!-- MSL -->
-    <div id="p-msl" class="page" style="display:none">
-      <div class="ph">
-        <div><div class="ptitle">MSL</div><div class="psub">Must Stock List — توافر المنتجات في كل Door</div></div>
-        <div class="pacts"><button class="bsm info" onclick="loadMSL()">↻ تحديث</button></div>
-      </div>
-      <div class="kgrid" style="grid-template-columns:repeat(3,1fr)">
-        <div class="kcard gr"><div class="klbl">متوافر</div><div class="kval" id="msl-ok">—</div><div class="kmeta">SKU حاضر</div></div>
-        <div class="kcard re"><div class="klbl">مفقود</div><div class="kval" id="msl-miss">—</div><div class="kmeta">SKU غائب</div></div>
-        <div class="kcard or"><div class="klbl">Compliance</div><div class="kval" id="msl-pct">—%</div><div class="kmeta">نسبة التوافر</div></div>
-      </div>
-      <div class="tw">
-        <div class="th">
-          <div class="tt">تفاصيل MSL</div>
-          <div class="tr">
-            <select class="fsel" id="msl-door-f" onchange="filterMSL()"><option value="">كل الـ Doors</option></select>
-            <select class="fsel" id="msl-stat-f" onchange="filterMSL()"><option value="">الكل</option><option value="present">متوافر</option><option value="missing">مفقود</option></select>
-            <input class="srch" id="msl-srch" placeholder="بحث..." oninput="filterMSL()">
-          </div>
+    <div id="p-msl" class="page">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="ptitle">MSL</div>
+          <div class="psub">Must Stock List</div>
         </div>
-        <div class="tscroll">
-          <table><thead><tr><th>الـ Door</th><th>Channel</th><th>كود SKU</th><th>المنتج</th><th>الحالة</th><th>آخر بيع</th><th>ملاحظة</th></tr></thead>
-          <tbody id="msl-body"><tr><td colspan="7" class="lrow">جاري التحميل...</td></tr></tbody></table>
+        <div class="page-header-right">
+          <button onclick="loadMSL()" style="background:var(--card);border:1px solid var(--bo);border-radius:10px;padding:7px 12px;color:var(--tx2);font-family:Cairo,sans-serif;font-size:12px;cursor:pointer">↻</button>
         </div>
       </div>
+      <div class="kpi-row">
+        <div class="kcard gr"><div class="klbl">متوافر</div><div class="kval" id="msl-ok">—</div><div class="kmeta">SKU</div></div>
+        <div class="kcard re"><div class="klbl">مفقود</div><div class="kval" id="msl-miss">—</div><div class="kmeta">SKU</div></div>
+        <div class="kcard or"><div class="klbl">Compliance</div><div class="kval" id="msl-pct">—%</div><div class="kmeta">التوافر</div></div>
+      </div>
+      <div class="filter-bar">
+        <select class="filter-pill" id="msl-door-f" onchange="filterMSL()"><option value="">كل الـ Doors</option></select>
+        <select class="filter-pill" id="msl-stat-f" onchange="filterMSL()"><option value="">الكل</option><option value="present">متوافر</option><option value="missing">مفقود</option></select>
+        <input class="filter-search" id="msl-srch" placeholder="بحث..." oninput="filterMSL()" style="min-width:100px">
+      </div>
+      <div id="msl-list"><div class="load-row">جاري التحميل...</div></div>
     </div>
 
     <!-- VISITS -->
-    <div id="p-visits" class="page" style="display:none">
-      <div class="ph">
-        <div><div class="ptitle">الزيارات</div><div class="psub">Check-in / Check-out</div></div>
-        <div class="pacts">
-          <input type="date" class="fsel" id="vis-date" onchange="loadVisits()">
-          <button class="bsm info" onclick="loadVisits()">↻ تحديث</button>
+    <div id="p-visits" class="page">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="ptitle">الزيارات</div>
+          <div class="psub">Check-in / Check-out</div>
+        </div>
+        <div class="page-header-right">
+          <input type="date" class="month-sel" id="vis-date" onchange="loadVisits()">
         </div>
       </div>
-      <div class="rep-bar" id="vis-rep-bar" style="display:none">
-        <label>المندوب:</label><div id="vis-rep-btns" style="display:flex;gap:6px;flex-wrap:wrap"></div>
-      </div>
-      <div class="kgrid" style="grid-template-columns:repeat(3,1fr)">
-        <div class="kcard gr"><div class="klbl">إجمالي الزيارات</div><div class="kval" id="v-tot">—</div><div class="kmeta">—</div></div>
+      <div id="vis-rep-bar" class="rep-bar hidden"></div>
+      <div class="kpi-row">
+        <div class="kcard gr"><div class="klbl">الزيارات</div><div class="kval" id="v-tot">—</div><div class="kmeta">اليوم</div></div>
         <div class="kcard bl"><div class="klbl">متوسط المدة</div><div class="kval" id="v-avg">—</div><div class="kmeta">دقيقة</div></div>
-        <div class="kcard or"><div class="klbl">Doors تمت زيارتها</div><div class="kval" id="v-doors">—</div><div class="kmeta">عميل مختلف</div></div>
+        <div class="kcard or"><div class="klbl">Doors</div><div class="kval" id="v-doors">—</div><div class="kmeta">مختلف</div></div>
       </div>
-      <div class="tw">
-        <div class="th">
-          <div class="tt">سجل الزيارات</div>
-          <div class="tr"><span class="tcnt" id="vis-cnt">0</span><input class="srch" id="vis-srch" placeholder="بحث..." oninput="filterTbl('vis')"></div>
-        </div>
-        <div class="tscroll">
-          <table><thead><tr><th>الـ Door</th><th>الكود</th><th>المندوب</th><th>التاريخ</th><th>Check-in</th><th>Check-out</th><th>المدة (د)</th><th>الحالة</th></tr></thead>
-          <tbody id="vis-body"><tr><td colspan="8" class="lrow">جاري التحميل...</td></tr></tbody></table>
-        </div>
+      <div class="filter-bar">
+        <input class="filter-search" id="vis-srch" placeholder="بحث..." oninput="renderVis(VISITS)">
       </div>
+      <div id="vis-list"><div class="load-row">جاري التحميل...</div></div>
     </div>
 
-    <!-- ZERO SALES -->
-    <div id="p-zero" class="page" style="display:none">
-      <div class="ph">
-        <div><div class="ptitle">Zero Sales</div><div class="psub">SKUs في MSL بدون مبيعات</div></div>
-        <div class="pacts">
-          <select class="fsel" id="zero-month" onchange="loadZero()"></select>
-          <button class="bsm info" onclick="loadZero()">↻ تحديث</button>
+    <!-- ZERO -->
+    <div id="p-zero" class="page">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="ptitle">Zero Sales</div>
+          <div class="psub">SKUs في MSL بدون مبيعات</div>
+        </div>
+        <div class="page-header-right">
+          <select class="month-sel" id="zero-month" onchange="loadZero()"></select>
         </div>
       </div>
-      <div class="kgrid" style="grid-template-columns:repeat(3,1fr)">
-        <div class="kcard re"><div class="klbl">Zero Items</div><div class="kval" id="z-cnt">—</div><div class="kmeta">SKU بدون مبيعات</div></div>
+      <div class="kpi-row">
+        <div class="kcard re"><div class="klbl">Zero Items</div><div class="kval" id="z-cnt">—</div><div class="kmeta">SKU</div></div>
         <div class="kcard or"><div class="klbl">Doors متأثرة</div><div class="kval" id="z-doors">—</div><div class="kmeta">—</div></div>
-        <div class="kcard pu"><div class="klbl">% من MSL</div><div class="kval" id="z-pct">—%</div><div class="kmeta">نسبة الـ Zero</div></div>
+        <div class="kcard pu"><div class="klbl">% من MSL</div><div class="kval" id="z-pct">—%</div><div class="kmeta">—</div></div>
       </div>
-      <div class="tw">
-        <div class="th">
-          <div class="tt">تفاصيل Zero Sales</div>
-          <div class="tr">
-            <select class="fsel" id="z-door-f" onchange="filterZero()"><option value="">كل الـ Doors</option></select>
-            <input class="srch" id="z-srch" placeholder="بحث..." oninput="filterZero()">
-          </div>
-        </div>
-        <div class="tscroll">
-          <table><thead><tr><th>الـ Door</th><th>Channel</th><th>كود SKU</th><th>المنتج</th><th>آخر بيع</th><th>أيام</th><th>الأولوية</th></tr></thead>
-          <tbody id="z-body"><tr><td colspan="7" class="lrow">جاري التحميل...</td></tr></tbody></table>
-        </div>
+      <div class="filter-bar">
+        <select class="filter-pill" id="z-door-f" onchange="filterZero()"><option value="">كل الـ Doors</option></select>
+        <input class="filter-search" id="z-srch" placeholder="بحث..." oninput="filterZero()" style="min-width:100px">
       </div>
+      <div id="z-list"><div class="load-row">جاري التحميل...</div></div>
     </div>
 
     <!-- ADMIN -->
-    <div id="p-admin" class="page" style="display:none">
-      <div class="ph"><div><div class="ptitle">الإدارة</div><div class="psub">إدارة البيانات الأساسية</div></div></div>
+    <div id="p-admin" class="page">
+      <div class="page-header">
+        <div class="page-header-left">
+          <div class="ptitle">الإدارة</div>
+          <div class="psub">إدارة البيانات</div>
+        </div>
+      </div>
       <div class="adm-grid">
-        <div class="adm-card" onclick="openM('m-user')"><div class="adm-icon">👤</div><div class="adm-t">إضافة مستخدم</div><div class="adm-s">مندوب جديد بإيميل وكلمة سر</div></div>
-        <div class="adm-card" onclick="openM('m-door')"><div class="adm-icon">🚪</div><div class="adm-t">إضافة Door</div><div class="adm-s">عميل / outlet جديد</div></div>
-        <div class="adm-card" onclick="openM('m-sku')"><div class="adm-icon">📦</div><div class="adm-t">إضافة SKU</div><div class="adm-s">منتج جديد</div></div>
-        <div class="adm-card" onclick="openM('m-target')"><div class="adm-icon">🎯</div><div class="adm-t">تحديد Target</div><div class="adm-s">هدف لـ Door × مندوب × شهر</div></div>
-        <div class="adm-card" onclick="openM('m-msl')"><div class="adm-icon">📋</div><div class="adm-t">تحديد MSL</div><div class="adm-s">ربط SKU بـ Door</div></div>
-        <div class="adm-card" onclick="openM('m-sale')"><div class="adm-icon">💰</div><div class="adm-t">إدخال مبيعات</div><div class="adm-s">Invoice لـ Door + SKU</div></div>
-        <div class="adm-card" onclick="openM('m-visit')"><div class="adm-icon">📍</div><div class="adm-t">تسجيل زيارة</div><div class="adm-s">Check-in / Check-out</div></div>
-        <div class="adm-card" onclick="openM('m-import')"><div class="adm-icon">📁</div><div class="adm-t">استيراد Excel</div><div class="adm-s">رفع بيانات دفعة واحدة</div></div>
+        <div class="adm-card" onclick="openBS('bs-user')"><div class="adm-icon">👤</div><div class="adm-t">مستخدم</div><div class="adm-s">إضافة مندوب</div></div>
+        <div class="adm-card" onclick="openBS('bs-door')"><div class="adm-icon">🚪</div><div class="adm-t">Door</div><div class="adm-s">إضافة عميل</div></div>
+        <div class="adm-card" onclick="openBS('bs-sku')"><div class="adm-icon">📦</div><div class="adm-t">SKU</div><div class="adm-s">إضافة منتج</div></div>
+        <div class="adm-card" onclick="openBS('bs-target')"><div class="adm-icon">🎯</div><div class="adm-t">Target</div><div class="adm-s">تحديد هدف</div></div>
+        <div class="adm-card" onclick="openBS('bs-msl')"><div class="adm-icon">📋</div><div class="adm-t">MSL</div><div class="adm-s">ربط SKU بـ Door</div></div>
+        <div class="adm-card" onclick="openBS('bs-sale')"><div class="adm-icon">💰</div><div class="adm-t">مبيعات</div><div class="adm-s">إدخال فاتورة</div></div>
+        <div class="adm-card" onclick="openBS('bs-visit')"><div class="adm-icon">📍</div><div class="adm-t">زيارة</div><div class="adm-s">Check-in/out</div></div>
+        <div class="adm-card" onclick="openBS('bs-import')"><div class="adm-icon">📁</div><div class="adm-t">استيراد</div><div class="adm-s">رفع Excel</div></div>
       </div>
-      <div class="two-col">
-        <div class="tw" style="margin:0">
-          <div class="th"><div class="tt">الـ Doors</div><span class="tcnt" id="adm-d-cnt">—</span></div>
-          <div style="max-height:260px;overflow-y:auto">
-            <table><thead><tr><th>الاسم</th><th>الكود</th><th>Channel</th><th>المندوب</th></tr></thead>
-            <tbody id="adm-d-body"><tr><td colspan="4" class="lrow">جاري التحميل...</td></tr></tbody></table>
-          </div>
-        </div>
-        <div class="tw" style="margin:0">
-          <div class="th"><div class="tt">المستخدمون</div><span class="tcnt" id="adm-u-cnt">—</span></div>
-          <div style="max-height:260px;overflow-y:auto">
-            <table><thead><tr><th>الاسم</th><th>الإيميل</th><th>الدور</th></tr></thead>
-            <tbody id="adm-u-body"><tr><td colspan="3" class="lrow">جاري التحميل...</td></tr></tbody></table>
-          </div>
-        </div>
+      <div style="height:16px"></div>
+      <div class="sec-title">الـ Doors</div>
+      <div id="adm-doors-list" class="card-list"><div class="load-row">جاري التحميل...</div></div>
+    </div>
+
+  </div><!-- /page-scroll -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="bnav-item active" data-tab="dash" onclick="goTab(this)"><div class="bi">📊</div><div class="bl">الرئيسية</div></div>
+    <div class="bnav-item" data-tab="targets" onclick="goTab(this)"><div class="bi">🎯</div><div class="bl">الأهداف</div></div>
+    <div class="bnav-item" data-tab="msl" onclick="goTab(this)"><div class="bi">📋</div><div class="bl">MSL</div></div>
+    <div class="bnav-item" data-tab="visits" onclick="goTab(this)"><div class="bi">📍</div><div class="bl">زيارات</div></div>
+    <div class="bnav-item" data-tab="zero" onclick="goTab(this)"><div class="bi">⚠️</div><div class="bl">Zero</div></div>
+    <div class="bnav-item hidden" id="bnav-admin" data-tab="admin" onclick="goTab(this)"><div class="bi">⚙️</div><div class="bl">إدارة</div></div>
+  </div>
+</div>
+
+<!-- BOTTOM SHEETS -->
+<!-- User Sheet (profile/logout) -->
+<div class="bsheet-ov" id="bs-user-profile">
+  <div class="bsheet">
+    <div class="bsheet-handle"></div>
+    <div class="user-sheet-info">
+      <div class="us-avatar" id="us-av">M</div>
+      <div><div class="us-name" id="us-name">—</div><div class="us-email" id="us-email">—</div><div class="us-role" id="us-role">—</div></div>
+    </div>
+    <div class="us-action" onclick="closeBS('bs-user-profile');openBS('bs-user')">
+      <div class="us-action-icon">👤</div><div class="us-action-text">إضافة مستخدم جديد</div>
+    </div>
+    <div class="us-action" style="color:var(--er)" onclick="logout()">
+      <div class="us-action-icon">🚪</div><div class="us-action-text" style="color:var(--er)">تسجيل الخروج</div>
+    </div>
+    <div style="height:8px"></div>
+  </div>
+</div>
+
+<!-- Add User -->
+<div class="bsheet-ov" id="bs-user">
+  <div class="bsheet">
+    <div class="bsheet-handle"></div>
+    <div class="bsheet-title">👤 إضافة مستخدم</div>
+    <div class="bsheet-sub">يُنشأ في Firebase Auth تلقائياً</div>
+    <div class="bsheet-body">
+      <div class="bfl"><label>الاسم *</label><input id="mu-name" placeholder="أحمد محمود"></div>
+      <div class="bfl"><label>الإيميل *</label><input id="mu-email" type="email" placeholder="ahmed@mighty-foods.com" inputmode="email"></div>
+      <div class="bfl"><label>كلمة المرور *</label><input id="mu-pass" type="password" placeholder="6+ أحرف"></div>
+      <div class="bfl"><label>الدور</label>
+        <select id="mu-role"><option value="rep">مندوب مبيعات</option><option value="manager">مدير</option></select></div>
+    </div>
+    <div class="bsheet-actions">
+      <button class="bcnl" onclick="closeBS('bs-user')">إلغاء</button>
+      <button class="bsav" onclick="addUser()">إضافة</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Door -->
+<div class="bsheet-ov" id="bs-door">
+  <div class="bsheet">
+    <div class="bsheet-handle"></div>
+    <div class="bsheet-title">🚪 إضافة Door</div>
+    <div class="bsheet-body">
+      <div class="bfl-row">
+        <div class="bfl"><label>الاسم *</label><input id="md-name" placeholder="Carrefour Maadi"></div>
+        <div class="bfl"><label>الكود *</label><input id="md-code" placeholder="10004024" inputmode="numeric"></div>
+      </div>
+      <div class="bfl-row">
+        <div class="bfl"><label>Channel</label>
+          <select id="md-chan"><option>Modern Trade</option><option>WS</option><option>General Trade</option><option>HoReCa</option><option>Pharmacy</option><option>Online</option></select></div>
+        <div class="bfl"><label>المنطقة</label><input id="md-area" placeholder="Cairo"></div>
+      </div>
+      <div class="bfl"><label>المندوب</label><select id="md-rep"><option value="">اختر...</option></select></div>
+    </div>
+    <div class="bsheet-actions">
+      <button class="bcnl" onclick="closeBS('bs-door')">إلغاء</button>
+      <button class="bsav" onclick="addDoor()">إضافة</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add SKU -->
+<div class="bsheet-ov" id="bs-sku">
+  <div class="bsheet">
+    <div class="bsheet-handle"></div>
+    <div class="bsheet-title">📦 إضافة SKU</div>
+    <div class="bsheet-body">
+      <div class="bfl-row">
+        <div class="bfl"><label>الكود *</label><input id="ms-code" placeholder="103010802" inputmode="numeric"></div>
+        <div class="bfl"><label>البراند</label><input id="ms-brand" placeholder="Popz"></div>
+      </div>
+      <div class="bfl"><label>اسم المنتج *</label><input id="ms-name" placeholder="بوبز ذرة فشار..."></div>
+      <div class="bfl"><label>السعر (ج.م)</label><input id="ms-price" type="number" placeholder="0.00" inputmode="decimal"></div>
+    </div>
+    <div class="bsheet-actions">
+      <button class="bcnl" onclick="closeBS('bs-sku')">إلغاء</button>
+      <button class="bsav" onclick="addSKU()">إضافة</button>
+    </div>
+  </div>
+</div>
+
+<!-- Target -->
+<div class="bsheet-ov" id="bs-target">
+  <div class="bsheet">
+    <div class="bsheet-handle"></div>
+    <div class="bsheet-title">🎯 تحديد Target</div>
+    <div class="bsheet-body">
+      <div class="bfl"><label>المندوب *</label><select id="mt-rep"><option value="">اختر...</option></select></div>
+      <div class="bfl"><label>الـ Door *</label><select id="mt-door"><option value="">اختر...</option></select></div>
+      <div class="bfl-row">
+        <div class="bfl"><label>الشهر *</label><input id="mt-month" type="month"></div>
+        <div class="bfl"><label>الهدف (ج.م) *</label><input id="mt-val" type="number" placeholder="50000" inputmode="decimal"></div>
       </div>
     </div>
-
-  </div><!-- /content -->
-</div><!-- /app -->
-
-<!-- ══ MODALS ══ -->
-<div class="mov" id="m-user">
-  <div class="mbox">
-    <div class="mtitle">👤 إضافة مستخدم</div><div class="msub">يُنشأ في Firebase Auth + Firestore تلقائياً</div>
-    <div class="mfl"><label>الاسم <span class="req">*</span></label><input id="mu-name" placeholder="أحمد محمود"></div>
-    <div class="mfl"><label>البريد الإلكتروني <span class="req">*</span></label><input id="mu-email" type="email" placeholder="ahmed@mighty-foods.com" style="direction:ltr"></div>
-    <div class="mfl"><label>كلمة المرور <span class="req">*</span></label><input id="mu-pass" type="password" placeholder="6+ حروف/أرقام"></div>
-    <div class="mfl"><label>الدور <span class="req">*</span></label>
-      <select id="mu-role"><option value="rep">مندوب مبيعات</option><option value="manager">مدير</option></select></div>
-    <div class="macts"><button class="bcnl" onclick="closeM('m-user')">إلغاء</button><button class="bsav" onclick="addUser()">إضافة المستخدم</button></div>
+    <div class="bsheet-actions">
+      <button class="bcnl" onclick="closeBS('bs-target')">إلغاء</button>
+      <button class="bsav" onclick="setTarget()">حفظ</button>
+    </div>
   </div>
 </div>
 
-<div class="mov" id="m-door">
-  <div class="mbox">
-    <div class="mtitle">🚪 إضافة Door</div><div class="msub">عميل / outlet</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="mfl"><label>اسم الـ Door <span class="req">*</span></label><input id="md-name" placeholder="Carrefour Maadi"></div>
-      <div class="mfl"><label>الكود <span class="req">*</span></label><input id="md-code" placeholder="10004024" style="direction:ltr"></div>
+<!-- MSL -->
+<div class="bsheet-ov" id="bs-msl">
+  <div class="bsheet">
+    <div class="bsheet-handle"></div>
+    <div class="bsheet-title">📋 تحديد MSL</div>
+    <div class="bsheet-body">
+      <div class="bfl"><label>الـ Door *</label><select id="mm-door"><option value="">اختر...</option></select></div>
+      <div class="bfl"><label>SKU *</label><select id="mm-sku"><option value="">اختر...</option></select></div>
+      <div class="bfl-row">
+        <div class="bfl"><label>الحالة</label>
+          <select id="mm-stat"><option value="present">✓ متوافر</option><option value="missing">✗ مفقود</option></select></div>
+        <div class="bfl"><label>آخر بيع</label><input id="mm-last" type="date"></div>
+      </div>
+      <div class="bfl"><label>ملاحظة</label><input id="mm-note" placeholder="سبب الغياب..."></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="mfl"><label>Channel <span class="req">*</span></label>
-        <select id="md-chan"><option>Modern Trade</option><option>WS</option><option>General Trade</option><option>HoReCa</option><option>Pharmacy</option><option>Online</option></select></div>
-      <div class="mfl"><label>المنطقة</label><input id="md-area" placeholder="Cairo"></div>
+    <div class="bsheet-actions">
+      <button class="bcnl" onclick="closeBS('bs-msl')">إلغاء</button>
+      <button class="bsav" onclick="setMSL()">حفظ</button>
     </div>
-    <div class="mfl"><label>المندوب المسؤول</label><select id="md-rep"><option value="">اختر مندوب...</option></select></div>
-    <div class="macts"><button class="bcnl" onclick="closeM('m-door')">إلغاء</button><button class="bsav" onclick="addDoor()">إضافة</button></div>
   </div>
 </div>
 
-<div class="mov" id="m-sku">
-  <div class="mbox">
-    <div class="mtitle">📦 إضافة SKU</div><div class="msub">منتج جديد</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="mfl"><label>كود SKU <span class="req">*</span></label><input id="ms-code" placeholder="MF-001" style="direction:ltr"></div>
-      <div class="mfl"><label>البراند</label><input id="ms-brand" placeholder="Chips"></div>
+<!-- Sale -->
+<div class="bsheet-ov" id="bs-sale">
+  <div class="bsheet">
+    <div class="bsheet-handle"></div>
+    <div class="bsheet-title">💰 إدخال مبيعات</div>
+    <div class="bsheet-body">
+      <div class="bfl"><label>المندوب</label><select id="msa-rep"><option value="">اختر...</option></select></div>
+      <div class="bfl"><label>الـ Door *</label><select id="msa-door"><option value="">اختر...</option></select></div>
+      <div class="bfl"><label>SKU *</label><select id="msa-sku"><option value="">اختر...</option></select></div>
+      <div class="bfl-row">
+        <div class="bfl"><label>الفاتورة</label><input id="msa-inv" placeholder="INV-001" inputmode="numeric"></div>
+        <div class="bfl"><label>الكمية</label><input id="msa-qty" type="number" placeholder="0" inputmode="numeric"></div>
+      </div>
+      <div class="bfl-row">
+        <div class="bfl"><label>القيمة (ج.م) *</label><input id="msa-val" type="number" placeholder="0" inputmode="decimal"></div>
+        <div class="bfl"><label>التاريخ *</label><input id="msa-date" type="date"></div>
+      </div>
     </div>
-    <div class="mfl"><label>اسم المنتج <span class="req">*</span></label><input id="ms-name" placeholder="Mighty Chips Classic 100g"></div>
-    <div class="mfl"><label>السعر (ج.م)</label><input id="ms-price" type="number" placeholder="0.00"></div>
-    <div class="macts"><button class="bcnl" onclick="closeM('m-sku')">إلغاء</button><button class="bsav" onclick="addSKU()">إضافة</button></div>
+    <div class="bsheet-actions">
+      <button class="bcnl" onclick="closeBS('bs-sale')">إلغاء</button>
+      <button class="bsav" onclick="addSale()">حفظ</button>
+    </div>
   </div>
 </div>
 
-<div class="mov" id="m-target">
-  <div class="mbox">
-    <div class="mtitle">🎯 تحديد Target</div><div class="msub">هدف شهري لـ Door معين</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="mfl"><label>المندوب <span class="req">*</span></label><select id="mt-rep"><option value="">اختر...</option></select></div>
-      <div class="mfl"><label>الـ Door <span class="req">*</span></label><select id="mt-door"><option value="">اختر...</option></select></div>
+<!-- Visit -->
+<div class="bsheet-ov" id="bs-visit">
+  <div class="bsheet">
+    <div class="bsheet-handle"></div>
+    <div class="bsheet-title">📍 تسجيل زيارة</div>
+    <div class="bsheet-body">
+      <div class="bfl"><label>المندوب</label><select id="mv-rep"><option value="">اختر...</option></select></div>
+      <div class="bfl"><label>الـ Door *</label><select id="mv-door"><option value="">اختر...</option></select></div>
+      <div class="bfl"><label>التاريخ *</label><input id="mv-date" type="date"></div>
+      <div class="bfl-row">
+        <div class="bfl"><label>Check-in</label><input id="mv-in" type="time"></div>
+        <div class="bfl"><label>Check-out</label><input id="mv-out" type="time"></div>
+      </div>
+      <div class="bfl"><label>الحالة</label>
+        <select id="mv-stat"><option value="completed">مكتملة</option><option value="in-progress">جارية</option><option value="skipped">لم تتم</option></select></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="mfl"><label>الشهر <span class="req">*</span></label><input id="mt-month" type="month"></div>
-      <div class="mfl"><label>الهدف (ج.م) <span class="req">*</span></label><input id="mt-val" type="number" placeholder="50000"></div>
+    <div class="bsheet-actions">
+      <button class="bcnl" onclick="closeBS('bs-visit')">إلغاء</button>
+      <button class="bsav" onclick="addVisit()">حفظ</button>
     </div>
-    <div class="macts"><button class="bcnl" onclick="closeM('m-target')">إلغاء</button><button class="bsav" onclick="setTarget()">حفظ</button></div>
   </div>
 </div>
 
-<div class="mov" id="m-msl">
-  <div class="mbox">
-    <div class="mtitle">📋 تحديد MSL</div><div class="msub">ربط SKU إلزامي بـ Door</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="mfl"><label>الـ Door <span class="req">*</span></label><select id="mm-door"><option value="">اختر...</option></select></div>
-      <div class="mfl"><label>SKU <span class="req">*</span></label><select id="mm-sku"><option value="">اختر...</option></select></div>
+<!-- Import -->
+<div class="bsheet-ov" id="bs-import">
+  <div class="bsheet">
+    <div class="bsheet-handle"></div>
+    <div class="bsheet-title">📁 استيراد Excel</div>
+    <div class="bsheet-sub">اختر النوع ثم ارفع الملف</div>
+    <div class="imp-type-grid">
+      <div class="imp-type-btn active" data-itype="doors" onclick="setImpType(this)"><div class="iti">🚪</div><div class="itl">Doors</div></div>
+      <div class="imp-type-btn" data-itype="skus" onclick="setImpType(this)"><div class="iti">📦</div><div class="itl">SKUs</div></div>
+      <div class="imp-type-btn" data-itype="targets" onclick="setImpType(this)"><div class="iti">🎯</div><div class="itl">Targets</div></div>
+      <div class="imp-type-btn" data-itype="msl" onclick="setImpType(this)"><div class="iti">📋</div><div class="itl">MSL</div></div>
+      <div class="imp-type-btn" data-itype="sales" onclick="setImpType(this)"><div class="iti">💰</div><div class="itl">Sales</div></div>
+      <div class="imp-type-btn" data-itype="visits" onclick="setImpType(this)"><div class="iti">📍</div><div class="itl">Visits</div></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="mfl"><label>الحالة</label>
-        <select id="mm-stat"><option value="present">✓ متوافر</option><option value="missing">✗ مفقود</option></select></div>
-      <div class="mfl"><label>آخر بيع</label><input id="mm-last" type="date"></div>
+    <!-- Structure tables -->
+    <div id="imp-struct-doors" class="struct-card">
+      <div class="struct-row"><div class="struct-col">name <span class="struct-req">*</span></div><div class="struct-ex">Carrefour Maadi</div></div>
+      <div class="struct-row"><div class="struct-col">code <span class="struct-req">*</span></div><div class="struct-ex">10004024</div></div>
+      <div class="struct-row"><div class="struct-col">channel <span class="struct-req">*</span></div><div class="struct-ex">Modern Trade / WS</div></div>
+      <div class="struct-row"><div class="struct-col">area</div><div class="struct-ex">Cairo <span style="color:var(--tx3)">(اختياري)</span></div></div>
+      <div class="struct-row"><div class="struct-col">rep_email</div><div class="struct-ex">omar@mighty-foods.com <span style="color:var(--tx3)">(اختياري)</span></div></div>
     </div>
-    <div class="mfl"><label>ملاحظة</label><input id="mm-note" placeholder="سبب الغياب..."></div>
-    <div class="macts"><button class="bcnl" onclick="closeM('m-msl')">إلغاء</button><button class="bsav" onclick="setMSL()">حفظ</button></div>
-  </div>
-</div>
-
-<div class="mov" id="m-sale">
-  <div class="mbox">
-    <div class="mtitle">💰 إدخال مبيعات</div><div class="msub">Invoice لـ Door + SKU</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="mfl"><label>المندوب <span class="req">*</span></label><select id="msa-rep"><option value="">اختر...</option></select></div>
-      <div class="mfl"><label>الـ Door <span class="req">*</span></label><select id="msa-door"><option value="">اختر...</option></select></div>
+    <div id="imp-struct-skus" class="struct-card hidden">
+      <div class="struct-row"><div class="struct-col">code <span class="struct-req">*</span></div><div class="struct-ex">103010802</div></div>
+      <div class="struct-row"><div class="struct-col">name <span class="struct-req">*</span></div><div class="struct-ex">بوبز ذرة فشار 90 جرام</div></div>
+      <div class="struct-row"><div class="struct-col">brand</div><div class="struct-ex">Popz <span style="color:var(--tx3)">(اختياري)</span></div></div>
+      <div class="struct-row"><div class="struct-col">price</div><div class="struct-ex">15.50 <span style="color:var(--tx3)">(اختياري)</span></div></div>
     </div>
-    <div class="mfl"><label>SKU <span class="req">*</span></label><select id="msa-sku"><option value="">اختر...</option></select></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-      <div class="mfl"><label>رقم الفاتورة</label><input id="msa-inv" placeholder="INV-001" style="direction:ltr"></div>
-      <div class="mfl"><label>الكمية</label><input id="msa-qty" type="number" placeholder="0"></div>
-      <div class="mfl"><label>القيمة (ج.م) <span class="req">*</span></label><input id="msa-val" type="number" placeholder="0"></div>
+    <div id="imp-struct-targets" class="struct-card hidden">
+      <div class="struct-row"><div class="struct-col">door_code <span class="struct-req">*</span></div><div class="struct-ex">10004024</div></div>
+      <div class="struct-row"><div class="struct-col">rep_email <span class="struct-req">*</span></div><div class="struct-ex">omar@mighty-foods.com</div></div>
+      <div class="struct-row"><div class="struct-col">month <span class="struct-req">*</span></div><div class="struct-ex">2026-03 <span style="color:var(--tx3)">(نصي Text)</span></div></div>
+      <div class="struct-row"><div class="struct-col">target <span class="struct-req">*</span></div><div class="struct-ex">85000</div></div>
     </div>
-    <div class="mfl"><label>التاريخ <span class="req">*</span></label><input id="msa-date" type="date"></div>
-    <div class="macts"><button class="bcnl" onclick="closeM('m-sale')">إلغاء</button><button class="bsav" onclick="addSale()">حفظ الفاتورة</button></div>
-  </div>
-</div>
-
-<div class="mov" id="m-visit">
-  <div class="mbox">
-    <div class="mtitle">📍 تسجيل زيارة</div><div class="msub">Check-in / Check-out</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="mfl"><label>المندوب <span class="req">*</span></label><select id="mv-rep"><option value="">اختر...</option></select></div>
-      <div class="mfl"><label>الـ Door <span class="req">*</span></label><select id="mv-door"><option value="">اختر...</option></select></div>
+    <div id="imp-struct-msl" class="struct-card hidden">
+      <div class="struct-row"><div class="struct-col">door_code <span class="struct-req">*</span></div><div class="struct-ex">10004024</div></div>
+      <div class="struct-row"><div class="struct-col">sku_code <span class="struct-req">*</span></div><div class="struct-ex">103010802</div></div>
+      <div class="struct-row"><div class="struct-col">status</div><div class="struct-ex">present / missing</div></div>
+      <div class="struct-row"><div class="struct-col">last_sale</div><div class="struct-ex">2026-03-15</div></div>
+      <div class="struct-row"><div class="struct-col">note</div><div class="struct-ex">OOS من المورد</div></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-      <div class="mfl"><label>التاريخ <span class="req">*</span></label><input id="mv-date" type="date"></div>
-      <div class="mfl"><label>Check-in</label><input id="mv-in" type="time"></div>
-      <div class="mfl"><label>Check-out</label><input id="mv-out" type="time"></div>
+    <div id="imp-struct-sales" class="struct-card hidden">
+      <div class="struct-row"><div class="struct-col">door_code <span class="struct-req">*</span></div><div class="struct-ex">10004024</div></div>
+      <div class="struct-row"><div class="struct-col">sku_code <span class="struct-req">*</span></div><div class="struct-ex">103010802</div></div>
+      <div class="struct-row"><div class="struct-col">value <span class="struct-req">*</span></div><div class="struct-ex">12500</div></div>
+      <div class="struct-row"><div class="struct-col">date <span class="struct-req">*</span></div><div class="struct-ex">2026-03-15</div></div>
+      <div class="struct-row"><div class="struct-col">rep_email</div><div class="struct-ex">omar@mighty-foods.com</div></div>
+      <div class="struct-row"><div class="struct-col">qty</div><div class="struct-ex">120</div></div>
+      <div class="struct-row"><div class="struct-col">invoice_no</div><div class="struct-ex">INV-001</div></div>
     </div>
-    <div class="mfl"><label>الحالة</label>
-      <select id="mv-stat"><option value="completed">مكتملة</option><option value="in-progress">جارية</option><option value="skipped">لم تتم</option></select></div>
-    <div class="macts"><button class="bcnl" onclick="closeM('m-visit')">إلغاء</button><button class="bsav" onclick="addVisit()">حفظ</button></div>
-  </div>
-</div>
-
-<!-- IMPORT MODAL -->
-<div class="mov" id="m-import">
-  <div class="mbox" style="max-width:700px">
-    <div class="mtitle">📁 استيراد Excel / CSV</div>
-    <div class="msub">اختر نوع البيانات — الجدول يوضح الأعمدة المطلوبة بالظبط</div>
-    <div class="mfl">
-      <label>نوع البيانات</label>
-      <select id="imp-type" onchange="updateImpUI()">
-        <option value="doors">🚪 عملاء (Doors)</option>
-        <option value="skus">📦 منتجات (SKUs)</option>
-        <option value="targets">🎯 أهداف (Targets)</option>
-        <option value="msl">📋 MSL</option>
-        <option value="sales">💰 مبيعات (Sales)</option>
-        <option value="visits">📍 زيارات (Visits)</option>
-      </select>
+    <div id="imp-struct-visits" class="struct-card hidden">
+      <div class="struct-row"><div class="struct-col">door_code <span class="struct-req">*</span></div><div class="struct-ex">10004024</div></div>
+      <div class="struct-row"><div class="struct-col">rep_email <span class="struct-req">*</span></div><div class="struct-ex">omar@mighty-foods.com</div></div>
+      <div class="struct-row"><div class="struct-col">date <span class="struct-req">*</span></div><div class="struct-ex">2026-03-15</div></div>
+      <div class="struct-row"><div class="struct-col">checkin</div><div class="struct-ex">09:15</div></div>
+      <div class="struct-row"><div class="struct-col">checkout</div><div class="struct-ex">09:50</div></div>
     </div>
-
-    <!-- Structure tables per type -->
-    <div id="imp-struct-doors" class="imp-struct">
-      <table><thead><tr><th>اسم العمود</th><th>مثال</th><th>ملاحظة</th></tr></thead><tbody>
-        <tr><td>name <span class="req">*</span></td><td>Carrefour Maadi</td><td>اسم العميل</td></tr>
-        <tr><td>code <span class="req">*</span></td><td>10004024</td><td>كود فريد لكل Door</td></tr>
-        <tr><td>channel <span class="req">*</span></td><td>Modern Trade</td><td>Modern Trade / WS / General Trade / HoReCa</td></tr>
-        <tr><td>area</td><td>Cairo</td><td><span class="opt">اختياري</span></td></tr>
-        <tr><td>rep_email</td><td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="8ee1e3effccee3e7e9e6faf7a3e8e1e1eafda0ede1e3">[email&#160;protected]</a></td><td><span class="opt">اختياري — إيميل المندوب</span></td></tr>
-      </tbody></table>
-    </div>
-
-    <div id="imp-struct-skus" class="imp-struct" style="display:none">
-      <table><thead><tr><th>اسم العمود</th><th>مثال</th><th>ملاحظة</th></tr></thead><tbody>
-        <tr><td>code <span class="req">*</span></td><td>103010802</td><td>كود فريد للمنتج</td></tr>
-        <tr><td>name <span class="req">*</span></td><td>بوبز ذره فشار 90 جرام</td><td>اسم المنتج كامل</td></tr>
-        <tr><td>brand</td><td>Popz</td><td><span class="opt">اختياري</span></td></tr>
-        <tr><td>price</td><td>15.50</td><td><span class="opt">اختياري — السعر بالجنيه</span></td></tr>
-      </tbody></table>
-    </div>
-
-    <div id="imp-struct-targets" class="imp-struct" style="display:none">
-      <table><thead><tr><th>اسم العمود</th><th>مثال</th><th>ملاحظة</th></tr></thead><tbody>
-        <tr><td>door_code <span class="req">*</span></td><td>10004024</td><td>كود الـ Door — لازم يكون موجود أولاً</td></tr>
-        <tr><td>rep_email <span class="req">*</span></td><td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="97f8faf6e5d7fafef0ffe3eebaf1f8f8f3e4b9f4f8fa">[email&#160;protected]</a></td><td>إيميل المندوب المسجل</td></tr>
-        <tr><td>month <span class="req">*</span></td><td>2025-03</td><td>صيغة YYYY-MM — خلي العمود نصي Text في Excel</td></tr>
-        <tr><td>target <span class="req">*</span></td><td>85000</td><td>الهدف بالجنيه</td></tr>
-      </tbody></table>
-    </div>
-
-    <div id="imp-struct-msl" class="imp-struct" style="display:none">
-      <table><thead><tr><th>اسم العمود</th><th>مثال</th><th>ملاحظة</th></tr></thead><tbody>
-        <tr><td>door_code <span class="req">*</span></td><td>10004024</td><td>كود الـ Door — لازم يكون موجود</td></tr>
-        <tr><td>sku_code <span class="req">*</span></td><td>103010802</td><td>كود الـ SKU — لازم يكون موجود</td></tr>
-        <tr><td>status</td><td>present</td><td><span class="opt">present أو missing — default: missing</span></td></tr>
-        <tr><td>last_sale</td><td>2025-03-15</td><td><span class="opt">تاريخ آخر بيع YYYY-MM-DD</span></td></tr>
-        <tr><td>note</td><td>OOS من المورد</td><td><span class="opt">ملاحظة اختيارية</span></td></tr>
-      </tbody></table>
-    </div>
-
-    <div id="imp-struct-sales" class="imp-struct" style="display:none">
-      <table><thead><tr><th>اسم العمود</th><th>مثال</th><th>ملاحظة</th></tr></thead><tbody>
-        <tr><td>door_code <span class="req">*</span></td><td>10004024</td><td>كود الـ Door</td></tr>
-        <tr><td>sku_code <span class="req">*</span></td><td>103010802</td><td>كود الـ SKU</td></tr>
-        <tr><td>value <span class="req">*</span></td><td>12500</td><td>قيمة الفاتورة بالجنيه</td></tr>
-        <tr><td>date <span class="req">*</span></td><td>2025-03-15</td><td>تاريخ الفاتورة YYYY-MM-DD</td></tr>
-        <tr><td>rep_email</td><td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b8d7d5d9caf8d5d1dfd0ccc195ded7d7dccb96dbd7d5">[email&#160;protected]</a></td><td><span class="opt">اختياري</span></td></tr>
-        <tr><td>qty</td><td>120</td><td><span class="opt">الكمية — اختياري</span></td></tr>
-        <tr><td>invoice_no</td><td>INV-2025-001</td><td><span class="opt">رقم الفاتورة — اختياري</span></td></tr>
-      </tbody></table>
-    </div>
-
-    <div id="imp-struct-visits" class="imp-struct" style="display:none">
-      <table><thead><tr><th>اسم العمود</th><th>مثال</th><th>ملاحظة</th></tr></thead><tbody>
-        <tr><td>door_code <span class="req">*</span></td><td>10004024</td><td>كود الـ Door</td></tr>
-        <tr><td>rep_email <span class="req">*</span></td><td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="77181a1605371a1e101f030e5a11181813045914181a">[email&#160;protected]</a></td><td>إيميل المندوب</td></tr>
-        <tr><td>date <span class="req">*</span></td><td>2025-03-15</td><td>تاريخ الزيارة YYYY-MM-DD</td></tr>
-        <tr><td>checkin</td><td>09:15</td><td><span class="opt">وقت الدخول HH:MM</span></td></tr>
-        <tr><td>checkout</td><td>09:50</td><td><span class="opt">وقت الخروج HH:MM</span></td></tr>
-        <tr><td>status</td><td>completed</td><td><span class="opt">completed / in-progress / skipped</span></td></tr>
-      </tbody></table>
-    </div>
-
+    <div style="height:12px"></div>
     <div class="upload-zone" id="upzone">
       <input type="file" accept=".xlsx,.xls,.csv" onchange="handleFile(event)">
-      <div style="font-size:28px;margin-bottom:8px">📂</div>
-      <div style="font-size:13px;font-weight:700;margin-bottom:4px">اسحب الملف هنا أو اضغط للاختيار</div>
-      <div style="font-size:11px;color:var(--tx2)">.xlsx / .xls / .csv</div>
+      <div class="upload-icon">📂</div>
+      <div class="upload-text">اضغط لاختيار الملف</div>
+      <div class="upload-sub">.xlsx / .xls / .csv</div>
     </div>
-
-    <div id="imp-prev" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <div id="imp-prev" class="hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px">
         <span style="font-size:13px;font-weight:700" id="imp-cnt">0 سطر</span>
-        <div style="display:flex;gap:8px;align-items:center">
-          <span id="imp-info" style="font-size:11px;color:var(--tx2)"></span>
-          <button class="bsav" style="width:auto;padding:7px 16px;border-radius:8px" onclick="doImport()">استيراد الآن</button>
-        </div>
+        <button class="bsav" style="width:auto;padding:9px 20px;border-radius:10px" onclick="doImport()">استيراد الآن</button>
       </div>
-      <div class="prev-wrap" id="imp-prev-tbl"></div>
+      <div class="prev-scroll" id="imp-prev-tbl"></div>
     </div>
-
-    <div class="macts" style="margin-top:12px">
-      <button class="bcnl" onclick="closeM('m-import')">إغلاق</button>
-    </div>
+    <div style="height:16px"></div>
   </div>
 </div>
 
 <div class="toasts" id="toasts"></div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-// ════════════════════════════════════════════════════════
-//  FIREBASE — CONFIG HARDCODED
-// ════════════════════════════════════════════════════════
+<script>
+// ══════════════════════════════════════════
+//  FIREBASE CONFIG
+// ══════════════════════════════════════════
 const firebaseConfig = {
   apiKey: "AIzaSyBsNm6AarRNb8onverD7Om9c89N3v2ABxs",
   authDomain: "mighty-db49e.firebaseapp.com",
@@ -664,117 +797,105 @@ try {
   firebase.initializeApp(firebaseConfig);
   AUTH = firebase.auth();
   DB   = firebase.firestore();
+} catch(e) { console.error('Firebase init:', e); }
 
-} catch(e) {
-  console.error('Firebase init error:', e);
-  document.getElementById('l-err').textContent = 'خطأ في الاتصال: ' + e.message;
-  document.getElementById('l-err').style.display = 'block';
-}
-
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  STATE
-// ════════════════════════════════════════════════════════
-let ME = null, PROFILE = null;
+// ══════════════════════════════════════════
+let ME=null, PROFILE=null;
 let DOORS=[], SKUS=[], USERS=[], REPS=[];
-let TARGETS=[], MSL=[], SALES=[], VISITS=[];
+let TARGETS=[], MSL=[], VISITS=[];
 let selDoor=null, selRep=null;
 let impRows=[], impType='doors';
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  BOOT
-// ════════════════════════════════════════════════════════
-// Safety check — if Firebase SDK didn't load properly
-if (typeof firebase === 'undefined' || !AUTH) {
-  document.addEventListener('DOMContentLoaded', () => {
-    showErr('l-err', 'Firebase SDK لم يتحمل — تأكد من الاتصال بالإنترنت');
-    g('l-err').style.display = 'block';
+// ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Login button
+  g('l-btn').addEventListener('click', doLogin);
+  g('l-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  g('l-email').addEventListener('keydown', e => { if(e.key==='Enter') g('l-pass').focus(); });
+
+  // Bottom sheet overlays close on backdrop tap
+  document.querySelectorAll('.bsheet-ov').forEach(el => {
+    el.addEventListener('click', e => { if(e.target===el) el.classList.remove('open'); });
+  });
+
+  fillMonths();
+  g('vis-date').value = today();
+  g('msa-date').value = today();
+  g('mv-date').value  = today();
+  g('mt-month').value = curMonth();
+});
+
+if (AUTH) {
+  AUTH.onAuthStateChanged(async u => {
+    if (u) {
+      ME = u;
+      await loadProfile();
+      show('s-app');
+      setTopbar();
+      await loadMaster();
+      goTabName('dash');
+    } else {
+      show('s-login');
+    }
   });
 } else {
-  AUTH.onAuthStateChanged(async u => {
-  if (u) {
-    ME = u;
-    await loadProfile();
-    show('s-app');
-    setTopbar();
-    await loadMaster();
-    goTabName('dash');
-  } else {
-    show('s-login');
-  }
-  });
+  show('s-login');
 }
 
-// events handled in DOMContentLoaded below
-
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  AUTH
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 async function doLogin() {
   const email = g('l-email').value.trim();
   const pass  = g('l-pass').value;
-  const btn   = g('l-btn');
   g('l-err').style.display = 'none';
-
-  if (!email || !pass) { showErr('l-err','أدخل الإيميل وكلمة السر'); return; }
-
-  btn.disabled = true;
-  btn.textContent = 'جاري الدخول...';
-
-  // Check if Firebase loaded correctly
-  if (!AUTH) {
-    showErr('l-err', 'Firebase لم يتحمل — افتح الملف من GitHub Pages أو أي HTTPS server وليس file://');
-    btn.disabled = false; btn.textContent = 'دخول';
-    return;
-  }
-
+  if (!email||!pass) { showErr('l-err','أدخل الإيميل وكلمة السر'); return; }
+  if (!AUTH) { showErr('l-err','Firebase لم يتحمل — افتح من HTTPS'); return; }
+  const btn = g('l-btn');
+  btn.disabled=true; btn.textContent='جاري الدخول...';
   try {
     await AUTH.signInWithEmailAndPassword(email, pass);
-    // onAuthStateChanged will handle the rest
   } catch(e) {
-    console.error('Login error:', e.code, e.message);
-    let msg = 'خطأ غير معروف';
-    if (['auth/user-not-found','auth/wrong-password','auth/invalid-credential','auth/invalid-email'].includes(e.code)) {
-      msg = 'الإيميل أو كلمة السر غير صحيحة';
-    } else if (e.code === 'auth/network-request-failed') {
-      msg = 'لا يوجد اتصال بالإنترنت';
-    } else if (e.code === 'auth/too-many-requests') {
-      msg = 'محاولات كثيرة — انتظر قليلاً';
-    } else {
-      msg = e.message;
-    }
-    showErr('l-err', msg);
-    btn.disabled = false;
-    btn.textContent = 'دخول';
+    const codes = ['auth/user-not-found','auth/wrong-password','auth/invalid-credential','auth/invalid-email'];
+    showErr('l-err', codes.includes(e.code) ? 'الإيميل أو كلمة السر غير صحيحة' :
+      e.code==='auth/network-request-failed' ? 'لا يوجد اتصال بالإنترنت' : e.message);
   }
+  btn.disabled=false; btn.textContent='دخول';
 }
 
-
-
 async function logout() {
+  closeBS('bs-user-profile');
   await AUTH.signOut();
-  ME=null; PROFILE=null;
-  show('s-login');
 }
 
 async function loadProfile() {
   try {
     const d = await DB.collection('users').doc(ME.uid).get();
-    PROFILE = d.exists ? d.data() : { name: ME.email, role:'rep', email: ME.email };
-  } catch(e) { PROFILE = { name: ME.email, role:'rep', email: ME.email }; }
+    PROFILE = d.exists ? d.data() : { name:ME.email, role:'rep', email:ME.email };
+  } catch(e) { PROFILE = { name:ME.email, role:'rep', email:ME.email }; }
 }
 
 function setTopbar() {
-  g('t-name').textContent = PROFILE.name || ME.email;
-  g('t-role').textContent = PROFILE.role==='manager' ? 'Manager' : 'Sales Rep';
-  g('t-av').textContent   = (PROFILE.name||ME.email).charAt(0).toUpperCase();
+  const name = PROFILE.name || ME.email;
+  g('tb-av').textContent = name.charAt(0).toUpperCase();
+  g('us-av').textContent = name.charAt(0).toUpperCase();
+  g('us-name').textContent = name;
+  g('us-email').textContent = ME.email;
+  g('us-role').textContent = PROFILE.role==='manager' ? 'Manager' : 'Sales Rep';
   if (PROFILE.role==='manager') {
-    g('tab-admin').style.display='flex';
+    g('bnav-admin').classList.remove('hidden');
   }
 }
 
-// ════════════════════════════════════════════════════════
-//  MASTER DATA LOAD
-// ════════════════════════════════════════════════════════
+function openUserSheet() { openBS('bs-user-profile'); }
+
+// ══════════════════════════════════════════
+//  MASTER DATA
+// ══════════════════════════════════════════
 async function loadMaster() {
   try {
     const [ds,ss,us] = await Promise.all([
@@ -786,30 +907,29 @@ async function loadMaster() {
     SKUS  = ss.docs.map(d=>({id:d.id,...d.data()}));
     USERS = us.docs.map(d=>({id:d.id,...d.data()}));
     REPS  = USERS.filter(u=>u.role==='rep');
-
-    // Reps only see their doors
     if (PROFILE.role==='rep') {
-      DOORS = DOORS.filter(d => d.repId===ME.uid || d.repEmail===ME.email);
+      DOORS = DOORS.filter(d=>d.repId===ME.uid||d.repEmail===ME.email);
     }
-    buildRepBars();
-    buildDoorGrid();
-    fillSelects();
-    loadAdminTables();
-  } catch(e) { toast('خطأ في تحميل البيانات: '+e.message,'error'); }
+    buildRepBars(); buildDoorList(); fillSelects();
+    renderAdminDoors();
+  } catch(e) { toast('خطأ في تحميل البيانات','error'); }
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  TABS
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
+const tabNames = {dash:'الرئيسية',targets:'الأهداف',msl:'MSL',visits:'الزيارات',zero:'Zero Sales',admin:'الإدارة'};
 function goTab(el) {
   const tab = el.dataset.tab;
-  document.querySelectorAll('.ntab').forEach(t=>t.classList.toggle('active',t===el));
-  document.querySelectorAll('.page').forEach(p=>p.style.display='none');
-  const pg = g('p-'+tab); if(pg) pg.style.display='block';
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.toggle('active',b===el));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  g('p-'+tab).classList.add('active');
+  g('tb-page').textContent = tabNames[tab]||'';
+  g('page-scroll').scrollTop = 0;
   loadTabData(tab);
 }
 function goTabName(tab) {
-  const el = document.querySelector(`.ntab[data-tab="${tab}"]`);
+  const el = document.querySelector(`.bnav-item[data-tab="${tab}"]`);
   if (el) goTab(el);
 }
 function loadTabData(tab) {
@@ -818,229 +938,225 @@ function loadTabData(tab) {
   if(tab==='msl')     loadMSL();
   if(tab==='visits')  loadVisits();
   if(tab==='zero')    loadZero();
-  if(tab==='admin')   loadAdminTables();
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  REP BARS
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 function buildRepBars() {
   if (PROFILE.role!=='manager') return;
-  [['mgr-bar','mgr-btns'],['tgt-rep-bar','tgt-rep-btns'],['vis-rep-bar','vis-rep-btns']].forEach(([bar,btns])=>{
-    const b=g(bar), c=g(btns); if(!b||!c) return;
-    b.style.display='flex';
-    c.innerHTML=`<button class="rpill active" data-rep="all" onclick="selRepFn('all','${btns}')">الكل</button>`
-      + REPS.map(r=>`<button class="rpill" data-rep="${r.id}" onclick="selRepFn('${r.id}','${btns}')">${r.name}</button>`).join('');
+  [['mgr-bar','dash'],['tgt-rep-bar','targets'],['vis-rep-bar','visits']].forEach(([bid,tab])=>{
+    const el=g(bid); if(!el) return;
+    el.classList.remove('hidden');
+    el.innerHTML = `<button class="rpill active" data-rep="all" onclick="selRepFn('all','${bid}')">الكل</button>`
+      + REPS.map(r=>`<button class="rpill" data-rep="${r.id}" onclick="selRepFn('${r.id}','${bid}')">${r.name}</button>`).join('');
   });
 }
 function selRepFn(rid, bid) {
   selRep = rid==='all'?null:rid;
   document.querySelectorAll(`#${bid} .rpill`).forEach(b=>b.classList.toggle('active',b.dataset.rep===rid));
-  buildDoorGrid();
-  const tab = document.querySelector('.ntab.active')?.dataset.tab;
-  if (tab) loadTabData(tab);
+  buildDoorList();
+  const tab = document.querySelector('.bnav-item.active')?.dataset.tab;
+  if(tab) loadTabData(tab);
 }
 
-// ════════════════════════════════════════════════════════
-//  DOOR GRID
-// ════════════════════════════════════════════════════════
-function buildDoorGrid(filter='') {
-  const q = filter.toLowerCase();
-  const doors = (selRep ? DOORS.filter(d=>d.repId===selRep) : DOORS)
-    .filter(d=> !q || d.name.toLowerCase().includes(q) || String(d.code).includes(q));
-  const grid = g('door-grid');
-  grid.innerHTML = doors.length
-    ? doors.map(d=>`<button class="door-btn${selDoor?.id===d.id?' active':''}" onclick="pickDoor('${d.id}',this)">
-        ${d.name}<span class="door-code">${d.code} · ${d.channel}</span>
-      </button>`).join('')
-    : '<div class="lrow" style="grid-column:1/-1">لا توجد نتائج</div>';
+// ══════════════════════════════════════════
+//  DOOR LIST
+// ══════════════════════════════════════════
+function buildDoorList(q='') {
+  const filtered = (selRep?DOORS.filter(d=>d.repId===selRep):DOORS)
+    .filter(d=>!q||d.name.toLowerCase().includes(q.toLowerCase())||String(d.code).includes(q));
+  g('door-cnt').textContent = filtered.length;
+  g('door-list').innerHTML = filtered.length ? filtered.map(d=>`
+    <div class="door-item${selDoor?.id===d.id?' active':''}" onclick="pickDoor('${d.id}',this)">
+      <div class="door-item-left">
+        <div class="door-name">${d.name}</div>
+        <div class="door-meta">${d.code} · ${d.channel}</div>
+      </div>
+      <div class="door-item-right">
+        <div class="door-check">${selDoor?.id===d.id?'<svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>':''}</div>
+      </div>
+    </div>`).join('')
+    : '<div class="load-row">لا توجد نتائج</div>';
 }
-function filterDoors() { buildDoorGrid(g('dp-srch').value); }
+function filterDoors() { buildDoorList(g('dp-srch').value); }
 function pickDoor(did, el) {
   selDoor = DOORS.find(d=>d.id===did);
-  document.querySelectorAll('.door-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.door-item').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
+  el.querySelector('.door-check').innerHTML = '<svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6l3 3 5-5" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
   loadDash();
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  FILL SELECTS
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 function fillSelects() {
-  const repOpts = '<option value="">اختر مندوب...</option>'+REPS.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
-  ['md-rep','mt-rep','msa-rep','mv-rep'].forEach(id=>{ const e=g(id);if(e)e.innerHTML=repOpts; });
-  const doorOpts = '<option value="">اختر Door...</option>'+DOORS.map(d=>`<option value="${d.id}">${d.name} (${d.code})</option>`).join('');
-  ['mt-door','mm-door','msa-door','mv-door','msl-door-f','z-door-f'].forEach(id=>{
-    const e=g(id); if(!e) return;
-    e.innerHTML = id.includes('-f') ? '<option value="">كل الـ Doors</option>'+DOORS.map(d=>`<option value="${d.id}">${d.name}</option>`).join('') : doorOpts;
-  });
-  const skuOpts = '<option value="">اختر SKU...</option>'+SKUS.map(s=>`<option value="${s.id}">${s.name} (${s.code})</option>`).join('');
-  ['mm-sku','msa-sku'].forEach(id=>{ const e=g(id);if(e)e.innerHTML=skuOpts; });
+  const ro = '<option value="">اختر مندوب...</option>'+REPS.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+  ['md-rep','mt-rep','msa-rep','mv-rep'].forEach(id=>{const e=g(id);if(e)e.innerHTML=ro;});
+  const do_ = '<option value="">اختر Door...</option>'+DOORS.map(d=>`<option value="${d.id}">${d.name} (${d.code})</option>`).join('');
+  ['mt-door','mm-door','msa-door','mv-door'].forEach(id=>{const e=g(id);if(e)e.innerHTML=do_;});
+  const df = '<option value="">كل الـ Doors</option>'+DOORS.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
+  ['msl-door-f','z-door-f'].forEach(id=>{const e=g(id);if(e)e.innerHTML=df;});
+  const so = '<option value="">اختر SKU...</option>'+SKUS.map(s=>`<option value="${s.id}">${s.name} (${s.code})</option>`).join('');
+  ['mm-sku','msa-sku'].forEach(id=>{const e=g(id);if(e)e.innerHTML=so;});
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  DASHBOARD
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 async function loadDash() {
-  const month = g('d-month').value || curMonth();
-  let tgt=null, mslItems=[];
-
+  const month = g('d-month').value||curMonth();
+  let tgt=null, mslItems=[], realActual=0;
   if (selDoor) {
     try {
-      // Get target
-      const tSnap = await DB.collection('targets')
-        .where('doorId','==',selDoor.id).where('month','==',month).limit(1).get();
-      if (!tSnap.empty) tgt = {...tSnap.docs[0].data()};
-
-      // Calculate actual from sales in real-time
-      const sSnap = await DB.collection('sales')
-        .where('doorId','==',selDoor.id).where('month','==',month).get();
-      const realActual = sSnap.docs.reduce((a,d)=>a+(d.data().value||0),0);
-      if (tgt) tgt.actual = realActual;
-      else if (realActual>0) tgt = {target:0, actual:realActual};
-
-      const mSnap = await DB.collection('msl').where('doorId','==',selDoor.id).get();
+      const [tSnap,sSnap,mSnap] = await Promise.all([
+        DB.collection('targets').where('doorId','==',selDoor.id).where('month','==',month).limit(1).get(),
+        DB.collection('sales').where('doorId','==',selDoor.id).where('month','==',month).get(),
+        DB.collection('msl').where('doorId','==',selDoor.id).get()
+      ]);
+      if(!tSnap.empty) tgt={...tSnap.docs[0].data()};
+      realActual = sSnap.docs.reduce((a,d)=>a+(d.data().value||0),0);
+      if(tgt) tgt.actual=realActual; else if(realActual>0) tgt={target:0,actual:realActual};
       mslItems = mSnap.docs.map(d=>d.data());
-    } catch(e) { console.error('loadDash error:',e); }
+    } catch(e){}
   }
+  const target=tgt?.target||0, actual=tgt?.actual||0;
+  const pct=target?Math.min(Math.round(actual/target*100),999):0;
+  const gap=Math.max(0,target-actual);
+  const pc=Math.min(pct,100);
+  const cl=pct>=100?'g':pct>=80?'o':'r';
 
-  const target = tgt?.target||0, actual = tgt?.actual||0;
-  const pct = target ? Math.round(actual/target*100) : 0;
-  const gap = Math.max(0,target-actual);
-
-  g('d-title').textContent = selDoor ? selDoor.name : 'لوحة التحكم';
-  g('d-sub').textContent   = selDoor ? `${selDoor.code} · ${selDoor.channel}` : 'اختر Door من القائمة';
+  g('d-title').textContent = selDoor?selDoor.name:'الرئيسية';
+  g('d-sub').textContent   = selDoor?`${selDoor.code} · ${selDoor.channel}`:'اختر Door لعرض بياناته';
   g('d-sales').textContent = fmt(actual);
-  g('d-sales-m').textContent = 'من هدف '+fmt(target);
+  g('d-sales-m').textContent = 'من '+fmt(target);
   g('d-tgt').textContent   = fmt(target);
   g('d-tgt-m').textContent = selDoor?.channel||'—';
   g('d-ach').textContent   = pct+'%';
-  g('d-ach-m').innerHTML   = `<span class="bg ${pct>=100?'bg-s':pct>=80?'bg-w':'bg-d'}">${pct>=100?'✓ تجاوز':pct>=80?'قريب':'تأخر'}</span>`;
+  g('d-ach-m').innerHTML   = `<span class="bg ${pct>=100?'bg-s':pct>=80?'bg-w':'bg-d'}">${pct>=100?'تجاوز':pct>=80?'قريب':'تأخر'}</span>`;
   g('d-zero').textContent  = mslItems.filter(m=>m.status==='missing').length;
 
-  // Ring
-  g('d-ring').style.strokeDashoffset = 289 - Math.min(pct/100,1)*289;
+  g('d-ring').style.strokeDashoffset = 232.5-(pc/100)*232.5;
   g('ring-txt').textContent = pct+'%';
-  g('ring-door').textContent = selDoor ? selDoor.name : 'لم يتم الاختيار';
+  g('ring-door').textContent = selDoor?selDoor.name:'اختر Door';
   g('ring-t').textContent = fmt(target);
   g('ring-a').textContent = fmt(actual);
   g('ring-g').textContent = fmt(gap);
+  const bar=g('ring-bar');
+  bar.style.width=pc+'%';
+  bar.className='prog-fill '+cl;
 
-  // Door MSL
-  g('dmsl-cnt').textContent = mslItems.length+' SKU';
-  g('dmsl-body').innerHTML = mslItems.length
-    ? mslItems.map(m=>{
-        const s=SKUS.find(x=>x.id===m.skuId);
-        return `<tr><td class="tdb">${s?.name||m.skuId}</td>
-          <td><span class="bg ${m.status==='present'?'bg-s':'bg-d'}">${m.status==='present'?'✓ متوافر':'✗ مفقود'}</span></td>
-          <td style="font-size:11px">${m.lastSale||'—'}</td></tr>`;
-      }).join('')
-    : '<tr><td colspan="3" class="lrow">اختر Door أولاً</td></tr>';
+  // MSL list
+  if(selDoor&&mslItems.length) {
+    g('dmsl-title').style.display='block';
+    g('dmsl-door-name').textContent=selDoor.name;
+    g('dmsl-list').innerHTML = mslItems.map(m=>{
+      const s=SKUS.find(x=>x.id===m.skuId);
+      return `<div class="msl-item">
+        <div class="msl-dot ${m.status==='present'?'ok':'miss'}"></div>
+        <div class="msl-info">
+          <div class="msl-name">${s?.name||m.skuId}</div>
+          <div class="msl-sub">${s?.code||''} ${m.lastSale?'· آخر بيع: '+m.lastSale:''}</div>
+        </div>
+        <span class="bg ${m.status==='present'?'bg-s':'bg-d'}">${m.status==='present'?'✓':'✗'}</span>
+      </div>`;
+    }).join('');
+  } else {
+    g('dmsl-title').style.display='none';
+    g('dmsl-list').innerHTML='';
+  }
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  TARGETS
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 async function loadTargets() {
-  const month = g('tgt-month').value || curMonth();
+  const month = g('tgt-month').value||curMonth();
   try {
-    // 1. Load targets for this month
-    let q = DB.collection('targets').where('month','==',month);
-    const snap = await q.get();
-    TARGETS = snap.docs.map(d=>({...d.data(), id:d.id}));
-
-    // Filter by rep
-    if (PROFILE.role==='rep') TARGETS=TARGETS.filter(t=>t.repId===ME.uid);
-    else if (selRep) TARGETS=TARGETS.filter(t=>t.repId===selRep);
-
-    // 2. Load all sales for this month — calculate actual per door in real-time
+    const snap = await DB.collection('targets').where('month','==',month).get();
+    TARGETS = snap.docs.map(d=>({...d.data(),id:d.id}));
+    if(PROFILE.role==='rep') TARGETS=TARGETS.filter(t=>t.repId===ME.uid);
+    else if(selRep) TARGETS=TARGETS.filter(t=>t.repId===selRep);
     const salesSnap = await DB.collection('sales').where('month','==',month).get();
-    const salesByDoor = {};
-    salesSnap.docs.forEach(d=>{
-      const s=d.data();
-      if(!salesByDoor[s.doorId]) salesByDoor[s.doorId]=0;
-      salesByDoor[s.doorId]+=(s.value||0);
-    });
-
-    // 3. Merge actual into targets
-    TARGETS = TARGETS.map(t=>({
-      ...t,
-      actual: salesByDoor[t.doorId]||0
-    }));
-
-  } catch(e) { console.error('loadTargets error:',e); TARGETS=[]; }
-
-  const sumT = TARGETS.reduce((a,t)=>a+(t.target||0),0);
-  const sumA = TARGETS.reduce((a,t)=>a+(t.actual||0),0);
-  const avg  = sumT ? Math.round(sumA/sumT*100) : 0;
-  const under= TARGETS.filter(t=>t.target&&(t.actual/t.target)<0.8).length;
-
-  g('tgt-total').textContent = fmt(sumT);
-  g('tgt-actual').textContent= fmt(sumA);
-  g('tgt-avg').textContent   = avg+'%';
-  g('tgt-under').textContent = under;
-  g('tgt-cnt').textContent   = TARGETS.length;
+    const byDoor={};
+    salesSnap.docs.forEach(d=>{const s=d.data();byDoor[s.doorId]=(byDoor[s.doorId]||0)+(s.value||0);});
+    TARGETS=TARGETS.map(t=>({...t,actual:byDoor[t.doorId]||0}));
+  } catch(e){TARGETS=[];}
+  const sumT=TARGETS.reduce((a,t)=>a+(t.target||0),0);
+  const sumA=TARGETS.reduce((a,t)=>a+(t.actual||0),0);
+  g('tgt-total').textContent=fmt(sumT);
+  g('tgt-actual').textContent=fmt(sumA);
+  g('tgt-avg').textContent=(sumT?Math.round(sumA/sumT*100):0)+'%';
+  g('tgt-under').textContent=TARGETS.filter(t=>t.target&&(t.actual/t.target)<0.8).length;
   renderTgt(TARGETS);
 }
+
 function renderTgt(data) {
-  g('tgt-body').innerHTML = data.map(t=>{
-    const door=DOORS.find(d=>d.id===t.doorId);
-    const rep =USERS.find(u=>u.id===t.repId);
-    const pct =t.target?Math.round((t.actual||0)/t.target*100):0;
-    const c   =pct>=100?'g':pct>=80?'o':'r';
-    return `<tr>
-      <td class="tdb">${door?.name||t.doorId}</td>
-      <td><code style="font-size:10px;color:var(--tx3)">${door?.code||'—'}</code></td>
-      <td><span class="bg bg-i">${door?.channel||'—'}</span></td>
-      <td>${rep?.name||t.repId||'—'}</td>
-      <td class="tdb">${fmt(t.target)}</td>
-      <td style="color:var(--ok)">${fmt(t.actual||0)}</td>
-      <td><div class="pb-wrap"><div class="pb"><div class="pb-fill ${c}" style="width:${Math.min(pct,100)}%"></div></div>
-          <span class="ppct" style="color:var(--${c==='g'?'ok':c==='o'?'wn':'er'})">${pct}%</span></div></td>
-      <td style="color:var(--er)">${fmt(Math.max(0,t.target-(t.actual||0)))}</td>
-      <td><span class="bg ${pct>=100?'bg-s':pct>=80?'bg-w':'bg-d'}">${pct>=100?'✓ تجاوز':pct>=80?'قريب':'تأخر'}</span></td>
-    </tr>`;
-  }).join('')||'<tr><td colspan="9" class="lrow">لا توجد أهداف</td></tr>';
+  const q=g('tgt-srch').value.toLowerCase();
+  const filtered=data.filter(t=>{const d=DOORS.find(x=>x.id===t.doorId);return !q||(d?.name||'').toLowerCase().includes(q)||String(d?.code||'').includes(q);});
+  g('tgt-list').innerHTML = filtered.map(t=>{
+    const d=DOORS.find(x=>x.id===t.doorId), u=USERS.find(x=>x.id===t.repId);
+    const pct=t.target?Math.min(Math.round((t.actual||0)/t.target*100),999):0;
+    const pc=Math.min(pct,100), cl=pct>=100?'g':pct>=80?'o':'r';
+    return `<div class="cl-item">
+      <div class="cl-item-hd">
+        <div class="cl-item-hd-left">
+          <div class="cl-item-title">${d?.name||t.doorId}</div>
+          <div class="cl-item-sub">${d?.code||'—'} · ${d?.channel||'—'} · ${u?.name||'—'}</div>
+        </div>
+        <span class="bg ${pct>=100?'bg-s':pct>=80?'bg-w':'bg-d'}">${pct}%</span>
+      </div>
+      <div class="cl-item-body">
+        <div class="cl-stat"><div class="cl-stat-label">الهدف</div><div class="cl-stat-val">${fmt(t.target)}</div></div>
+        <div class="cl-stat"><div class="cl-stat-label">المحقق</div><div class="cl-stat-val" style="color:var(--ok)">${fmt(t.actual||0)}</div></div>
+        <div class="cl-stat"><div class="cl-stat-label">الفجوة</div><div class="cl-stat-val" style="color:var(--er)">${fmt(Math.max(0,(t.target||0)-(t.actual||0)))}</div></div>
+        <div class="cl-stat"><div class="cl-stat-label">الحالة</div><div class="cl-stat-val"><span class="bg ${pct>=100?'bg-s':pct>=80?'bg-w':'bg-d'}">${pct>=100?'تجاوز':pct>=80?'قريب':'تأخر'}</span></div></div>
+      </div>
+      <div class="pb-mini-wrap">
+        <div class="pb-mini-label"><span>${fmt(t.actual||0)} ج.م</span><span>${fmt(t.target||0)} ج.م</span></div>
+        <div class="pb-mini"><div class="prog-fill ${cl}" style="width:${pc}%"></div></div>
+      </div>
+    </div>`;
+  }).join('')||'<div class="empty"><div class="empty-icon">🎯</div><div class="empty-txt">لا توجد أهداف</div></div>';
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  MSL
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 async function loadMSL() {
   try {
-    let q = DB.collection('msl');
-    const snap = await q.get();
-    MSL = snap.docs.map(d=>d.data());
-    if (PROFILE.role==='rep') MSL=MSL.filter(m=>{ const d=DOORS.find(x=>x.id===m.doorId); return d?.repId===ME.uid||d?.repEmail===ME.email; });
-  } catch(e) { MSL=[]; }
-  g('msl-ok').textContent   = MSL.filter(m=>m.status==='present').length;
-  g('msl-miss').textContent = MSL.filter(m=>m.status==='missing').length;
-  g('msl-pct').textContent  = MSL.length?Math.round(MSL.filter(m=>m.status==='present').length/MSL.length*100)+'%':'—%';
+    const snap=await DB.collection('msl').get();
+    MSL=snap.docs.map(d=>d.data());
+    if(PROFILE.role==='rep') MSL=MSL.filter(m=>{const d=DOORS.find(x=>x.id===m.doorId);return d?.repId===ME.uid||d?.repEmail===ME.email;});
+  } catch(e){MSL=[];}
+  g('msl-ok').textContent=MSL.filter(m=>m.status==='present').length;
+  g('msl-miss').textContent=MSL.filter(m=>m.status==='missing').length;
+  g('msl-pct').textContent=MSL.length?Math.round(MSL.filter(m=>m.status==='present').length/MSL.length*100)+'%':'—%';
   filterMSL();
 }
 function filterMSL() {
   const df=g('msl-door-f').value, sf=g('msl-stat-f').value, q=g('msl-srch').value.toLowerCase();
   const data=MSL.filter(m=>{
-    const s=SKUS.find(x=>x.id===m.skuId), d=DOORS.find(x=>x.id===m.doorId);
-    return(!df||m.doorId===df)&&(!sf||m.status===sf)&&(!q||(s?.name||'').toLowerCase().includes(q)||(d?.name||'').toLowerCase().includes(q)||(s?.code||'').toLowerCase().includes(q));
+    const s=SKUS.find(x=>x.id===m.skuId),d=DOORS.find(x=>x.id===m.doorId);
+    return(!df||m.doorId===df)&&(!sf||m.status===sf)&&(!q||(s?.name||'').toLowerCase().includes(q)||(d?.name||'').toLowerCase().includes(q));
   });
-  g('msl-body').innerHTML=data.map(m=>{
-    const s=SKUS.find(x=>x.id===m.skuId), d=DOORS.find(x=>x.id===m.doorId);
-    return `<tr>
-      <td class="tdb">${d?.name||m.doorId}</td>
-      <td><span class="bg bg-i">${d?.channel||'—'}</span></td>
-      <td><code style="font-size:10px;color:var(--tx3)">${s?.code||m.skuId}</code></td>
-      <td class="tdb">${s?.name||m.skuId}</td>
-      <td><span class="bg ${m.status==='present'?'bg-s':'bg-d'}">${m.status==='present'?'✓ متوافر':'✗ مفقود'}</span></td>
-      <td style="font-size:11px">${m.lastSale||'—'}</td>
-      <td style="font-size:11px;color:var(--tx3)">${m.note||'—'}</td>
-    </tr>`;
-  }).join('')||'<tr><td colspan="7" class="lrow">لا توجد بيانات</td></tr>';
+  g('msl-list').innerHTML=data.map(m=>{
+    const s=SKUS.find(x=>x.id===m.skuId),d=DOORS.find(x=>x.id===m.doorId);
+    return `<div class="msl-item">
+      <div class="msl-dot ${m.status==='present'?'ok':'miss'}"></div>
+      <div class="msl-info">
+        <div class="msl-name">${s?.name||m.skuId}</div>
+        <div class="msl-sub">${d?.name||m.doorId} · ${s?.code||''}</div>
+      </div>
+      <span class="bg ${m.status==='present'?'bg-s':'bg-d'}">${m.status==='present'?'✓ متوافر':'✗ مفقود'}</span>
+    </div>`;
+  }).join('')||'<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">لا توجد بيانات</div></div>';
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  VISITS
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 async function loadVisits() {
   const date=g('vis-date').value||today();
   try {
@@ -1049,109 +1165,97 @@ async function loadVisits() {
     else if(selRep) q=q.where('repId','==',selRep);
     const snap=await q.get();
     VISITS=snap.docs.map(d=>d.data());
-  } catch(e){ VISITS=[]; }
+  } catch(e){VISITS=[];}
   const done=VISITS.filter(v=>v.status==='completed');
-  const durs=done.map(v=>{
-    if(!v.checkin||!v.checkout) return 0;
-    const [h1,m1]=v.checkin.split(':').map(Number);
-    const [h2,m2]=v.checkout.split(':').map(Number);
-    return Math.max(0,(h2*60+m2)-(h1*60+m1));
-  }).filter(d=>d>0);
-  const avg=durs.length?Math.round(durs.reduce((a,b)=>a+b,0)/durs.length):0;
+  const durs=done.map(v=>{if(!v.checkin||!v.checkout)return 0;const [h1,m1]=v.checkin.split(':').map(Number);const [h2,m2]=v.checkout.split(':').map(Number);return Math.max(0,(h2*60+m2)-(h1*60+m1));}).filter(d=>d>0);
   g('v-tot').textContent=VISITS.length;
-  g('v-avg').textContent=avg;
+  g('v-avg').textContent=durs.length?Math.round(durs.reduce((a,b)=>a+b,0)/durs.length):0;
   g('v-doors').textContent=new Set(VISITS.map(v=>v.doorId)).size;
-  g('vis-cnt').textContent=VISITS.length;
   renderVis(VISITS);
 }
 function renderVis(data) {
-  g('vis-body').innerHTML=data.map(v=>{
-    const d=DOORS.find(x=>x.id===v.doorId), u=USERS.find(x=>x.id===v.repId);
+  const q=g('vis-srch').value.toLowerCase();
+  const filtered=data.filter(v=>{const d=DOORS.find(x=>x.id===v.doorId);return !q||(d?.name||'').toLowerCase().includes(q);});
+  g('vis-list').innerHTML=filtered.map(v=>{
+    const d=DOORS.find(x=>x.id===v.doorId),u=USERS.find(x=>x.id===v.repId);
     const dur=v.checkin&&v.checkout?(()=>{const [h1,m1]=v.checkin.split(':').map(Number);const [h2,m2]=v.checkout.split(':').map(Number);return Math.max(0,(h2*60+m2)-(h1*60+m1));})():null;
-    return `<tr>
-      <td class="tdb">${d?.name||v.doorId}</td>
-      <td><code style="font-size:10px;color:var(--tx3)">${d?.code||'—'}</code></td>
-      <td>${u?.name||v.repId||'—'}</td>
-      <td>${v.date||'—'}</td>
-      <td>${v.checkin||'—'}</td>
-      <td>${v.checkout||'—'}</td>
-      <td class="tdb">${dur!=null?dur:'—'}</td>
-      <td><span class="bg ${v.status==='completed'?'bg-s':v.status==='in-progress'?'bg-w':'bg-n'}">${v.status==='completed'?'✓ مكتملة':v.status==='in-progress'?'● جارية':'—'}</span></td>
-    </tr>`;
-  }).join('')||'<tr><td colspan="8" class="lrow">لا توجد زيارات</td></tr>';
+    return `<div class="visit-item">
+      <div class="visit-time-col"><div class="visit-time">${v.checkin||'—'}</div><div class="visit-dur">${dur!=null?dur+'د':'—'}</div></div>
+      <div class="visit-divider"></div>
+      <div class="visit-info">
+        <div class="visit-name">${d?.name||v.doorId}</div>
+        <div class="visit-sub">${u?.name||'—'} · ${v.date||'—'}</div>
+      </div>
+      <span class="bg ${v.status==='completed'?'bg-s':v.status==='in-progress'?'bg-w':'bg-n'}">${v.status==='completed'?'✓':v.status==='in-progress'?'●':'—'}</span>
+    </div>`;
+  }).join('')||'<div class="empty"><div class="empty-icon">📍</div><div class="empty-txt">لا توجد زيارات</div></div>';
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  ZERO SALES
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 async function loadZero() {
   await loadMSL();
-  const month=g('zero-month').value||curMonth();
-  // Zero = MSL missing items
   let data=MSL.filter(m=>m.status==='missing');
   if(selRep) data=data.filter(m=>{const d=DOORS.find(x=>x.id===m.doorId);return d?.repId===selRep;});
   g('z-cnt').textContent=data.length;
   g('z-doors').textContent=new Set(data.map(m=>m.doorId)).size;
   g('z-pct').textContent=MSL.length?Math.round(data.length/MSL.length*100)+'%':'—%';
-  // Fill door filter
   const doors=[...new Set(data.map(m=>m.doorId))];
   g('z-door-f').innerHTML='<option value="">كل الـ Doors</option>'+doors.map(did=>{const d=DOORS.find(x=>x.id===did);return`<option value="${did}">${d?.name||did}</option>`;}).join('');
   renderZero(data);
 }
 function filterZero() {
-  const df=g('z-door-f').value, q=g('z-srch').value.toLowerCase();
-  const data=MSL.filter(m=>m.status==='missing'&&(!df||m.doorId===df));
-  renderZero(data.filter(m=>{const s=SKUS.find(x=>x.id===m.skuId),d=DOORS.find(x=>x.id===m.doorId);return !q||(s?.name||'').toLowerCase().includes(q)||(d?.name||'').toLowerCase().includes(q);}));
+  const df=g('z-door-f').value,q=g('z-srch').value.toLowerCase();
+  renderZero(MSL.filter(m=>m.status==='missing'&&(!df||m.doorId===df)&&(()=>{const s=SKUS.find(x=>x.id===m.skuId),d=DOORS.find(x=>x.id===m.doorId);return !q||(s?.name||'').toLowerCase().includes(q)||(d?.name||'').toLowerCase().includes(q);})()));
 }
 function renderZero(data) {
-  g('z-body').innerHTML=data.map(m=>{
-    const s=SKUS.find(x=>x.id===m.skuId), d=DOORS.find(x=>x.id===m.doorId);
+  g('z-list').innerHTML=data.map(m=>{
+    const s=SKUS.find(x=>x.id===m.skuId),d=DOORS.find(x=>x.id===m.doorId);
     const ds=m.lastSale?daysSince(m.lastSale):999;
     const pri=ds>30?'high':ds>14?'medium':'low';
-    return `<tr>
-      <td class="tdb">${d?.name||m.doorId}</td>
-      <td><span class="bg bg-i">${d?.channel||'—'}</span></td>
-      <td><code style="font-size:10px;color:var(--tx3)">${s?.code||m.skuId}</code></td>
-      <td class="tdb">${s?.name||m.skuId}</td>
-      <td>${m.lastSale||'—'}</td>
-      <td class="tdb" style="color:${pri==='high'?'var(--er)':pri==='medium'?'var(--wn)':'var(--tx2)'}">${ds===999?'—':ds}</td>
-      <td><span class="bg ${pri==='high'?'bg-d':pri==='medium'?'bg-w':'bg-s'}">${pri==='high'?'عالية':pri==='medium'?'متوسطة':'منخفضة'}</span></td>
-    </tr>`;
-  }).join('')||'<tr><td colspan="7" class="lrow">✅ لا توجد Zero Sales</td></tr>';
+    return `<div class="msl-item">
+      <div class="msl-dot miss"></div>
+      <div class="msl-info">
+        <div class="msl-name">${s?.name||m.skuId}</div>
+        <div class="msl-sub">${d?.name||m.doorId} · ${ds===999?'لا يوجد بيع':ds+' يوم'}</div>
+      </div>
+      <span class="bg ${pri==='high'?'bg-d':pri==='medium'?'bg-w':'bg-s'}">${pri==='high'?'عالية':pri==='medium'?'متوسطة':'منخفضة'}</span>
+    </div>`;
+  }).join('')||'<div class="empty"><div class="empty-icon">✅</div><div class="empty-txt">لا توجد Zero Sales</div></div>';
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  ADMIN
-// ════════════════════════════════════════════════════════
-function loadAdminTables() {
-  g('adm-d-cnt').textContent=DOORS.length+' Door';
-  g('adm-d-body').innerHTML=DOORS.map(d=>{
+// ══════════════════════════════════════════
+function renderAdminDoors() {
+  g('adm-doors-list').innerHTML=DOORS.map(d=>{
     const r=REPS.find(x=>x.id===d.repId);
-    return `<tr><td class="tdb">${d.name}</td><td><code style="font-size:10px;color:var(--tx3)">${d.code}</code></td><td><span class="bg bg-i">${d.channel}</span></td><td>${r?.name||d.repEmail||'—'}</td></tr>`;
-  }).join('')||'<tr><td colspan="4" class="lrow">لا توجد Doors</td></tr>';
-
-  g('adm-u-cnt').textContent=USERS.length+' مستخدم';
-  g('adm-u-body').innerHTML=USERS.map(u=>`<tr>
-    <td class="tdb">${u.name||'—'}</td>
-    <td style="font-size:11px;direction:ltr">${u.email}</td>
-    <td><span class="bg ${u.role==='manager'?'bg-w':'bg-i'}">${u.role==='manager'?'Manager':'Rep'}</span></td>
-  </tr>`).join('')||'<tr><td colspan="3" class="lrow">لا توجد مستخدمين</td></tr>';
+    return `<div class="cl-item">
+      <div class="cl-item-hd">
+        <div class="cl-item-hd-left">
+          <div class="cl-item-title">${d.name}</div>
+          <div class="cl-item-sub">${d.code} · ${d.channel} · ${r?.name||d.repEmail||'—'}</div>
+        </div>
+        <span class="bg bg-i">${d.channel}</span>
+      </div>
+    </div>`;
+  }).join('')||'<div class="empty"><div class="empty-icon">🚪</div><div class="empty-txt">لا توجد Doors</div></div>';
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  CRUD
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 async function addUser() {
   const name=g('mu-name').value.trim(),email=g('mu-email').value.trim(),pass=g('mu-pass').value,role=g('mu-role').value;
   if(!name||!email||!pass){toast('أكمل الحقول المطلوبة','error');return;}
-  const btn=document.querySelector('#m-user .bsav');btn.disabled=true;
+  const btn=document.querySelector('#bs-user .bsav');btn.disabled=true;
   try {
-    const cred=await AUTH.createUserWithEmailAndPassword(email,pass);
-    await DB.collection('users').doc(cred.user.uid).set({name,email,role,createdAt:new Date().toISOString()});
-    USERS.push({id:cred.user.uid,name,email,role});
-    if(role==='rep') REPS.push({id:cred.user.uid,name,email,role});
-    buildRepBars();fillSelects();loadAdminTables();
-    toast('✓ تمت إضافة المستخدم','success');closeM('m-user');
+    const c=await AUTH.createUserWithEmailAndPassword(email,pass);
+    await DB.collection('users').doc(c.user.uid).set({name,email,role,createdAt:new Date().toISOString()});
+    USERS.push({id:c.user.uid,name,email,role});if(role==='rep')REPS.push({id:c.user.uid,name,email,role});
+    buildRepBars();fillSelects();
+    toast('✓ تمت إضافة المستخدم','success');closeBS('bs-user');
     ['mu-name','mu-email','mu-pass'].forEach(id=>g(id).value='');
   } catch(e){toast(e.message,'error');}
   btn.disabled=false;
@@ -1163,10 +1267,10 @@ async function addDoor() {
   const rep=REPS.find(r=>r.id===g('md-rep').value);
   const door={name,code,channel:g('md-chan').value,area:g('md-area').value.trim(),repId:rep?.id||'',repEmail:rep?.email||'',createdAt:new Date().toISOString()};
   try {
-    const ref=await DB.collection('doors').doc(code).set(door);
+    await DB.collection('doors').doc(code).set(door);
     if(!DOORS.find(d=>d.code===code)){door.id=code;DOORS.push(door);}
-    buildDoorGrid();fillSelects();loadAdminTables();
-    toast('✓ تمت إضافة الـ Door','success');closeM('m-door');
+    buildDoorList();fillSelects();renderAdminDoors();
+    toast('✓ تمت إضافة الـ Door','success');closeBS('bs-door');
   } catch(e){toast(e.message,'error');}
 }
 
@@ -1177,107 +1281,63 @@ async function addSKU() {
   try {
     await DB.collection('skus').doc(code).set(sku);
     if(!SKUS.find(s=>s.code===code)){sku.id=code;SKUS.push(sku);}
-    fillSelects();toast('✓ تمت إضافة المنتج','success');closeM('m-sku');
+    fillSelects();toast('✓ تمت إضافة المنتج','success');closeBS('bs-sku');
   } catch(e){toast(e.message,'error');}
 }
 
 async function setTarget() {
   const repId=g('mt-rep').value,doorId=g('mt-door').value,month=g('mt-month').value,target=parseFloat(g('mt-val').value)||0;
-  if(!doorId||!month||!target){toast('أكمل الحقول المطلوبة','error');return;}
+  if(!doorId||!month||!target){toast('أكمل الحقول','error');return;}
   const key=`${repId}_${doorId}_${month}`;
   try {
     await DB.collection('targets').doc(key).set({repId,doorId,month,target,actual:0},{merge:true});
-    toast('✓ تم حفظ الـ Target','success');closeM('m-target');
+    toast('✓ تم حفظ الـ Target','success');closeBS('bs-target');
   } catch(e){toast(e.message,'error');}
 }
 
 async function setMSL() {
   const doorId=g('mm-door').value,skuId=g('mm-sku').value;
   if(!doorId||!skuId){toast('اختر Door وSKU','error');return;}
-  const status=g('mm-stat').value;
-  const key=`${doorId}_${skuId}`;
+  const status=g('mm-stat').value,key=`${doorId}_${skuId}`;
   try {
     await DB.collection('msl').doc(key).set({doorId,skuId,status,lastSale:status==='present'?(g('mm-last').value||today()):'',note:g('mm-note').value.trim(),updatedAt:new Date().toISOString()},{merge:true});
-    toast('✓ تم حفظ MSL','success');closeM('m-msl');
+    toast('✓ تم حفظ MSL','success');closeBS('bs-msl');
   } catch(e){toast(e.message,'error');}
 }
 
 async function addSale() {
-  const doorId=g('msa-door').value, skuId=g('msa-sku').value;
-  const val=parseFloat(g('msa-val').value)||0;
-  const rawDate=g('msa-date').value;
+  const doorId=g('msa-door').value,skuId=g('msa-sku').value,val=parseFloat(g('msa-val').value)||0,rawDate=g('msa-date').value;
   if(!doorId||!skuId||!val||!rawDate){toast('أكمل الحقول المطلوبة','error');return;}
-  const repId=g('msa-rep').value;
-  // Normalize date to YYYY-MM-DD
-  const date=pDate(rawDate)||rawDate;
-  const month=date.slice(0,7);
+  const repId=g('msa-rep').value,date=pDate(rawDate)||rawDate,month=date.slice(0,7);
   const sale={doorId,skuId,repId,qty:parseFloat(g('msa-qty').value)||0,value:val,date,month,invoiceNo:g('msa-inv').value.trim(),createdAt:new Date().toISOString()};
+  const btn=document.querySelector('#bs-sale .bsav');btn.disabled=true;
   try {
     await DB.collection('sales').add(sale);
-    // Update target actual — try all possible key formats
-    const key=`${repId}_${doorId}_${month}`;
-    // Debug: log what we're searching for
-    console.log('Looking for target:', {doorId, month, repId, key});
-    const tSnap=await DB.collection('targets')
-      .where('doorId','==',doorId).where('month','==',month).get();
-    console.log('Targets found by doorId+month:', tSnap.size);
-    if(!tSnap.empty){
-      // Update all matching targets (could be multiple reps)
-      for(const doc of tSnap.docs){
-        console.log('Updating target doc:', doc.id, doc.data());
-        await doc.ref.update({actual:firebase.firestore.FieldValue.increment(val)});
-      }
-      toast('✓ تم حفظ الفاتورة وتحديث الهدف','success');
-    } else {
-      // Fallback: try with repId in key
-      console.warn('No target found by query, trying key:', key);
-      const tDoc = await DB.collection('targets').doc(key).get();
-      if(tDoc.exists){
-        await tDoc.ref.update({actual:firebase.firestore.FieldValue.increment(val)});
-        toast('✓ تم حفظ الفاتورة وتحديث الهدف','success');
-      } else {
-        // Try without repId
-        const tSnap2=await DB.collection('targets').where('doorId','==',doorId).get();
-        console.log('All targets for this door:', tSnap2.size, tSnap2.docs.map(d=>d.data().month));
-        if(!tSnap2.empty){
-          const match=tSnap2.docs.find(d=>d.data().month===month);
-          if(match){
-            await match.ref.update({actual:firebase.firestore.FieldValue.increment(val)});
-            toast('✓ تم حفظ الفاتورة وتحديث الهدف','success');
-          } else {
-            toast('✓ تم حفظ الفاتورة — لم يُوجد target لهذا الـ Door في '+month,'warning');
-          }
-        } else {
-          toast('✓ تم حفظ الفاتورة — لا يوجد target لهذا الـ Door','warning');
-        }
-      }
-    }
-    // Update MSL last sale
-    const mKey=`${doorId}_${skuId}`;
-    await DB.collection('msl').doc(mKey).update({lastSale:date,status:'present'}).catch(()=>{});
-    toast('✓ تم حفظ الفاتورة','success');closeM('m-sale');
-  } catch(e){toast(e.message,'error');console.error(e);}
+    const tSnap=await DB.collection('targets').where('doorId','==',doorId).where('month','==',month).get();
+    for(const doc of tSnap.docs) await doc.ref.update({actual:firebase.firestore.FieldValue.increment(val)});
+    await DB.collection('msl').doc(`${doorId}_${skuId}`).update({lastSale:date,status:'present'}).catch(()=>{});
+    toast('✓ تم حفظ الفاتورة','success');closeBS('bs-sale');
+  } catch(e){toast(e.message,'error');}
+  btn.disabled=false;
 }
 
 async function addVisit() {
   const doorId=g('mv-door').value,date=g('mv-date').value;
   if(!doorId||!date){toast('اختر Door والتاريخ','error');return;}
-  const visit={doorId,repId:g('mv-rep').value,date,checkin:g('mv-in').value,checkout:g('mv-out').value,status:g('mv-stat').value,createdAt:new Date().toISOString()};
   try {
-    await DB.collection('visits').add(visit);
-    toast('✓ تمت إضافة الزيارة','success');closeM('m-visit');
+    await DB.collection('visits').add({doorId,repId:g('mv-rep').value,date,checkin:g('mv-in').value,checkout:g('mv-out').value,status:g('mv-stat').value,createdAt:new Date().toISOString()});
+    toast('✓ تمت إضافة الزيارة','success');closeBS('bs-visit');
   } catch(e){toast(e.message,'error');}
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  IMPORT
-// ════════════════════════════════════════════════════════
-function updateImpUI() {
-  impType=g('imp-type').value;
-  ['doors','skus','targets','msl','sales','visits'].forEach(t=>{
-    const el=g('imp-struct-'+t);if(el) el.style.display=t===impType?'block':'none';
-  });
-  g('imp-prev').style.display='none';
+// ══════════════════════════════════════════
+function setImpType(el) {
+  impType=el.dataset.itype;
+  document.querySelectorAll('.imp-type-btn').forEach(b=>b.classList.toggle('active',b===el));
+  ['doors','skus','targets','msl','sales','visits'].forEach(t=>g('imp-struct-'+t).classList.toggle('hidden',t!==impType));
+  g('imp-prev').classList.add('hidden');
 }
 
 function handleFile(e) {
@@ -1286,275 +1346,82 @@ function handleFile(e) {
   reader.onload=ev=>{
     const wb=XLSX.read(ev.target.result,{type:'array'});
     const ws=wb.Sheets[wb.SheetNames[0]];
-    const rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});
-    impRows=rows;
-    showPreview(rows);
+    impRows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});
+    if(!impRows.length){toast('الملف فارغ','error');return;}
+    const keys=Object.keys(impRows[0]);
+    g('imp-cnt').textContent=impRows.length+' سطر للاستيراد';
+    g('imp-prev-tbl').innerHTML=`<table><thead><tr>${keys.map(k=>`<th>${k}</th>`).join('')}</tr></thead>
+      <tbody>${impRows.slice(0,3).map(r=>`<tr>${keys.map(k=>`<td>${String(r[k]).slice(0,30)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    g('imp-prev').classList.remove('hidden');
   };
   reader.readAsArrayBuffer(file);
 }
 
-function showPreview(rows) {
-  if(!rows.length){toast('الملف فارغ','error');return;}
-  const keys=Object.keys(rows[0]);
-  const preview=rows.slice(0,5);
-  g('imp-cnt').textContent=rows.length+' سطر';
-  g('imp-info').textContent='معاينة أول 5 صفوف:';
-  g('imp-prev-tbl').innerHTML=`<table><thead><tr>${keys.map(k=>`<th>${k}</th>`).join('')}</tr></thead>
-    <tbody>${preview.map(r=>`<tr>${keys.map(k=>`<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r[k]}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
-  g('imp-prev').style.display='block';
-}
-
 async function doImport() {
   if(!impRows.length)return;
-  const type=g('imp-type').value;
-  let ok=0,skip=0;
-  const skipReasons=[];
-  toast('جاري الاستيراد '+impRows.length+' سطر...','info');
+  const type=impType;
   const colMap={targets:'targets',msl:'msl',doors:'doors',skus:'skus',visits:'visits',sales:'sales'};
   const col=colMap[type]||'sales';
-
-  // Process in batches of 400
+  let ok=0,skip=0;
+  toast('جاري الاستيراد '+impRows.length+' سطر...','info');
   const chunks=[];
-  for(let i=0;i<impRows.length;i+=400) chunks.push(impRows.slice(i,i+400));
-
+  for(let i=0;i<impRows.length;i+=400)chunks.push(impRows.slice(i,i+400));
   for(const chunk of chunks){
-    const batch=DB.batch();
-    let batchHasData=false;
+    const batch=DB.batch();let has=false;
     for(const row of chunk){
       const doc=buildDoc(row,type);
-      if(doc){
-        const ref=doc.id?DB.collection(col).doc(String(doc.id)):DB.collection(col).doc();
-        batch.set(ref,doc.data,{merge:true});
-        ok++;batchHasData=true;
-      } else {
-        skip++;
-        if(skipReasons.length<3){
-          const sample=Object.entries(row).slice(0,4).map(([k,v])=>`${k}="${v}"`).join(' | ');
-          skipReasons.push(sample);
-          console.warn('Import skip reason — row:', row);
-        }
-      }
+      if(doc){const ref=doc.id?DB.collection(col).doc(String(doc.id)):DB.collection(col).doc();batch.set(ref,doc.data,{merge:true});ok++;has=true;}
+      else skip++;
     }
-    if(batchHasData) await batch.commit().catch(e=>{toast('Firebase error: '+e.message,'error');});
+    if(has)await batch.commit().catch(e=>toast('Firebase: '+e.message,'error'));
   }
-
-  let msg=`✓ استُورد ${ok}`;
-  if(skip>0) msg+=` | تجاهل ${skip}`;
-  toast(msg,skip>0?'warning':'success');
-  if(skip>0&&skipReasons.length>0) setTimeout(()=>toast('تجاهل: '+skipReasons[0],'warning'),500);
-
+  toast(`✓ استُورد ${ok}${skip?' | تجاهل '+skip:''}`,skip>0?'warning':'success');
   await loadMaster();
-  g('imp-prev').style.display='none';
+  g('imp-prev').classList.add('hidden');
 }
 
-// ─── PARSE HELPERS ───
-function pMonth(v){
-  if(!v&&v!==0)return'';
-  const s=String(v).trim();
-  // Already YYYY-MM
-  if(/^\d{4}-\d{2}$/.test(s))return s;
-  // YYYY-MM-DD
-  if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,7);
-  // Excel serial
-  const n=parseFloat(s);
-  if(!isNaN(n)&&n>40000){
-    const d=new Date(Math.round((n-25569)*86400*1000));
-    return d.toISOString().slice(0,7);
-  }
-  // M/D/YY or M/YYYY style — use pDate and extract month
-  const asDate=pDate(v);
-  if(asDate&&asDate.length>=7)return asDate.slice(0,7);
-  return s.slice(0,7);
-}
-function pDate(v){
-  if(!v&&v!==0)return'';
-  const s=String(v).trim();
-  // Already YYYY-MM-DD
-  if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);
-  // Excel serial number
-  const n=parseFloat(s);
-  if(!isNaN(n)&&n>40000){
-    const d=new Date(Math.round((n-25569)*86400*1000));
-    return d.toISOString().slice(0,10);
-  }
-  // Handle M/D/YY or M/D/YYYY or D/M/YY formats e.g. "3/1/26" or "1/3/2026"
-  const parts=s.split('/');
-  if(parts.length===3){
-    let y=parseInt(parts[2]);
-    if(y<100) y+=2000; // 26 -> 2026
-    const m=String(parseInt(parts[0])).padStart(2,'0');
-    const d2=String(parseInt(parts[1])).padStart(2,'0');
-    return `${y}-${m}-${d2}`;
-  }
-  // Handle D-M-YYYY
-  const parts2=s.split('-');
-  if(parts2.length===3&&parts2[0].length<=2){
-    const y=parseInt(parts2[2]);
-    const m=String(parseInt(parts2[1])).padStart(2,'0');
-    const d2=String(parseInt(parts2[0])).padStart(2,'0');
-    return `${y}-${m}-${d2}`;
-  }
-  return s;
-}
 function fld(row,...keys){
-  // Normalize row keys once — strip whitespace/tabs from column headers
-  const normRow={};
-  Object.keys(row).forEach(k=>{normRow[k.trim().toLowerCase().replace(/\s+/g,'_')]=String(row[k]).trim();});
+  const nr={};Object.keys(row).forEach(k=>{nr[k.trim().toLowerCase().replace(/\s+/g,'_')]=String(row[k]).trim();});
   for(const k of keys){
-    // Try exact, then trimmed original, then normalized
     let v=row[k];
-    if(v===undefined||v===null||String(v).trim()===''){v=row[k.trim()];}
-    if(v===undefined||v===null||String(v).trim()===''){v=normRow[k.trim().toLowerCase().replace(/\s+/g,'_')];}
+    if(v===undefined||v===null||String(v).trim()==='')v=row[k.trim()];
+    if(v===undefined||v===null||String(v).trim()==='')v=nr[k.trim().toLowerCase().replace(/\s+/g,'_')];
     if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim();
-  }
-  return'';
+  }return'';
 }
+function pDate(v){if(!v&&v!==0)return'';const s=String(v).trim();if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,10);const n=parseFloat(s);if(!isNaN(n)&&n>40000){const d=new Date(Math.round((n-25569)*86400*1000));return d.toISOString().slice(0,10);}const p=s.split('/');if(p.length===3){let y=parseInt(p[2]);if(y<100)y+=2000;return`${y}-${String(parseInt(p[0])).padStart(2,'0')}-${String(parseInt(p[1])).padStart(2,'0')}`;}return s;}
+function pMonth(v){const d=pDate(v);if(d&&d.length>=7)return d.slice(0,7);const s=String(v).trim();if(/^\d{4}-\d{2}$/.test(s))return s;const n=parseFloat(s);if(!isNaN(n)&&n>40000){const dt=new Date(Math.round((n-25569)*86400*1000));return dt.toISOString().slice(0,7);}return s.slice(0,7);}
 
 function buildDoc(row,type){
   switch(type){
-    case 'skus':{
-      const code=fld(row,'code','Code','CODE','sku_code','SKU Code','SKU_CODE');
-      const name=fld(row,'name','Name','NAME','sku_name','SKU Name');
-      if(!code){console.warn('SKUS SKIP — no code. Row keys:',Object.keys(row));return null;}
-      return{id:code,data:{code,name:name||code,brand:fld(row,'brand','Brand','BRAND'),price:parseFloat(fld(row,'price','Price','PRICE'))||0}};
-    }
-    case 'doors':{
-      const code=fld(row,'code','Code','CODE','door_code','Door Code');
-      const name=fld(row,'name','Name','NAME','door_name','Door Name');
-      if(!code){console.warn('DOORS SKIP — no code found. Row keys:',Object.keys(row));return null;}
-      const repEmail=fld(row,'rep_email','Rep Email','REP_EMAIL');
-      const rep=USERS.find(u=>u.email===repEmail);
-      return{id:code,data:{code,name:name||code,channel:fld(row,'channel','Channel','CHANNEL')||'Modern Trade',area:fld(row,'area','Area','AREA'),repId:rep?.id||'',repEmail}};
-    }
-    case 'targets':{
-      const doorCode=fld(row,'door_code','Door Code','DOOR_CODE','door');
-      const door=DOORS.find(d=>String(d.code)===String(doorCode)||String(d.id)===String(doorCode));
-      if(!door)return null;
-      const repEmail=fld(row,'rep_email','Rep Email');
-      const rep=USERS.find(u=>u.email===repEmail);
-      const repId=rep?.id||repEmail||'';
-      const month=pMonth(fld(row,'month','Month','MONTH'));
-      if(!month)return null;
-      const key=`${repId}_${door.id}_${month}`;
-      return{id:key,data:{repId,doorId:door.id,month,target:parseFloat(fld(row,'target','Target','TARGET'))||0,actual:0}};
-    }
-    case 'msl':{
-      const doorCode=fld(row,'door_code','Door Code','DOOR_CODE');
-      const skuCode=fld(row,'sku_code','SKU Code','SKU_CODE');
-      const door=DOORS.find(d=>String(d.code)===String(doorCode)||String(d.id)===String(doorCode));
-      const sku=SKUS.find(s=>String(s.code)===String(skuCode)||String(s.id)===String(skuCode));
-      if(!door||!sku)return null;
-      const status=fld(row,'status','Status')||'missing';
-      return{id:`${door.id}_${sku.id}`,data:{doorId:door.id,skuId:sku.id,status,lastSale:pDate(fld(row,'last_sale','Last Sale')),note:fld(row,'note','Note')||''}};
-    }
-    case 'sales':{
-      const doorCode=fld(row,'door_code','Door Code','DOOR_CODE');
-      const skuCode=fld(row,'sku_code','SKU Code','SKU_CODE');
-      const door=DOORS.find(d=>String(d.code)===String(doorCode)||String(d.id)===String(doorCode));
-      const sku=SKUS.find(s=>String(s.code)===String(skuCode)||String(s.id)===String(skuCode));
-      if(!door){
-        console.warn('SALES SKIP — door not found. door_code in file:',JSON.stringify(doorCode),'Available codes:',DOORS.slice(0,5).map(d=>d.code));
-        return null;
-      }
-      if(!sku){
-        console.warn('SALES SKIP — sku not found. sku_code in file:',JSON.stringify(skuCode),'Available codes:',SKUS.slice(0,5).map(s=>s.code));
-        return null;
-      }
-      const rawDate=fld(row,'date','Date','DATE');
-      const date=pDate(rawDate)||rawDate;
-      const month=date.length>=7?date.slice(0,7):'';
-      const repEmail=fld(row,'rep_email','Rep Email');
-      const rep=USERS.find(u=>u.email===repEmail);
-      return{id:null,data:{doorId:door.id,skuId:sku.id,repId:rep?.id||'',qty:parseFloat(fld(row,'qty','Qty','QTY'))||0,value:parseFloat(fld(row,'value','Value','VALUE'))||0,date,month,invoiceNo:fld(row,'invoice_no','Invoice No','INVOICE_NO')}};
-    }
-    case 'visits':{
-      const doorCode=fld(row,'door_code','Door Code','DOOR_CODE');
-      const door=DOORS.find(d=>String(d.code)===String(doorCode)||String(d.id)===String(doorCode));
-      if(!door)return null;
-      const repEmail=fld(row,'rep_email','Rep Email');
-      const rep=USERS.find(u=>u.email===repEmail);
-      return{id:null,data:{doorId:door.id,repId:rep?.id||'',date:pDate(fld(row,'date','Date')),checkin:fld(row,'checkin','Checkin','CHECK_IN','check_in'),checkout:fld(row,'checkout','Checkout','CHECK_OUT','check_out'),status:fld(row,'status','Status')||'completed'}};
-    }
+    case 'skus':{const code=fld(row,'code','Code','CODE','sku_code');const name=fld(row,'name','Name','NAME');if(!code)return null;return{id:code,data:{code,name:name||code,brand:fld(row,'brand','Brand'),price:parseFloat(fld(row,'price','Price'))||0}};}
+    case 'doors':{const code=fld(row,'code','Code','CODE','door_code');const name=fld(row,'name','Name','NAME');if(!code)return null;const re=fld(row,'rep_email','Rep Email');const rep=USERS.find(u=>u.email===re);return{id:code,data:{code,name:name||code,channel:fld(row,'channel','Channel')||'Modern Trade',area:fld(row,'area','Area'),repId:rep?.id||'',repEmail:re}};}
+    case 'targets':{const dc=fld(row,'door_code','Door Code','DOOR_CODE');const door=DOORS.find(d=>String(d.code)===String(dc)||String(d.id)===String(dc));if(!door)return null;const re=fld(row,'rep_email','Rep Email');const rep=USERS.find(u=>u.email===re);const repId=rep?.id||re||'';const month=pMonth(fld(row,'month','Month','MONTH'));if(!month)return null;return{id:`${repId}_${door.id}_${month}`,data:{repId,doorId:door.id,month,target:parseFloat(fld(row,'target','Target'))||0,actual:0}};}
+    case 'msl':{const dc=fld(row,'door_code','Door Code','DOOR_CODE');const sc=fld(row,'sku_code','SKU Code','SKU_CODE');const door=DOORS.find(d=>String(d.code)===String(dc)||String(d.id)===String(dc));const sku=SKUS.find(s=>String(s.code)===String(sc)||String(s.id)===String(sc));if(!door||!sku)return null;const status=fld(row,'status','Status')||'missing';return{id:`${door.id}_${sku.id}`,data:{doorId:door.id,skuId:sku.id,status,lastSale:pDate(fld(row,'last_sale','Last Sale')),note:fld(row,'note','Note')}};}
+    case 'sales':{const dc=fld(row,'door_code','Door Code','DOOR_CODE');const sc=fld(row,'sku_code','SKU Code','SKU_CODE');const door=DOORS.find(d=>String(d.code)===String(dc)||String(d.id)===String(dc));const sku=SKUS.find(s=>String(s.code)===String(sc)||String(s.id)===String(sc));if(!door||!sku){console.warn('SKIP sale: door=',dc,!!door,'sku=',sc,!!sku);return null;}const rawD=fld(row,'date','Date','DATE');const date=pDate(rawD)||rawD;const month=date.slice(0,7);const re=fld(row,'rep_email','Rep Email');const rep=USERS.find(u=>u.email===re);return{id:null,data:{doorId:door.id,skuId:sku.id,repId:rep?.id||'',qty:parseFloat(fld(row,'qty','Qty'))||0,value:parseFloat(fld(row,'value','Value','VALUE'))||0,date,month,invoiceNo:fld(row,'invoice_no','Invoice No')}};}
+    case 'visits':{const dc=fld(row,'door_code','Door Code','DOOR_CODE');const door=DOORS.find(d=>String(d.code)===String(dc)||String(d.id)===String(dc));if(!door)return null;const re=fld(row,'rep_email','Rep Email');const rep=USERS.find(u=>u.email===re);return{id:null,data:{doorId:door.id,repId:rep?.id||'',date:pDate(fld(row,'date','Date')),checkin:fld(row,'checkin','Checkin','check_in'),checkout:fld(row,'checkout','Checkout','check_out'),status:fld(row,'status','Status')||'completed'}};}
     default:return null;
   }
 }
 
-// ════════════════════════════════════════════════════════
-//  TABLE FILTER
-// ════════════════════════════════════════════════════════
-function filterTbl(prefix){
-  const q=g(prefix+'-srch').value.toLowerCase();
-  if(prefix==='tgt') renderTgt(TARGETS.filter(t=>{const d=DOORS.find(x=>x.id===t.doorId);return(d?.name||t.doorId).toLowerCase().includes(q)||(String(d?.code)||'').includes(q);}));
-  if(prefix==='vis') renderVis(VISITS.filter(v=>{const d=DOORS.find(x=>x.id===v.doorId);return(d?.name||v.doorId).toLowerCase().includes(q);}));
-}
+// ══════════════════════════════════════════
+//  BOTTOM SHEET
+// ══════════════════════════════════════════
+function openBS(id){g(id).classList.add('open');}
+function closeBS(id){g(id).classList.remove('open');}
 
-// ════════════════════════════════════════════════════════
-//  MONTH FILTERS
-// ════════════════════════════════════════════════════════
-function fillMonths(){
-  const now=new Date();
-  ['d-month','tgt-month','zero-month'].forEach(sid=>{
-    const el=g(sid);if(!el)return;
-    el.innerHTML='<option value="">'+curMonthLabel()+'</option>';
-    for(let i=1;i<=6;i++){
-      const d=new Date(now.getFullYear(),now.getMonth()-i,1);
-      const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-      el.innerHTML+=`<option value="${val}">${d.toLocaleDateString('ar-EG',{month:'long',year:'numeric'})}</option>`;
-    }
-  });
-}
-
-// ════════════════════════════════════════════════════════
-//  MODAL
-// ════════════════════════════════════════════════════════
-function openM(id){
-  g(id).classList.add('open');
-  const m=g(id);
-  m.querySelectorAll('input[type=date]').forEach(el=>{if(!el.value)el.value=today();});
-  if(id==='m-import') updateImpUI();
-}
-function closeM(id){g(id).classList.remove('open');}
-
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  UTILS
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 function g(id){return document.getElementById(id);}
 function show(id){document.querySelectorAll('.screen').forEach(s=>{s.style.display='none';s.classList.remove('active');});const el=g(id);if(el){el.style.display='flex';el.classList.add('active');}}
-function showErr(eid,msg){const el=g(eid);if(el){el.textContent=msg;el.style.display='block';}}
+function showErr(id,msg){const el=g(id);if(el){el.textContent=msg;el.style.display='block';}}
 function fmt(n){if(!n)return'0';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return Math.round(n).toLocaleString();}
 function today(){return new Date().toISOString().split('T')[0];}
 function curMonth(){return new Date().toISOString().slice(0,7);}
-function curMonthLabel(){return new Date().toLocaleDateString('ar-EG',{month:'long',year:'numeric'});}
-function daysSince(d){return Math.floor((new Date()-new Date(d))/(1000*60*60*24));}
-function toast(msg,type='info'){
-  const c=g('toasts'),t=document.createElement('div');
-  t.className='toast';
-  t.style.borderColor=type==='success'?'rgba(0,196,122,.4)':type==='error'?'rgba(255,59,92,.4)':type==='warning'?'rgba(255,184,0,.4)':'var(--bo2)';
-  t.style.color=type==='success'?'var(--ok)':type==='error'?'var(--er)':type==='warning'?'var(--wn)':'var(--tx)';
-  t.textContent=msg;c.appendChild(t);setTimeout(()=>t.remove(),4000);
-}
-
-// ── ATTACH EVENTS after DOM ready ──
-document.addEventListener('DOMContentLoaded', () => {
-  const btn = document.getElementById('l-btn');
-  if (btn) btn.addEventListener('click', doLogin);
-  const ep = document.getElementById('l-email');
-  const pp = document.getElementById('l-pass');
-  if (ep) ep.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
-  if (pp) pp.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
-  fillMonths();
-  const vd = document.getElementById('vis-date');
-  const sd = document.getElementById('msa-date');
-  const md = document.getElementById('mv-date');
-  const mm = document.getElementById('mt-month');
-  if(vd) vd.value = today();
-  if(sd) sd.value = today();
-  if(md) md.value = today();
-  if(mm) mm.value = curMonth();
-  document.querySelectorAll('.mov').forEach(m => {
-    m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
-  });
-});
+function daysSince(d){return Math.floor((new Date()-new Date(d))/(86400000));}
+function fillMonths(){const now=new Date();['d-month','tgt-month','zero-month'].forEach(sid=>{const el=g(sid);if(!el)return;el.innerHTML=`<option value="">${now.toLocaleDateString('ar-EG',{month:'long',year:'numeric'})}</option>`;for(let i=1;i<=6;i++){const d=new Date(now.getFullYear(),now.getMonth()-i,1);const v=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;el.innerHTML+=`<option value="${v}">${d.toLocaleDateString('ar-EG',{month:'long',year:'numeric'})}</option>`;}});}
+function toast(msg,type='info'){const c=g('toasts'),t=document.createElement('div');t.className='toast';const icons={success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};t.innerHTML=`<span class="toast-icon">${icons[type]||'ℹ️'}</span>${msg}`;t.style.borderColor=type==='success'?'rgba(0,196,122,.4)':type==='error'?'rgba(255,59,92,.4)':type==='warning'?'rgba(255,184,0,.4)':'var(--bo2)';t.style.color=type==='success'?'var(--ok)':type==='error'?'var(--er)':type==='warning'?'var(--wn)':'var(--tx)';c.appendChild(t);setTimeout(()=>t.remove(),4000);}
 </script>
 </body>
 </html>
