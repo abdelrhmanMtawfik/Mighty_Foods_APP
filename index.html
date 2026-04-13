@@ -887,12 +887,21 @@ async function loadDash() {
 
   if (selDoor) {
     try {
+      // Get target
       const tSnap = await DB.collection('targets')
         .where('doorId','==',selDoor.id).where('month','==',month).limit(1).get();
-      if (!tSnap.empty) tgt = tSnap.docs[0].data();
+      if (!tSnap.empty) tgt = {...tSnap.docs[0].data()};
+
+      // Calculate actual from sales in real-time
+      const sSnap = await DB.collection('sales')
+        .where('doorId','==',selDoor.id).where('month','==',month).get();
+      const realActual = sSnap.docs.reduce((a,d)=>a+(d.data().value||0),0);
+      if (tgt) tgt.actual = realActual;
+      else if (realActual>0) tgt = {target:0, actual:realActual};
+
       const mSnap = await DB.collection('msl').where('doorId','==',selDoor.id).get();
       mslItems = mSnap.docs.map(d=>d.data());
-    } catch(e) {}
+    } catch(e) { console.error('loadDash error:',e); }
   }
 
   const target = tgt?.target||0, actual = tgt?.actual||0;
@@ -935,17 +944,36 @@ async function loadDash() {
 async function loadTargets() {
   const month = g('tgt-month').value || curMonth();
   try {
+    // 1. Load targets for this month
     let q = DB.collection('targets').where('month','==',month);
-    if (PROFILE.role==='rep') q=q.where('repId','==',ME.uid);
-    else if (selRep) q=q.where('repId','==',selRep);
     const snap = await q.get();
-    TARGETS = snap.docs.map(d=>d.data());
-  } catch(e) { TARGETS=[]; }
+    TARGETS = snap.docs.map(d=>({...d.data(), id:d.id}));
 
-  const sumT = TARGETS.reduce((a,t)=>a+t.target,0);
+    // Filter by rep
+    if (PROFILE.role==='rep') TARGETS=TARGETS.filter(t=>t.repId===ME.uid);
+    else if (selRep) TARGETS=TARGETS.filter(t=>t.repId===selRep);
+
+    // 2. Load all sales for this month — calculate actual per door in real-time
+    const salesSnap = await DB.collection('sales').where('month','==',month).get();
+    const salesByDoor = {};
+    salesSnap.docs.forEach(d=>{
+      const s=d.data();
+      if(!salesByDoor[s.doorId]) salesByDoor[s.doorId]=0;
+      salesByDoor[s.doorId]+=(s.value||0);
+    });
+
+    // 3. Merge actual into targets
+    TARGETS = TARGETS.map(t=>({
+      ...t,
+      actual: salesByDoor[t.doorId]||0
+    }));
+
+  } catch(e) { console.error('loadTargets error:',e); TARGETS=[]; }
+
+  const sumT = TARGETS.reduce((a,t)=>a+(t.target||0),0);
   const sumA = TARGETS.reduce((a,t)=>a+(t.actual||0),0);
-  const avg  = TARGETS.length ? Math.round(sumA/sumT*100)||0 : 0;
-  const under= TARGETS.filter(t=>t.target&&((t.actual||0)/t.target)<0.8).length;
+  const avg  = sumT ? Math.round(sumA/sumT*100) : 0;
+  const under= TARGETS.filter(t=>t.target&&(t.actual/t.target)<0.8).length;
 
   g('tgt-total').textContent = fmt(sumT);
   g('tgt-actual').textContent= fmt(sumA);
@@ -1301,8 +1329,9 @@ async function doImport() {
       } else {
         skip++;
         if(skipReasons.length<3){
-          const sample=Object.entries(row).slice(0,3).map(([k,v])=>`${k}:${v}`).join(', ');
+          const sample=Object.entries(row).slice(0,4).map(([k,v])=>`${k}="${v}"`).join(' | ');
           skipReasons.push(sample);
+          console.warn('Import skip reason — row:', row);
         }
       }
     }
@@ -1386,13 +1415,13 @@ function buildDoc(row,type){
     case 'skus':{
       const code=fld(row,'code','Code','CODE','sku_code','SKU Code','SKU_CODE');
       const name=fld(row,'name','Name','NAME','sku_name','SKU Name');
-      if(!code)return null;
+      if(!code){console.warn('SKUS SKIP — no code. Row keys:',Object.keys(row));return null;}
       return{id:code,data:{code,name:name||code,brand:fld(row,'brand','Brand','BRAND'),price:parseFloat(fld(row,'price','Price','PRICE'))||0}};
     }
     case 'doors':{
       const code=fld(row,'code','Code','CODE','door_code','Door Code');
       const name=fld(row,'name','Name','NAME','door_name','Door Name');
-      if(!code)return null;
+      if(!code){console.warn('DOORS SKIP — no code found. Row keys:',Object.keys(row));return null;}
       const repEmail=fld(row,'rep_email','Rep Email','REP_EMAIL');
       const rep=USERS.find(u=>u.email===repEmail);
       return{id:code,data:{code,name:name||code,channel:fld(row,'channel','Channel','CHANNEL')||'Modern Trade',area:fld(row,'area','Area','AREA'),repId:rep?.id||'',repEmail}};
@@ -1423,7 +1452,14 @@ function buildDoc(row,type){
       const skuCode=fld(row,'sku_code','SKU Code','SKU_CODE');
       const door=DOORS.find(d=>String(d.code)===String(doorCode)||String(d.id)===String(doorCode));
       const sku=SKUS.find(s=>String(s.code)===String(skuCode)||String(s.id)===String(skuCode));
-      if(!door||!sku)return null;
+      if(!door){
+        console.warn('SALES SKIP — door not found. door_code in file:',JSON.stringify(doorCode),'Available codes:',DOORS.slice(0,5).map(d=>d.code));
+        return null;
+      }
+      if(!sku){
+        console.warn('SALES SKIP — sku not found. sku_code in file:',JSON.stringify(skuCode),'Available codes:',SKUS.slice(0,5).map(s=>s.code));
+        return null;
+      }
       const rawDate=fld(row,'date','Date','DATE');
       const date=pDate(rawDate)||rawDate;
       const month=date.length>=7?date.slice(0,7):'';
