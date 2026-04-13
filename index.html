@@ -200,7 +200,7 @@ tbody tr:hover td{background:rgba(255,255,255,.02);color:var(--tx)}
     <div class="ltitle">تسجيل الدخول</div>
     <div class="fl"><label>البريد الإلكتروني</label><input type="email" id="l-email" placeholder="email@mighty-foods.com" style="direction:ltr" autocomplete="email"></div>
     <div class="fl"><label>كلمة المرور</label><input type="password" id="l-pass" placeholder="••••••••" autocomplete="current-password"></div>
-    <button class="btn-main" id="l-btn" onclick="doLogin()">دخول</button>
+    <button class="btn-main" id="l-btn" >دخول</button>
     <div class="emsg" id="l-err"></div>
   </div>
 </div>
@@ -664,8 +664,7 @@ try {
   firebase.initializeApp(firebaseConfig);
   AUTH = firebase.auth();
   DB   = firebase.firestore();
-  // Enable offline persistence
-  DB.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+
 } catch(e) {
   console.error('Firebase init error:', e);
   document.getElementById('l-err').textContent = 'خطأ في الاتصال: ' + e.message;
@@ -684,7 +683,14 @@ let impRows=[], impType='doors';
 // ════════════════════════════════════════════════════════
 //  BOOT
 // ════════════════════════════════════════════════════════
-AUTH.onAuthStateChanged(async u => {
+// Safety check — if Firebase SDK didn't load properly
+if (typeof firebase === 'undefined' || !AUTH) {
+  document.addEventListener('DOMContentLoaded', () => {
+    showErr('l-err', 'Firebase SDK لم يتحمل — تأكد من الاتصال بالإنترنت');
+    g('l-err').style.display = 'block';
+  });
+} else {
+  AUTH.onAuthStateChanged(async u => {
   if (u) {
     ME = u;
     await loadProfile();
@@ -695,16 +701,10 @@ AUTH.onAuthStateChanged(async u => {
   } else {
     show('s-login');
   }
-});
+  });
+}
 
-window.onload = () => {
-  fillMonths();
-  g('vis-date').value = today();
-  g('msa-date').value = today();
-  g('mv-date').value  = today();
-  g('mt-month').value = curMonth();
-  document.querySelectorAll('.mov').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
-};
+// events handled in DOMContentLoaded below
 
 // ════════════════════════════════════════════════════════
 //  AUTH
@@ -713,23 +713,42 @@ async function doLogin() {
   const email = g('l-email').value.trim();
   const pass  = g('l-pass').value;
   const btn   = g('l-btn');
-  g('l-err').style.display='none';
-  if (!email||!pass) { showErr('l-err','أدخل الإيميل وكلمة السر'); return; }
-  if (!AUTH) { showErr('l-err','Firebase غير متصل — تأكد من فتح الملف عبر HTTPS وليس file://'); return; }
-  btn.disabled=true; btn.textContent='جاري الدخول...';
+  g('l-err').style.display = 'none';
+
+  if (!email || !pass) { showErr('l-err','أدخل الإيميل وكلمة السر'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'جاري الدخول...';
+
+  // Check if Firebase loaded correctly
+  if (!AUTH) {
+    showErr('l-err', 'Firebase لم يتحمل — افتح الملف من GitHub Pages أو أي HTTPS server وليس file://');
+    btn.disabled = false; btn.textContent = 'دخول';
+    return;
+  }
+
   try {
     await AUTH.signInWithEmailAndPassword(email, pass);
+    // onAuthStateChanged will handle the rest
   } catch(e) {
-    const m = e.code==='auth/user-not-found'||e.code==='auth/wrong-password'||e.code==='auth/invalid-credential'
-      ? 'بيانات غير صحيحة' : e.message;
-    showErr('l-err', m);
+    console.error('Login error:', e.code, e.message);
+    let msg = 'خطأ غير معروف';
+    if (['auth/user-not-found','auth/wrong-password','auth/invalid-credential','auth/invalid-email'].includes(e.code)) {
+      msg = 'الإيميل أو كلمة السر غير صحيحة';
+    } else if (e.code === 'auth/network-request-failed') {
+      msg = 'لا يوجد اتصال بالإنترنت';
+    } else if (e.code === 'auth/too-many-requests') {
+      msg = 'محاولات كثيرة — انتظر قليلاً';
+    } else {
+      msg = e.message;
+    }
+    showErr('l-err', msg);
+    btn.disabled = false;
+    btn.textContent = 'دخول';
   }
-  btn.disabled=false; btn.textContent='دخول';
 }
 
-document.addEventListener('keydown', e => {
-  if (e.key==='Enter' && g('s-login').classList.contains('active')) doLogin();
-});
+
 
 async function logout() {
   await AUTH.signOut();
@@ -1397,4 +1416,37 @@ function showErr(eid,msg){const el=g(eid);if(el){el.textContent=msg;el.style.dis
 function fmt(n){if(!n)return'0';if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return Math.round(n).toLocaleString();}
 function today(){return new Date().toISOString().split('T')[0];}
 function curMonth(){return new Date().toISOString().slice(0,7);}
-function curMonthLabel(){return new Date().toLocaleDa
+function curMonthLabel(){return new Date().toLocaleDateString('ar-EG',{month:'long',year:'numeric'});}
+function daysSince(d){return Math.floor((new Date()-new Date(d))/(1000*60*60*24));}
+function toast(msg,type='info'){
+  const c=g('toasts'),t=document.createElement('div');
+  t.className='toast';
+  t.style.borderColor=type==='success'?'rgba(0,196,122,.4)':type==='error'?'rgba(255,59,92,.4)':type==='warning'?'rgba(255,184,0,.4)':'var(--bo2)';
+  t.style.color=type==='success'?'var(--ok)':type==='error'?'var(--er)':type==='warning'?'var(--wn)':'var(--tx)';
+  t.textContent=msg;c.appendChild(t);setTimeout(()=>t.remove(),4000);
+}
+
+// ── ATTACH EVENTS after DOM ready ──
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('l-btn');
+  if (btn) btn.addEventListener('click', doLogin);
+  const ep = document.getElementById('l-email');
+  const pp = document.getElementById('l-pass');
+  if (ep) ep.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  if (pp) pp.addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+  fillMonths();
+  const vd = document.getElementById('vis-date');
+  const sd = document.getElementById('msa-date');
+  const md = document.getElementById('mv-date');
+  const mm = document.getElementById('mt-month');
+  if(vd) vd.value = today();
+  if(sd) sd.value = today();
+  if(md) md.value = today();
+  if(mm) mm.value = curMonth();
+  document.querySelectorAll('.mov').forEach(m => {
+    m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+  });
+});
+</script>
+</body>
+</html>
