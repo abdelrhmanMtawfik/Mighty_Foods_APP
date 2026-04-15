@@ -288,6 +288,90 @@ html,body{height:100%;overflow:hidden;font-family:'Cairo',sans-serif;background:
 .hidden{display:none!important}
 .divider{height:1px;background:var(--bo);margin:8px 0}
 .load-row{text-align:center;padding:32px;color:var(--tx3);font-size:13px}
+
+/* ── FIELD UX: larger tap targets ── */
+.bnav-item{min-height:56px}
+.adm-card{min-height:90px;padding:18px 12px}
+.bsav,.bcnl{min-height:52px;font-size:15px}
+.door-item{min-height:56px;padding:14px}
+.rpill{padding:9px 16px;font-size:13px}
+.imp-type-btn{min-height:64px;padding:12px 6px}
+
+/* ── ACCORDION TARGETS ── */
+.tgt-door-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px;background:var(--card2);border-radius:var(--r);
+  margin-bottom:8px;cursor:pointer;-webkit-user-select:none;
+  border:1px solid var(--bo);transition:background .15s;
+}
+.tgt-door-hd:active{background:var(--bg3)}
+.tgt-door-hd.open{border-color:var(--bo2);background:var(--brand3)}
+.tgt-door-hd-left{flex:1;min-width:0}
+.tgt-door-name{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tgt-door-sub{font-size:11px;color:var(--tx2);margin-top:2px}
+.tgt-door-hd-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.tgt-chevron{font-size:12px;color:var(--tx3);transition:transform .25s;display:inline-block}
+.tgt-door-hd.open .tgt-chevron{transform:rotate(180deg)}
+.tgt-sku-list{
+  overflow:hidden;max-height:0;
+  transition:max-height .3s cubic-bezier(.4,0,.2,1);
+  margin-bottom:4px;
+}
+.tgt-sku-list.open{max-height:1200px}
+.tgt-sku-item{
+  background:var(--card);border:1px solid var(--bo);border-radius:var(--rs);
+  margin:0 0 6px 10px;padding:11px 13px;
+}
+.tgt-sku-item-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.tgt-sku-name{font-size:12px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-left:8px}
+.tgt-sku-code{font-size:10px;color:var(--tx3);font-family:monospace}
+.tgt-sku-stats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px}
+.tgt-sku-stat{flex:1;min-width:70px;background:var(--bg2);border-radius:8px;padding:6px 8px}
+.tgt-sku-stat-lbl{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;font-weight:700}
+.tgt-sku-stat-val{font-size:13px;font-weight:900}
+
+/* ── VISITS SUMMARY CARDS ── */
+.vis-summary-card{
+  background:var(--card);border:1px solid var(--bo);border-radius:var(--r);
+  margin:0 16px 10px;overflow:hidden;transition:border-color .2s;
+}
+.vis-summary-card.on-track{border-color:rgba(0,196,122,.35)}
+.vis-summary-card.behind{border-color:rgba(255,59,92,.25)}
+.vis-card-hd{
+  display:flex;align-items:center;gap:12px;padding:13px 14px;
+  border-bottom:1px solid var(--bo);
+}
+.vis-avatar{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;
+}
+.vis-avatar.on-track{background:rgba(0,196,122,.15);color:var(--ok)}
+.vis-avatar.behind{background:rgba(255,59,92,.12);color:var(--er)}
+.vis-rep-name{font-size:14px;font-weight:700;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vis-position-badge{padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700;flex-shrink:0}
+.vis-position-badge.on-track{background:rgba(0,196,122,.15);color:var(--ok)}
+.vis-position-badge.behind{background:rgba(255,59,92,.15);color:var(--er)}
+.vis-card-body{padding:12px 14px}
+.vis-kpi-row{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.vis-kpi-row::-webkit-scrollbar{display:none}
+.vis-kpi{flex-shrink:0;min-width:70px;background:var(--bg2);border-radius:9px;padding:7px 8px;text-align:center}
+.vis-kpi-lbl{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.7px;font-weight:700;margin-bottom:2px}
+.vis-kpi-val{font-size:14px;font-weight:900;line-height:1}
+.vis-prog-section{margin-top:2px}
+.vis-prog-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.vis-prog-title{font-size:11px;color:var(--tx2);font-weight:600}
+.vis-prog-pct{font-size:12px;font-weight:900}
+.vis-prog-bar{height:7px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-bottom:8px}
+.vis-prog-fill{height:100%;border-radius:4px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.vis-prog-fill.ok{background:linear-gradient(90deg,#00C47A,#00E090)}
+.vis-prog-fill.warn{background:linear-gradient(90deg,var(--wn),#FF9500)}
+.vis-prog-fill.bad{background:linear-gradient(90deg,var(--er),#FF7080)}
+
+/* ── COLOR-CODE BEHIND vs ON TRACK ── */
+.metric-behind{color:var(--er)!important}
+.metric-on-track{color:var(--ok)!important}
+.metric-warn{color:var(--wn)!important}
 </style>
 </head>
 <body>
@@ -462,7 +546,7 @@ html,body{height:100%;overflow:hidden;font-family:'Cairo',sans-serif;background:
       <div class="kpi-row">
         <div class="kcard gr"><div class="klbl">الزيارات</div><div class="kval" id="v-tot">—</div><div class="kmeta">اليوم</div></div>
         <div class="kcard bl"><div class="klbl">متوسط المدة</div><div class="kval" id="v-avg">—</div><div class="kmeta">دقيقة</div></div>
-        <div class="kcard or"><div class="klbl">Doors</div><div class="kval" id="v-doors">—</div><div class="kmeta">مختلف</div></div>
+        <div class="kcard or"><div class="klbl">Doors</div><div class="kval" id="v-doors">—</div><div class="kmeta" id="v-doors-m">مختلف</div></div>
       </div>
       <div class="filter-bar">
         <input class="filter-search" id="vis-srch" placeholder="بحث..." oninput="renderVis(VISITS)">
@@ -753,11 +837,15 @@ html,body{height:100%;overflow:hidden;font-family:'Cairo',sans-serif;background:
       <div class="struct-row"><div class="struct-col">invoice_no</div><div class="struct-ex">INV-001</div></div>
     </div>
     <div id="imp-struct-visits" class="struct-card hidden">
-      <div class="struct-row"><div class="struct-col">door_code <span class="struct-req">*</span></div><div class="struct-ex">10004024</div></div>
-      <div class="struct-row"><div class="struct-col">rep_email <span class="struct-req">*</span></div><div class="struct-ex">omar@mighty-foods.com</div></div>
-      <div class="struct-row"><div class="struct-col">date <span class="struct-req">*</span></div><div class="struct-ex">2026-03-15</div></div>
-      <div class="struct-row"><div class="struct-col">checkin</div><div class="struct-ex">09:15</div></div>
-      <div class="struct-row"><div class="struct-col">checkout</div><div class="struct-ex">09:50</div></div>
+      <div class="struct-row"><div class="struct-col">Rep <span class="struct-req">*</span></div><div class="struct-ex">Ahmed El Sherbiny</div></div>
+      <div class="struct-row"><div class="struct-col">Number Of Visits <span class="struct-req">*</span></div><div class="struct-ex">88</div></div>
+      <div class="struct-row"><div class="struct-col">Daily Targets</div><div class="struct-ex">76</div></div>
+      <div class="struct-row"><div class="struct-col">%%</div><div class="struct-ex">1.16 (نسبة الإنجاز)</div></div>
+      <div class="struct-row"><div class="struct-col">Monthly Target</div><div class="struct-ex">76</div></div>
+      <div class="struct-row"><div class="struct-col">To Achieve 100%</div><div class="struct-ex">-12</div></div>
+      <div class="struct-row"><div class="struct-col">Total Duration</div><div class="struct-ex">timedelta / ساعات</div></div>
+      <div class="struct-row"><div class="struct-col">Time %</div><div class="struct-ex">0.77</div></div>
+      <div class="struct-row"><div class="struct-col">Position</div><div class="struct-ex">Behind / On Track</div></div>
     </div>
     <div style="height:12px"></div>
     <div class="upload-zone" id="upzone">
@@ -1094,31 +1182,81 @@ async function loadTargets() {
 
 function renderTgt(data) {
   const q=g('tgt-srch').value.toLowerCase();
-  const filtered=data.filter(t=>{const d=DOORS.find(x=>x.id===t.doorId);return !q||(d?.name||'').toLowerCase().includes(q)||String(d?.code||'').includes(q);});
-  g('tgt-list').innerHTML = filtered.map(t=>{
-    const d=DOORS.find(x=>x.id===t.doorId), u=USERS.find(x=>x.id===t.repId);
-    const pct=t.target?Math.min(Math.round((t.actual||0)/t.target*100),999):0;
-    const pc=Math.min(pct,100), cl=pct>=100?'g':pct>=80?'o':'r';
-    return `<div class="cl-item">
-      <div class="cl-item-hd">
-        <div class="cl-item-hd-left">
-          <div class="cl-item-title">${d?.name||t.doorId}</div>
-          <div class="cl-item-sub">${d?.code||'—'} · ${d?.channel||'—'} · ${u?.name||'—'}</div>
+  const filtered=data.filter(t=>{
+    const d=DOORS.find(x=>x.id===t.doorId);
+    return !q||(d?.name||'').toLowerCase().includes(q)||String(d?.code||'').includes(q);
+  });
+  if(!filtered.length){
+    g('tgt-list').innerHTML='<div class="empty"><div class="empty-icon">🎯</div><div class="empty-txt">لا توجد أهداف</div></div>';
+    return;
+  }
+  // Group by doorId
+  const byDoor={};
+  filtered.forEach(t=>{if(!byDoor[t.doorId])byDoor[t.doorId]=[];byDoor[t.doorId].push(t);});
+
+  g('tgt-list').innerHTML=Object.entries(byDoor).map(([doorId,items],idx)=>{
+    const door=DOORS.find(x=>x.id===doorId);
+    const rep=USERS.find(x=>x.id===items[0]?.repId);
+    // Door-level totals
+    const sumT=items.reduce((a,t)=>a+(t.target||0),0);
+    const sumA=items.reduce((a,t)=>a+(t.actual||0),0);
+    const pct=sumT?Math.min(Math.round(sumA/sumT*100),999):0;
+    const pc=Math.min(pct,100);
+    const cl=pct>=100?'bg-s':pct>=80?'bg-w':'bg-d';
+    const barCl=pct>=100?'g':pct>=80?'o':'r';
+    const uid='tgt-acc-'+idx;
+    // SKU rows
+    const skuRows=items.map(t=>{
+      const sku=SKUS.find(x=>x.id===t.skuId);
+      const sp=t.target?Math.min(Math.round((t.actual||0)/t.target*100),999):0;
+      const spc=Math.min(sp,100);
+      const scl=sp>=100?'g':sp>=80?'o':'r';
+      return `<div class="tgt-sku-item">
+        <div class="tgt-sku-item-top">
+          <span class="tgt-sku-code">${sku?.code||t.skuId||'—'}</span>
+          <div class="tgt-sku-name">${sku?.name||t.skuId||'—'}</div>
+          <span class="bg ${sp>=100?'bg-s':sp>=80?'bg-w':'bg-d'}">${sp}%</span>
         </div>
-        <span class="bg ${pct>=100?'bg-s':pct>=80?'bg-w':'bg-d'}">${pct}%</span>
+        <div class="tgt-sku-stats">
+          <div class="tgt-sku-stat"><div class="tgt-sku-stat-lbl">الهدف</div><div class="tgt-sku-stat-val">${fmt(t.target)}</div></div>
+          <div class="tgt-sku-stat"><div class="tgt-sku-stat-lbl">المحقق</div><div class="tgt-sku-stat-val metric-on-track">${fmt(t.actual||0)}</div></div>
+          <div class="tgt-sku-stat"><div class="tgt-sku-stat-lbl">الفجوة</div><div class="tgt-sku-stat-val ${(t.target||0)-(t.actual||0)>0?'metric-behind':'metric-on-track'}">${fmt(Math.max(0,(t.target||0)-(t.actual||0)))}</div></div>
+        </div>
+        <div class="pb-mini"><div class="prog-fill ${scl}" style="width:${spc}%"></div></div>
+      </div>`;
+    }).join('');
+
+    return `<div style="margin-bottom:10px">
+      <div class="tgt-door-hd" id="hd-${uid}" onclick="toggleAcc('${uid}')">
+        <div class="tgt-door-hd-left">
+          <div class="tgt-door-name">${door?.name||doorId}</div>
+          <div class="tgt-door-sub">${door?.code||'—'} · ${door?.channel||'—'} · ${rep?.name||'—'} · ${items.length} SKU</div>
+        </div>
+        <div class="tgt-door-hd-right">
+          <span class="bg ${cl}">${pct}%</span>
+          <span class="tgt-chevron">▼</span>
+        </div>
       </div>
-      <div class="cl-item-body">
-        <div class="cl-stat"><div class="cl-stat-label">الهدف</div><div class="cl-stat-val">${fmt(t.target)}</div></div>
-        <div class="cl-stat"><div class="cl-stat-label">المحقق</div><div class="cl-stat-val" style="color:var(--ok)">${fmt(t.actual||0)}</div></div>
-        <div class="cl-stat"><div class="cl-stat-label">الفجوة</div><div class="cl-stat-val" style="color:var(--er)">${fmt(Math.max(0,(t.target||0)-(t.actual||0)))}</div></div>
-        <div class="cl-stat"><div class="cl-stat-label">الحالة</div><div class="cl-stat-val"><span class="bg ${pct>=100?'bg-s':pct>=80?'bg-w':'bg-d'}">${pct>=100?'تجاوز':pct>=80?'قريب':'تأخر'}</span></div></div>
-      </div>
-      <div class="pb-mini-wrap">
-        <div class="pb-mini-label"><span>${fmt(t.actual||0)} ج.م</span><span>${fmt(t.target||0)} ج.م</span></div>
-        <div class="pb-mini"><div class="prog-fill ${cl}" style="width:${pc}%"></div></div>
+      <div class="tgt-sku-list" id="list-${uid}">
+        <div class="pb-mini-wrap" style="padding:8px 14px 4px">
+          <div class="pb-mini-label">
+            <span style="font-size:11px;color:var(--tx2)">${fmt(sumA)} ج.م محقق</span>
+            <span style="font-size:11px;color:var(--tx2)">${fmt(sumT)} ج.م هدف</span>
+          </div>
+          <div class="pb-mini"><div class="prog-fill ${barCl}" style="width:${pc}%"></div></div>
+        </div>
+        ${skuRows}
       </div>
     </div>`;
-  }).join('')||'<div class="empty"><div class="empty-icon">🎯</div><div class="empty-txt">لا توجد أهداف</div></div>';
+  }).join('');
+}
+
+function toggleAcc(uid){
+  const hd=document.getElementById('hd-'+uid);
+  const list=document.getElementById('list-'+uid);
+  if(!hd||!list)return;
+  hd.classList.toggle('open');
+  list.classList.toggle('open');
 }
 
 // ══════════════════════════════════════════
@@ -1130,28 +1268,51 @@ async function loadMSL() {
     MSL=snap.docs.map(d=>d.data());
     if(PROFILE.role==='rep') MSL=MSL.filter(m=>{const d=DOORS.find(x=>x.id===m.doorId);return d?.repId===ME.uid||d?.repEmail===ME.email;});
   } catch(e){MSL=[];}
+  // Totals across all doors
   g('msl-ok').textContent=MSL.filter(m=>m.status==='present').length;
   g('msl-miss').textContent=MSL.filter(m=>m.status==='missing').length;
   g('msl-pct').textContent=MSL.length?Math.round(MSL.filter(m=>m.status==='present').length/MSL.length*100)+'%':'—%';
+  // On load: no door selected → show prompt
+  const df=g('msl-door-f').value;
+  if(!df){
+    g('msl-list').innerHTML=`<div class="empty">
+      <div class="empty-icon">🚪</div>
+      <div class="empty-txt">اختر Door لعرض الـ MSL</div>
+      <div class="empty-sub">Select a Door from the filter above</div>
+    </div>`;
+    return;
+  }
   filterMSL();
 }
 function filterMSL() {
-  const df=g('msl-door-f').value, sf=g('msl-stat-f').value, q=g('msl-srch').value.toLowerCase();
+  const df=g('msl-door-f').value;
+  // Require door selection
+  if(!df){
+    g('msl-list').innerHTML=`<div class="empty">
+      <div class="empty-icon">🚪</div>
+      <div class="empty-txt">اختر Door لعرض الـ MSL</div>
+      <div class="empty-sub">Select a Door from the filter above</div>
+    </div>`;
+    return;
+  }
+  const sf=g('msl-stat-f').value, q=g('msl-srch').value.toLowerCase();
   const data=MSL.filter(m=>{
     const s=SKUS.find(x=>x.id===m.skuId),d=DOORS.find(x=>x.id===m.doorId);
-    return(!df||m.doorId===df)&&(!sf||m.status===sf)&&(!q||(s?.name||'').toLowerCase().includes(q)||(d?.name||'').toLowerCase().includes(q));
+    return m.doorId===df&&(!sf||m.status===sf)&&(!q||(s?.name||'').toLowerCase().includes(q)||(d?.name||'').toLowerCase().includes(q));
   });
-  g('msl-list').innerHTML=data.map(m=>{
-    const s=SKUS.find(x=>x.id===m.skuId),d=DOORS.find(x=>x.id===m.doorId);
+  const door=DOORS.find(x=>x.id===df);
+  g('msl-list').innerHTML=data.length?data.map(m=>{
+    const s=SKUS.find(x=>x.id===m.skuId);
     return `<div class="msl-item">
       <div class="msl-dot ${m.status==='present'?'ok':'miss'}"></div>
       <div class="msl-info">
         <div class="msl-name">${s?.name||m.skuId}</div>
-        <div class="msl-sub">${d?.name||m.doorId} · ${s?.code||''}</div>
+        <div class="msl-sub">${s?.code||m.skuId}${m.lastSale?' · آخر بيع: '+m.lastSale:''}</div>
       </div>
       <span class="bg ${m.status==='present'?'bg-s':'bg-d'}">${m.status==='present'?'✓ متوافر':'✗ مفقود'}</span>
     </div>`;
-  }).join('')||'<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">لا توجد بيانات</div></div>';
+  }).join(''):`<div class="empty"><div class="empty-icon">📋</div>
+    <div class="empty-txt">لا توجد MSL لـ ${door?.name||df}</div></div>`;
 }
 
 // ══════════════════════════════════════════
@@ -1160,21 +1321,90 @@ function filterMSL() {
 async function loadVisits() {
   const date=g('vis-date').value||today();
   try {
-    let q=DB.collection('visits').where('date','==',date);
-    if(PROFILE.role==='rep') q=q.where('repId','==',ME.uid);
-    else if(selRep) q=q.where('repId','==',selRep);
-    const snap=await q.get();
+    const snap=await DB.collection('visits').get();
     VISITS=snap.docs.map(d=>d.data());
+    if(PROFILE.role==='rep') VISITS=VISITS.filter(v=>v.repId===ME.uid||v.rep===PROFILE.name);
   } catch(e){VISITS=[];}
-  const done=VISITS.filter(v=>v.status==='completed');
-  const durs=done.map(v=>{if(!v.checkin||!v.checkout)return 0;const [h1,m1]=v.checkin.split(':').map(Number);const [h2,m2]=v.checkout.split(':').map(Number);return Math.max(0,(h2*60+m2)-(h1*60+m1));}).filter(d=>d>0);
-  g('v-tot').textContent=VISITS.length;
-  g('v-avg').textContent=durs.length?Math.round(durs.reduce((a,b)=>a+b,0)/durs.length):0;
-  g('v-doors').textContent=new Set(VISITS.map(v=>v.doorId)).size;
+  // Detect format
+  const isSummary=VISITS.length>0&&VISITS[0].rep!==undefined;
+  if(isSummary){
+    const total=VISITS.reduce((a,v)=>a+(v.visits||0),0);
+    const onTrack=VISITS.filter(v=>(v.position||'').toLowerCase().includes('track')).length;
+    g('v-tot').textContent=total;
+    g('v-avg').textContent=VISITS.length?Math.round(total/VISITS.length):0;
+    g('v-doors').textContent=onTrack+' on track';
+  } else {
+    const done=VISITS.filter(v=>v.date===date&&v.status==='completed');
+    const durs=done.map(v=>{if(!v.checkin||!v.checkout)return 0;const [h1,m1]=v.checkin.split(':').map(Number);const [h2,m2]=v.checkout.split(':').map(Number);return Math.max(0,(h2*60+m2)-(h1*60+m1));}).filter(d=>d>0);
+    const today_=VISITS.filter(v=>v.date===date);
+    g('v-tot').textContent=today_.length;
+    g('v-avg').textContent=durs.length?Math.round(durs.reduce((a,b)=>a+b,0)/durs.length):0;
+    g('v-doors').textContent=new Set(today_.map(v=>v.doorId)).size;
+  }
   renderVis(VISITS);
 }
 function renderVis(data) {
   const q=g('vis-srch').value.toLowerCase();
+  // Detect if new summary format (has 'rep' field) or old door-based format
+  const isSummary = data.length>0 && data[0].rep!==undefined;
+  if(isSummary){
+    const filtered=data.filter(v=>!q||(v.rep||'').toLowerCase().includes(q));
+    g('vis-list').innerHTML=filtered.map(v=>{
+      const pos=(v.position||'').toLowerCase().includes('track')?'on-track':'behind';
+      const visitPct=Math.round((v.visitPct||0)*100);
+      const timePct=Math.round((v.timePct||0)*100);
+      const vBar=Math.min(visitPct,100);
+      const tBar=Math.min(timePct,100);
+      const vCl=visitPct>=100?'ok':visitPct>=80?'warn':'bad';
+      const tCl=timePct>=100?'ok':timePct>=80?'warn':'bad';
+      const initials=(v.rep||'?').split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+      return `<div class="vis-summary-card ${pos}">
+        <div class="vis-card-hd">
+          <div class="vis-avatar ${pos}">${initials}</div>
+          <div class="vis-rep-name">${v.rep||'—'}</div>
+          <span class="vis-position-badge ${pos}">${pos==='on-track'?'✓ On Track':'⚠ Behind'}</span>
+        </div>
+        <div class="vis-card-body">
+          <div class="vis-kpi-row">
+            <div class="vis-kpi">
+              <div class="vis-kpi-lbl">الزيارات</div>
+              <div class="vis-kpi-val ${pos==='on-track'?'metric-on-track':'metric-behind'}">${v.visits||0}</div>
+            </div>
+            <div class="vis-kpi">
+              <div class="vis-kpi-lbl">الهدف اليومي</div>
+              <div class="vis-kpi-val">${v.dailyTarget||0}</div>
+            </div>
+            <div class="vis-kpi">
+              <div class="vis-kpi-lbl">الهدف الشهري</div>
+              <div class="vis-kpi-val">${v.monthlyTarget||0}</div>
+            </div>
+            <div class="vis-kpi">
+              <div class="vis-kpi-lbl">للإكمال</div>
+              <div class="vis-kpi-val ${(v.toAchieve||0)>0?'metric-behind':'metric-on-track'}">${v.toAchieve||0}</div>
+            </div>
+            <div class="vis-kpi">
+              <div class="vis-kpi-lbl">مدة التنفيذ</div>
+              <div class="vis-kpi-val">${v.durationHrs||'—'}</div>
+            </div>
+          </div>
+          <div class="vis-prog-section">
+            <div class="vis-prog-label">
+              <span class="vis-prog-title">إنجاز الزيارات</span>
+              <span class="vis-prog-pct ${vCl==='ok'?'metric-on-track':vCl==='bad'?'metric-behind':'metric-warn'}">${visitPct}%</span>
+            </div>
+            <div class="vis-prog-bar"><div class="vis-prog-fill ${vCl}" style="width:${vBar}%"></div></div>
+            <div class="vis-prog-label">
+              <span class="vis-prog-title">إنجاز الوقت</span>
+              <span class="vis-prog-pct ${tCl==='ok'?'metric-on-track':tCl==='bad'?'metric-behind':'metric-warn'}">${timePct}%</span>
+            </div>
+            <div class="vis-prog-bar"><div class="vis-prog-fill ${tCl}" style="width:${tBar}%"></div></div>
+          </div>
+        </div>
+      </div>`;
+    }).join('')||'<div class="empty"><div class="empty-icon">📍</div><div class="empty-txt">لا توجد زيارات</div></div>';
+    return;
+  }
+  // Old individual visit format
   const filtered=data.filter(v=>{const d=DOORS.find(x=>x.id===v.doorId);return !q||(d?.name||'').toLowerCase().includes(q);});
   g('vis-list').innerHTML=filtered.map(v=>{
     const d=DOORS.find(x=>x.id===v.doorId),u=USERS.find(x=>x.id===v.repId);
@@ -1399,7 +1629,56 @@ function buildDoc(row,type){
     case 'targets':{const dc=fld(row,'door_code','Door Code','DOOR_CODE');const door=DOORS.find(d=>String(d.code)===String(dc)||String(d.id)===String(dc));if(!door)return null;const re=fld(row,'rep_email','Rep Email');const rep=USERS.find(u=>u.email===re);const repId=rep?.id||re||'';const month=pMonth(fld(row,'month','Month','MONTH'));if(!month)return null;return{id:`${repId}_${door.id}_${month}`,data:{repId,doorId:door.id,month,target:parseFloat(fld(row,'target','Target'))||0,actual:0}};}
     case 'msl':{const dc=fld(row,'door_code','Door Code','DOOR_CODE');const sc=fld(row,'sku_code','SKU Code','SKU_CODE');const door=DOORS.find(d=>String(d.code)===String(dc)||String(d.id)===String(dc));const sku=SKUS.find(s=>String(s.code)===String(sc)||String(s.id)===String(sc));if(!door||!sku)return null;const status=fld(row,'status','Status')||'missing';return{id:`${door.id}_${sku.id}`,data:{doorId:door.id,skuId:sku.id,status,lastSale:pDate(fld(row,'last_sale','Last Sale')),note:fld(row,'note','Note')}};}
     case 'sales':{const dc=fld(row,'door_code','Door Code','DOOR_CODE');const sc=fld(row,'sku_code','SKU Code','SKU_CODE');const door=DOORS.find(d=>String(d.code)===String(dc)||String(d.id)===String(dc));const sku=SKUS.find(s=>String(s.code)===String(sc)||String(s.id)===String(sc));if(!door||!sku){console.warn('SKIP sale: door=',dc,!!door,'sku=',sc,!!sku);return null;}const rawD=fld(row,'date','Date','DATE');const date=pDate(rawD)||rawD;const month=date.slice(0,7);const re=fld(row,'rep_email','Rep Email');const rep=USERS.find(u=>u.email===re);return{id:null,data:{doorId:door.id,skuId:sku.id,repId:rep?.id||'',qty:parseFloat(fld(row,'qty','Qty'))||0,value:parseFloat(fld(row,'value','Value','VALUE'))||0,date,month,invoiceNo:fld(row,'invoice_no','Invoice No')}};}
-    case 'visits':{const dc=fld(row,'door_code','Door Code','DOOR_CODE');const door=DOORS.find(d=>String(d.code)===String(dc)||String(d.id)===String(dc));if(!door)return null;const re=fld(row,'rep_email','Rep Email');const rep=USERS.find(u=>u.email===re);return{id:null,data:{doorId:door.id,repId:rep?.id||'',date:pDate(fld(row,'date','Date')),checkin:fld(row,'checkin','Checkin','check_in'),checkout:fld(row,'checkout','Checkout','check_out'),status:fld(row,'status','Status')||'completed'}};}
+    case 'visits':{
+      // Support BOTH formats:
+      // New summary: Rep, Number Of Visits, Daily Targets, %%, Monthly Target, To Achieve 100%, Total Duration, Daily Time Targets, Time %, Position
+      // Old detail:  door_code, rep_email, date, checkin, checkout, status
+      const repName=fld(row,'Rep','rep','REP','rep_name');
+      if(repName){
+        // NEW SUMMARY FORMAT
+        const visits=parseInt(fld(row,'Number Of Visits','Number_Of_Visits','visits'))||0;
+        const dailyTarget=parseInt(fld(row,'Daily Targets','Daily_Targets','daily_targets'))||0;
+        const visitPctRaw=fld(row,'%%','pct','visit_pct','%');
+        const visitPct=parseFloat(visitPctRaw)||0;
+        const monthlyTarget=parseInt(fld(row,'Monthly Target','Monthly_Target','monthly_target'))||0;
+        const toAchieveRaw=fld(row,'To Achieve 100%','To_Achieve_100','to_achieve');
+        const toAchieve=parseInt(toAchieveRaw)||0;
+        // Duration: Excel timedelta comes as decimal days (raw:false gives string)
+        const durRaw=fld(row,'Total Duration','Total_Duration','total_duration');
+        const timePctRaw=fld(row,'Time %','Time_Pct','time_pct','time_%');
+        const timePct=parseFloat(timePctRaw)||0;
+        const position=fld(row,'Position','position')||'Behind';
+        // Parse duration: "2 days, 4:20:45" or "X days, HH:MM:SS" or decimal
+        function parseDur(s){
+          if(!s)return'—';
+          const n=parseFloat(s);
+          if(!isNaN(n)&&n>0){
+            const totalH=Math.round(n*24);
+            return totalH+'h';
+          }
+          const m=String(s).match(/(\d+)\s*day[s,]*\s*(\d+):(\d+)/);
+          if(m){const h=parseInt(m[1])*24+parseInt(m[2]);return h+'h '+m[3]+'m';}
+          const m2=String(s).match(/(\d+):(\d+)/);
+          if(m2)return m2[1]+'h '+m2[2]+'m';
+          return String(s).slice(0,8);
+        }
+        return{id:null,data:{
+          rep:repName,
+          visits,dailyTarget,visitPct,
+          monthlyTarget,toAchieve,
+          durationHrs:parseDur(durRaw),
+          timePct,position,
+          importedAt:new Date().toISOString()
+        }};
+      }
+      // OLD DETAIL FORMAT
+      const dc=fld(row,'door_code','Door Code','DOOR_CODE');
+      const door=DOORS.find(d=>String(d.code)===String(dc)||String(d.id)===String(dc));
+      if(!door)return null;
+      const re=fld(row,'rep_email','Rep Email');
+      const rep=USERS.find(u=>u.email===re);
+      return{id:null,data:{doorId:door.id,repId:rep?.id||'',date:pDate(fld(row,'date','Date')),checkin:fld(row,'checkin','Checkin','check_in'),checkout:fld(row,'checkout','Checkout','check_out'),status:fld(row,'status','Status')||'completed'}};
+    }
     default:return null;
   }
 }
