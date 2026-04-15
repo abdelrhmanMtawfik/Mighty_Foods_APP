@@ -1264,18 +1264,39 @@ function toggleAcc(uid){
 // ══════════════════════════════════════════
 async function loadMSL() {
   try {
-    const snap=await DB.collection('msl').get();
-    MSL=snap.docs.map(d=>d.data());
-    if(PROFILE.role==='rep') MSL=MSL.filter(m=>{const d=DOORS.find(x=>x.id===m.doorId);return d?.repId===ME.uid||d?.repEmail===ME.email;});
-  } catch(e){MSL=[];}
-  // Totals across all doors
-  g('msl-ok').textContent=MSL.filter(m=>m.status==='present').length;
-  g('msl-miss').textContent=MSL.filter(m=>m.status==='missing').length;
-  g('msl-pct').textContent=MSL.length?Math.round(MSL.filter(m=>m.status==='present').length/MSL.length*100)+'%':'—%';
-  // On load: no door selected → show prompt
-  const df=g('msl-door-f').value;
-  if(!df){
-    g('msl-list').innerHTML=`<div class="empty">
+    const snap = await DB.collection('msl').get();
+    // Normalize doorId: map code-based IDs to DOORS array ids
+    MSL = snap.docs.map(d => {
+      const raw = d.data();
+      // Find door by id OR code so doorId is always consistent
+      const door = DOORS.find(x =>
+        x.id === raw.doorId ||
+        String(x.code) === String(raw.doorId)
+      );
+      return { ...raw, doorId: door ? door.id : raw.doorId };
+    });
+    if (PROFILE.role === 'rep') {
+      MSL = MSL.filter(m => {
+        const d = DOORS.find(x => x.id === m.doorId);
+        return d?.repId === ME.uid || d?.repEmail === ME.email;
+      });
+    }
+  } catch(e) { console.error('loadMSL error:', e); MSL = []; }
+
+  // Update KPI counts
+  g('msl-ok').textContent   = MSL.filter(m => m.status === 'present').length;
+  g('msl-miss').textContent = MSL.filter(m => m.status === 'missing').length;
+  g('msl-pct').textContent  = MSL.length
+    ? Math.round(MSL.filter(m => m.status === 'present').length / MSL.length * 100) + '%'
+    : '—%';
+
+  console.log('MSL loaded:', MSL.length, 'items');
+  console.log('Sample doorIds after normalize:', [...new Set(MSL.map(m=>m.doorId))].slice(0,5));
+
+  // On load: require door selection
+  const df = g('msl-door-f').value;
+  if (!df) {
+    g('msl-list').innerHTML = `<div class="empty">
       <div class="empty-icon">🚪</div>
       <div class="empty-txt">اختر Door لعرض الـ MSL</div>
       <div class="empty-sub">Select a Door from the filter above</div>
@@ -1285,34 +1306,62 @@ async function loadMSL() {
   filterMSL();
 }
 function filterMSL() {
-  const df=g('msl-door-f').value;
-  // Require door selection
-  if(!df){
-    g('msl-list').innerHTML=`<div class="empty">
+  const df = g('msl-door-f').value;
+
+  if (!df) {
+    g('msl-list').innerHTML = `<div class="empty">
       <div class="empty-icon">🚪</div>
       <div class="empty-txt">اختر Door لعرض الـ MSL</div>
       <div class="empty-sub">Select a Door from the filter above</div>
     </div>`;
     return;
   }
-  const sf=g('msl-stat-f').value, q=g('msl-srch').value.toLowerCase();
-  const data=MSL.filter(m=>{
-    const s=SKUS.find(x=>x.id===m.skuId),d=DOORS.find(x=>x.id===m.doorId);
-    return m.doorId===df&&(!sf||m.status===sf)&&(!q||(s?.name||'').toLowerCase().includes(q)||(d?.name||'').toLowerCase().includes(q));
+
+  const sf = g('msl-stat-f').value;
+  const q  = g('msl-srch').value.toLowerCase();
+
+  // Match doorId flexibly: exact id OR code match
+  const door = DOORS.find(x => x.id === df || String(x.code) === String(df));
+
+  const data = MSL.filter(m => {
+    const sku  = SKUS.find(x => x.id === m.skuId || String(x.code) === String(m.skuId));
+    // Match by doorId OR by door code
+    const doorMatch = m.doorId === df
+      || (door && (m.doorId === door.id || String(m.doorId) === String(door.code) || String(m.doorId) === String(door.id)));
+    if (!doorMatch) return false;
+    if (sf && m.status !== sf) return false;
+    if (q) {
+      const skuName = (sku?.name || m.skuId || '').toLowerCase();
+      const doorName = (door?.name || m.doorId || '').toLowerCase();
+      if (!skuName.includes(q) && !doorName.includes(q) && !(sku?.code||'').toLowerCase().includes(q)) return false;
+    }
+    return true;
   });
-  const door=DOORS.find(x=>x.id===df);
-  g('msl-list').innerHTML=data.length?data.map(m=>{
-    const s=SKUS.find(x=>x.id===m.skuId);
-    return `<div class="msl-item">
-      <div class="msl-dot ${m.status==='present'?'ok':'miss'}"></div>
-      <div class="msl-info">
-        <div class="msl-name">${s?.name||m.skuId}</div>
-        <div class="msl-sub">${s?.code||m.skuId}${m.lastSale?' · آخر بيع: '+m.lastSale:''}</div>
-      </div>
-      <span class="bg ${m.status==='present'?'bg-s':'bg-d'}">${m.status==='present'?'✓ متوافر':'✗ مفقود'}</span>
+
+  console.log('MSL filter — door:', df, '| total MSL:', MSL.length, '| matched:', data.length);
+  console.log('Sample MSL doorIds:', MSL.slice(0,3).map(m=>m.doorId));
+  console.log('DOORS ids:', DOORS.slice(0,3).map(d=>({id:d.id,code:d.code})));
+
+  if (!data.length) {
+    g('msl-list').innerHTML = `<div class="empty">
+      <div class="empty-icon">📋</div>
+      <div class="empty-txt">لا توجد MSL لـ ${door?.name || df}</div>
+      <div class="empty-sub">تأكد من رفع بيانات MSL لهذا الـ Door</div>
     </div>`;
-  }).join(''):`<div class="empty"><div class="empty-icon">📋</div>
-    <div class="empty-txt">لا توجد MSL لـ ${door?.name||df}</div></div>`;
+    return;
+  }
+
+  g('msl-list').innerHTML = data.map(m => {
+    const sku = SKUS.find(x => x.id === m.skuId || String(x.code) === String(m.skuId));
+    return `<div class="msl-item">
+      <div class="msl-dot ${m.status === 'present' ? 'ok' : 'miss'}"></div>
+      <div class="msl-info">
+        <div class="msl-name">${sku?.name || m.skuId}</div>
+        <div class="msl-sub">${sku?.code || m.skuId}${m.lastSale ? ' · آخر بيع: ' + m.lastSale : ''}</div>
+      </div>
+      <span class="bg ${m.status === 'present' ? 'bg-s' : 'bg-d'}">${m.status === 'present' ? '✓ متوافر' : '✗ مفقود'}</span>
+    </div>`;
+  }).join('');
 }
 
 // ══════════════════════════════════════════
