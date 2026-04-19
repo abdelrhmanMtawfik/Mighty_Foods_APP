@@ -2,1674 +2,1695 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mighty Foods | Sales Portal</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mighty Foods</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
-  --brand:#1443C8;--brand2:#1e54e8;--brand3:rgba(20,67,200,0.15);
-  --accent:#FF6B00;--success:#00C47A;--danger:#FF3B5C;--warning:#FFB800;
-  --bg:#080C18;--bg2:#0D1425;--bg3:#121A2E;
-  --card:#111827;--card2:#1a2338;
-  --border:rgba(255,255,255,0.07);--border2:rgba(20,67,200,0.3);
-  --text:#F0F4FF;--text2:#8B9DC3;--text3:#4A5A7A;
-  --r:16px;--rs:10px;--shadow:0 8px 32px rgba(0,0,0,0.4);
+  --bg:#080b12; --s1:#10141f; --s2:#171d2e; --s3:#1c2438;
+  --border:#1e2840; --border2:#263050;
+  --accent:#f97316; --accent2:#fb923c;
+  --blue:#3d7fff; --blue2:#5b5ef4;
+  --green:#0fba73; --yellow:#f7c948; --red:#f04040;
+  --text:#eaf0ff; --sub:#5e6e8a; --muted:#3a4a66;
+  --gold:#f7c948; --purple:#a855f7;
+  --r:14px; --r-sm:10px; --r-xs:8px;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
 
-/* SCREENS */
-.screen{display:none;min-height:100vh}
-.screen.active{display:block}
+/* ─── LOADER ─── */
+#loader{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .4s}
+#loader.out{opacity:0;pointer-events:none}
+.ld-logo{width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,var(--accent),#c2410c);display:flex;align-items:center;justify-content:center;font-size:36px;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 30px rgba(249,115,22,.4)}50%{box-shadow:0 0 70px rgba(249,115,22,.75)}}
+.ld-title{font-size:22px;font-weight:900;letter-spacing:-.5px}
+.ld-sub{font-size:12px;color:var(--sub)}
+.ld-bar{width:120px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.ld-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));animation:lfill 1.6s ease forwards}
+@keyframes lfill{to{width:100%}}
 
-/* ── SETUP SCREEN ── */
-#setup-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,rgba(20,67,200,0.18) 0%,transparent 60%),var(--bg)}
-.setup-box{background:var(--card);border:1px solid var(--border2);border-radius:24px;padding:40px;width:100%;max-width:480px;margin:20px}
-.setup-logo{text-align:center;margin-bottom:28px}
-.setup-logo .logo{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;color:var(--brand2)}
-.setup-logo .sub{font-size:11px;color:var(--text3);letter-spacing:4px;text-transform:uppercase;margin-top:4px}
-.setup-title{font-size:18px;font-weight:700;margin-bottom:6px}
-.setup-sub{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.6}
-.step-list{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
-.step-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:14px 16px;font-size:13px;color:var(--text2)}
-.step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--brand);border-radius:50%;font-size:11px;font-weight:700;color:white;margin-left:8px;flex-shrink:0}
+/* ─── LAYOUT ─── */
+#app{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.topbar{flex-shrink:0;padding:10px 14px;background:rgba(8,11,18,.92);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.topbar-icon{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--accent),#c2410c);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.topbar-info{flex:1;min-width:0}
+.topbar-name{font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-door{font-size:10px;color:var(--sub)}
+.topbar-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;flex-shrink:0;background:rgba(249,115,22,.12);color:var(--accent);border:1px solid rgba(249,115,22,.3)}
+.door-btn{flex-shrink:0;padding:5px 10px;border-radius:8px;border:1px solid var(--border2);background:var(--s2);font-size:10px;font-weight:700;color:var(--sub);cursor:pointer;font-family:'Cairo',sans-serif}
+.door-btn:active{transform:scale(.95)}
 
-/* ── LOGIN SCREEN ── */
-#login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,rgba(20,67,200,0.18) 0%,transparent 60%),var(--bg)}
-.login-box{background:var(--card);border:1px solid var(--border2);border-radius:24px;padding:44px 38px;width:100%;max-width:400px;margin:20px}
-.login-logo{text-align:center;margin-bottom:32px}
-.login-logo .logo{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:900;color:var(--brand2);letter-spacing:2px}
-.login-logo .sub{font-size:11px;color:var(--text3);letter-spacing:4px;text-transform:uppercase;margin-top:4px}
-.login-title{font-size:20px;font-weight:700;text-align:center;margin-bottom:24px}
-.field{margin-bottom:14px}
-.field label{display:block;font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px}
-.field input,.field select{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:12px 14px;font-family:'Cairo',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;direction:rtl}
-.field input:focus,.field select:focus{border-color:var(--brand2);box-shadow:0 0 0 3px rgba(20,67,200,.2)}
-.field select option{background:var(--bg2)}
-.btn{width:100%;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;border-radius:var(--rs);padding:14px;font-family:'Cairo',sans-serif;font-size:15px;font-weight:700;color:white;cursor:pointer;transition:all .2s;margin-top:6px}
-.btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(20,67,200,.4)}
-.btn:disabled{opacity:.6;cursor:not-allowed;transform:none}
-.err-msg{background:rgba(255,59,92,.1);border:1px solid rgba(255,59,92,.3);border-radius:var(--rs);padding:10px 14px;font-size:13px;color:var(--danger);margin-top:10px;display:none;text-align:center}
+/* ─── SCROLL BODY ─── */
+#scroll-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#scroll-body::-webkit-scrollbar{display:none}
 
-/* ── TOP BAR ── */
-.topbar{position:sticky;top:0;z-index:100;background:rgba(8,12,24,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:60px}
-.topbar-logo{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--brand2);letter-spacing:1px}
-.topbar-right{display:flex;align-items:center;gap:12px}
-.user-badge{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:40px;padding:5px 12px 5px 7px}
-.avatar{width:30px;height:30px;background:linear-gradient(135deg,var(--brand),var(--brand2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
-.uname{font-size:13px;font-weight:600}
-.urole{font-size:10px;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:1px}
-.btn-sm{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--text2);font-family:'Cairo',sans-serif;font-size:12px;cursor:pointer;transition:all .2s}
-.btn-sm:hover{border-color:var(--danger);color:var(--danger)}
-.btn-sm.blue:hover{border-color:var(--brand2);color:var(--brand2)}
+/* ─── HERO CARD ─── */
+.hero-section{padding:14px 14px 0;background:linear-gradient(180deg,rgba(249,115,22,.06) 0%,transparent 100%);border-bottom:1px solid var(--border)}
+.hero-card{background:var(--s1);border:1px solid var(--border2);border-radius:18px;padding:16px 16px 14px;position:relative;overflow:hidden;margin-bottom:14px}
+.hero-card::before{content:'';position:absolute;top:0;right:0;width:120px;height:120px;background:radial-gradient(circle at top right,rgba(249,115,22,.12),transparent 70%);pointer-events:none}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.hero-left{flex:1}
+.hero-greeting{font-size:10px;color:var(--sub);font-weight:600;letter-spacing:.6px;text-transform:uppercase;margin-bottom:3px}
+.hero-mtd-val{font-size:30px;font-weight:900;line-height:1;letter-spacing:-1px}
+.hero-mtd-lbl{font-size:10px;color:var(--sub);margin-top:3px}
+.hero-ring-wrap{position:relative;flex-shrink:0}
+.hero-ring-svg{transform:rotate(-90deg);filter:drop-shadow(0 0 8px rgba(249,115,22,.25))}
+.hero-ring-track{fill:none;stroke:var(--border);stroke-width:10}
+.hero-ring-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1),stroke .4s}
+.hero-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.hero-ring-pct{font-size:18px;font-weight:900;line-height:1}
+.hero-ring-lbl{font-size:8px;color:var(--sub);font-weight:600}
+/* metric rows */
+.hero-metrics{display:flex;flex-direction:column;gap:8px}
+.hm-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px}
+.hm-left{display:flex;flex-direction:column;gap:4px}
+.hm-label{font-size:10px;color:var(--sub);font-weight:600}
+.hm-bar-wrap{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.hm-bar-fill{height:100%;border-radius:3px;transition:width 1.3s cubic-bezier(.4,0,.2,1)}
+.hm-val{font-size:13px;font-weight:800;white-space:nowrap;text-align:left}
+.hero-divider{height:1px;background:var(--border);margin:10px 0 8px}
+.hero-gap-row{display:flex;justify-content:space-between;align-items:center}
+.hero-gap-lbl{font-size:10px;color:var(--sub)}
+.hero-gap-val{font-size:13px;font-weight:900}
+.hero-no-target{text-align:center;padding:8px 0 4px;font-size:11px;color:var(--sub);background:rgba(255,255,255,.02);border-radius:8px}
 
-/* ── NAV ── */
-.nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 12px;gap:2px}
-.ntab{display:flex;align-items:center;gap:7px;padding:13px 16px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;user-select:none}
-.ntab:hover{color:var(--text)}
-.ntab.active{color:var(--brand2);border-bottom-color:var(--brand2)}
-.ntab .badge-count{background:var(--danger);color:white;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;min-width:18px;text-align:center}
+/* ─── KPI GRID ─── */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 14px 8px}
+.kpi-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px;position:relative;overflow:hidden}
+.kpi-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;border-radius:0 0 var(--r) var(--r)}
+.kpi-card.gap::after{background:var(--red)}.kpi-card.time::after{background:var(--yellow)}.kpi-card.doors::after{background:var(--blue)}.kpi-card.best::after{background:var(--green)}
+.kpi-icon{font-size:16px;margin-bottom:5px}
+.kpi-lbl{font-size:9px;color:var(--sub);font-weight:600;letter-spacing:.5px;text-transform:uppercase}
+.kpi-val{font-size:20px;font-weight:900;margin-top:4px;line-height:1}
+.kpi-sub{font-size:9px;color:var(--sub);margin-top:3px}
 
-/* ── CONTENT ── */
-.content{padding:20px;max-width:1400px;margin:0 auto}
-.page-h{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:14px}
-.page-title{font-size:24px;font-weight:900;letter-spacing:-.5px}
-.page-sub{font-size:13px;color:var(--text2);margin-top:3px}
-.actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+/* ─── TABS ─── */
+.tabs-wrap{display:flex;gap:5px;padding:6px 14px 8px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
+.tabs-wrap::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;font-size:11px;font-weight:700;padding:6px 13px;border-radius:20px;background:var(--s1);border:1px solid var(--border);cursor:pointer;transition:all .2s;color:var(--sub);font-family:'Cairo',sans-serif}
+.tab.active{background:rgba(249,115,22,.12);border-color:var(--accent);color:var(--accent)}
+.tab:active{transform:scale(.95)}
+.tab-badge{display:inline-block;background:var(--red);color:#fff;font-size:9px;padding:1px 5px;border-radius:10px;margin-right:4px}
 
-/* ── DOOR SELECTOR ── */
-.door-panel{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:18px;margin-bottom:22px}
-.door-panel-title{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.door-search{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:9px 14px;font-family:'Cairo',sans-serif;font-size:13px;color:var(--text);outline:none;width:100%;margin-bottom:12px;transition:border-color .2s;direction:rtl}
-.door-search:focus{border-color:var(--brand2)}
-.door-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;max-height:200px;overflow-y:auto}
-.door-btn{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:10px 12px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .2s;text-align:right}
-.door-btn:hover{border-color:var(--brand2);color:var(--brand2)}
-.door-btn.active{background:var(--brand3);border-color:var(--brand2);color:var(--brand2)}
-.door-btn .door-code{font-size:10px;color:var(--text3);display:block;margin-top:2px}
+/* ─── PANELS ─── */
+.panel{display:none;padding:0 14px 90px}
+.panel.active{display:block}
+.section-title{font-size:10px;font-weight:800;color:var(--sub);letter-spacing:1.2px;text-transform:uppercase;padding:14px 0 8px;border-bottom:1px solid var(--border);margin-bottom:8px}
 
-/* ── KPI GRID ── */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:22px}
-.kcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 18px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
-.kcard:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
-.kcard::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
-.kcard.blue::before{background:linear-gradient(90deg,var(--brand),var(--brand2))}
-.kcard.orange::before{background:linear-gradient(90deg,var(--accent),#FF9500)}
-.kcard.green::before{background:linear-gradient(90deg,#00C47A,#00E5A0)}
-.kcard.red::before{background:linear-gradient(90deg,var(--danger),#FF6B7A)}
-.kcard.purple::before{background:linear-gradient(90deg,#7C3AED,#A855F7)}
-.klabel{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:9px}
-.kval{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:700;line-height:1;margin-bottom:5px}
-.kmeta{font-size:12px;color:var(--text2)}
+/* ─── DOOR CARDS ─── */
+.door-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .2s,transform .15s;position:relative;overflow:hidden}
+.door-card::before{content:'';position:absolute;right:0;top:0;bottom:0;width:4px;border-radius:0 var(--r) var(--r) 0}
+.door-card.ach-high::before{background:var(--green)}.door-card.ach-mid::before{background:var(--accent)}.door-card.ach-warn::before{background:var(--yellow)}.door-card.ach-low::before{background:var(--red)}
+.door-card.current{border-color:var(--accent)}
+.door-card:active{transform:scale(.98)}
+.door-card-name{font-size:13px;font-weight:700;line-height:1.4}
+.door-card-ch{font-size:10px;color:var(--sub);margin-top:2px}
+.door-card-row{display:flex;justify-content:space-between;align-items:flex-end;margin-top:8px}
+.door-card-nums{display:flex;flex-direction:column;gap:2px}
+.door-num-item{font-size:10px;color:var(--sub)}
+.door-num-item span{font-weight:700;color:var(--text)}
+.door-pct-badge{font-size:20px;font-weight:900;line-height:1;text-align:left}
+.door-pct-sub{font-size:9px;color:var(--sub);text-align:left;margin-top:1px}
+.door-prog{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:8px}
+.door-prog-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.door-no-target{font-size:10px;color:var(--muted);padding:4px 0 2px;font-style:italic}
 
-/* ── PROGRESS BAR ── */
-.pbar-wrap{display:flex;align-items:center;gap:8px;min-width:100px}
-.pbar{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
-.pbar-fill{height:100%;border-radius:3px;transition:width .8s cubic-bezier(.4,0,.2,1)}
-.pbar-fill.g{background:linear-gradient(90deg,#00C47A,#00E5A0)}
-.pbar-fill.o{background:linear-gradient(90deg,var(--warning),#FF9500)}
-.pbar-fill.r{background:linear-gradient(90deg,var(--danger),#FF6B7A)}
-.pbar-fill.b{background:linear-gradient(90deg,var(--brand),var(--brand2))}
-.ppct{font-size:12px;font-weight:700;min-width:34px}
+/* ─── MSL TABLE ─── */
+.msl-controls{padding:12px 0 8px;display:flex;flex-direction:column;gap:8px}
+.search-wrap{position:relative}
+.search-input{width:100%;background:var(--s1);border:1px solid var(--border);border-radius:var(--r-sm);padding:9px 12px 9px 34px;font-family:'Cairo',sans-serif;font-size:12px;color:var(--text);outline:none}
+.search-input:focus{border-color:var(--accent)}
+.search-ico{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none}
+.chips-row{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips-row::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;font-size:10px;font-weight:700;padding:4px 11px;border-radius:20px;cursor:pointer;transition:all .2s;background:var(--s1);border:1px solid var(--border);color:var(--sub);font-family:'Cairo',sans-serif}
+.chip.active{background:rgba(249,115,22,.12);border-color:var(--accent);color:var(--accent)}
 
-/* ── TABLE ── */
-.tbl-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:22px}
-.tbl-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
-.tbl-title{font-size:15px;font-weight:700}
-.tbl-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.tbl-count{font-size:12px;color:var(--text2);background:var(--bg2);padding:3px 10px;border-radius:20px}
-.search{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:8px 12px;font-family:'Cairo',sans-serif;font-size:12px;color:var(--text);outline:none;width:180px;transition:border-color .2s;direction:rtl}
-.search:focus{border-color:var(--brand2)}
-.fsel{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:7px 12px;color:var(--text);font-family:'Cairo',sans-serif;font-size:12px;outline:none;cursor:pointer;direction:rtl}
-.fsel option{background:var(--bg2)}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:var(--bg2);padding:11px 14px;text-align:right;font-size:10px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:middle}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
-.td-b{color:var(--text);font-weight:600}
+.msl-tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r-sm);border:1px solid var(--border)}
+.msl-tbl{width:100%;border-collapse:collapse;min-width:480px}
+.msl-tbl thead th{font-size:9px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.7px;padding:8px 8px;text-align:right;border-bottom:2px solid var(--border);background:var(--s1);white-space:nowrap}
+.msl-tbl thead th.cen{text-align:center}
+.msl-tbl tbody tr{border-bottom:1px solid rgba(30,40,64,.5);transition:background .15s}
+.msl-tbl tbody tr:last-child{border-bottom:none}
+.msl-tbl tbody tr.has-qty{background:rgba(15,186,115,.04)}
+.msl-tbl tbody tr.is-promo{background:rgba(249,115,22,.04)}
+.msl-tbl td{padding:8px;font-size:11px;vertical-align:middle}
 
-/* ── BADGES ── */
-.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
-.bs{background:rgba(0,196,122,.15);color:var(--success)}
-.bd{background:rgba(255,59,92,.15);color:var(--danger)}
-.bw{background:rgba(255,184,0,.15);color:var(--warning)}
-.bi{background:rgba(20,67,200,.2);color:#6B9FFF}
-.bn{background:rgba(255,255,255,.06);color:var(--text2)}
+.td-img-btn{text-align:center}
+.img-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border2);background:var(--s2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .2s}
+.img-btn:active{transform:scale(.9)}
 
-/* ── RING ── */
-.ring-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:20px}
-.ring-svg{transform:rotate(-90deg)}
-.ring-track{fill:none;stroke:var(--bg3);stroke-width:8}
-.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(.4,0,.2,1)}
+.td-name{max-width:170px}
+.sku-name{font-size:11.5px;font-weight:700;line-height:1.4}
+.sku-badges{display:flex;gap:3px;flex-wrap:wrap;margin-top:3px}
+.badge{display:inline-block;font-size:9px;font-weight:800;padding:2px 6px;border-radius:10px;white-space:nowrap}
+.badge-zero{background:rgba(240,64,64,.12);color:var(--red);border:1px solid rgba(240,64,64,.25)}
+.badge-promo{background:rgba(249,115,22,.15);color:var(--accent);border:1px solid rgba(249,115,22,.3)}
+.badge-cat{background:var(--s2);color:var(--sub);border:1px solid var(--border)}
 
-/* ── MODAL ── */
-.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
-.modal-ov.open{display:flex}
-.modal-box{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:28px;width:100%;max-width:580px;max-height:88vh;overflow-y:auto}
-.modal-title{font-size:18px;font-weight:700;margin-bottom:6px}
-.modal-sub{font-size:13px;color:var(--text2);margin-bottom:22px}
-.mfield{margin-bottom:13px}
-.mfield label{display:block;font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
-.mfield input,.mfield select{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 13px;font-family:'Cairo',sans-serif;font-size:13px;color:var(--text);outline:none;direction:rtl;transition:border-color .2s}
-.mfield input:focus,.mfield select:focus{border-color:var(--brand2)}
-.mfield .mhint{font-size:11px;color:var(--text3);margin-top:4px}
-.modal-acts{display:flex;gap:10px;margin-top:20px}
-.btn-cancel{flex:1;background:none;border:1px solid var(--border);border-radius:8px;padding:11px;color:var(--text2);font-family:'Cairo',sans-serif;font-size:13px;cursor:pointer;transition:all .2s}
-.btn-cancel:hover{border-color:var(--text2);color:var(--text)}
-.btn-save{flex:2;background:linear-gradient(135deg,var(--brand),var(--brand2));border:none;border-radius:8px;padding:11px;color:white;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s}
-.btn-save:hover{box-shadow:0 4px 16px rgba(20,67,200,.4)}
+.td-case{text-align:center;font-size:10px;color:var(--sub)}
+.td-stock{text-align:center}
+.stock-badge{display:inline-block;min-width:38px;padding:3px 7px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:.3px;text-align:center}
+.stk-high{background:rgba(15,186,115,.14);color:var(--green);border:1px solid rgba(15,186,115,.25)}
+.stk-mid{background:rgba(247,201,72,.13);color:var(--yellow);border:1px solid rgba(247,201,72,.25)}
+.stk-low{background:rgba(240,64,64,.12);color:var(--red);border:1px solid rgba(240,64,64,.22)}
+.stk-zero{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--border)}
 
-/* ── UPLOAD BOX ── */
-.upload-box{border:2px dashed var(--border2);border-radius:var(--r);padding:32px;text-align:center;cursor:pointer;transition:all .2s;position:relative}
-.upload-box:hover,.upload-box.drag{border-color:var(--brand2);background:var(--brand3)}
-.upload-box input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
-.upload-icon{font-size:32px;margin-bottom:10px}
-.upload-text{font-size:14px;font-weight:600;margin-bottom:4px}
-.upload-sub{font-size:12px;color:var(--text2)}
-.preview-table{max-height:220px;overflow-y:auto;border-radius:var(--rs);border:1px solid var(--border);margin-top:14px}
+.td-last{text-align:center;font-size:10px}
+.last-date{color:var(--sub)}
+.last-qty{font-weight:700;font-size:11px;margin-top:1px}
 
-/* ── ADMIN SECTIONS ── */
-.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:22px}
-.admin-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;cursor:pointer;transition:all .2s}
-.admin-card:hover{border-color:var(--brand2);transform:translateY(-2px)}
-.admin-icon{font-size:28px;margin-bottom:12px}
-.admin-card-title{font-size:15px;font-weight:700;margin-bottom:4px}
-.admin-card-sub{font-size:12px;color:var(--text2)}
+.td-promo{text-align:center;font-size:10px}
+.promo-disc{color:var(--accent);font-weight:800}
+.promo-price{color:var(--sub);font-size:9px;margin-top:1px}
 
-/* ── TOAST ── */
-.toast-cont{position:fixed;bottom:20px;left:20px;z-index:9999;display:flex;flex-direction:column;gap:7px}
-.toast{background:var(--card2);border:1px solid var(--border2);border-radius:12px;padding:11px 15px;font-size:13px;font-weight:600;min-width:220px;box-shadow:var(--shadow);animation:tin .3s ease}
-@keyframes tin{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.td-qty{text-align:center}
+.qty-input{width:54px;background:var(--s2);border:1.5px solid var(--border);border-radius:8px;padding:5px 4px;text-align:center;font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;color:var(--text);outline:none;-moz-appearance:textfield}
+.qty-input::-webkit-inner-spin-button,.qty-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.qty-input:focus{border-color:var(--accent)}
+.qty-input.filled{border-color:var(--green);background:rgba(15,186,115,.08);color:var(--green)}
 
-/* ── UTILS ── */
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
-.loading-row{text-align:center;padding:40px;color:var(--text3)}
-.empty-st{text-align:center;padding:50px 20px;color:var(--text3)}
-.empty-icon{font-size:40px;margin-bottom:12px}
-.empty-txt{font-size:14px;color:var(--text2);margin-bottom:5px}
-.sep{border:none;border-top:1px solid var(--border);margin:20px 0}
-.rep-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:20px}
-.rep-bar label{font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap}
-.rep-pill{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:none;color:var(--text2);font-family:'Cairo',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
-.rep-pill:hover{border-color:var(--brand2);color:var(--brand2)}
-.rep-pill.active{background:var(--brand);border-color:var(--brand);color:white}
-.firebase-cfg{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:14px;font-size:12px;color:var(--text2);direction:ltr;font-family:monospace;line-height:1.8;margin-bottom:14px}
-@media(max-width:768px){.two-col{grid-template-columns:1fr}.content{padding:14px}.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+/* Summary bar */
+.msl-summary{position:sticky;bottom:5px;z-index:10;background:rgba(8,11,18,.95);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;gap:10px;margin-top:10px}
+.sum-info{flex:1}
+.sum-lbl{font-size:10px;color:var(--sub)}
+.sum-val{font-size:17px;font-weight:900;color:var(--green)}
+.export-btn{flex-shrink:0;padding:9px 16px;border:none;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--green),#0d9e62);color:#fff;font-family:'Cairo',sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 3px 14px rgba(15,186,115,.3)}
+.export-btn:active{transform:scale(.96)}
+.export-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+
+/* ─── HISTORY ─── */
+.hist-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r-sm);padding:11px 13px;margin-bottom:7px;display:flex;align-items:center;gap:10px}
+.hist-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.hist-dot.hot{background:var(--green);box-shadow:0 0 8px rgba(15,186,115,.5)}
+.hist-dot.warn{background:var(--yellow);box-shadow:0 0 8px rgba(247,201,72,.5)}
+.hist-dot.stop{background:var(--red);box-shadow:0 0 8px rgba(240,64,64,.5)}
+.hist-main{flex:1;min-width:0}
+.hist-name{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-meta{font-size:10px;color:var(--sub);margin-top:2px}
+.hist-right{text-align:left;flex-shrink:0}
+.hist-qty{font-size:15px;font-weight:900}
+.hist-sub{font-size:9px;color:var(--sub)}
+
+/* ─── ZERO ─── */
+.zero-summary{background:rgba(240,64,64,.07);border:1px solid rgba(240,64,64,.15);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--sub)}
+.zero-num{font-size:20px;font-weight:900;color:var(--red)}
+.zero-card{background:var(--s1);border:1px solid rgba(240,64,64,.18);border-right:3px solid var(--red);border-radius:var(--r-sm);padding:10px 13px;margin-bottom:7px}
+.zero-name{font-size:12.5px;font-weight:700;line-height:1.5;margin-bottom:5px}
+.zero-meta{font-size:10px;color:var(--sub)}
+
+/* ─── PROMO ─── */
+.promo-card{background:var(--s1);border:1px solid rgba(249,115,22,.25);border-radius:var(--r);padding:14px;margin-bottom:8px;position:relative;overflow:hidden}
+.promo-card::before{content:'';position:absolute;top:0;right:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--accent),var(--accent2))}
+.promo-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.promo-name{font-size:13px;font-weight:800;line-height:1.4;flex:1}
+.promo-disc-badge{flex-shrink:0;background:rgba(249,115,22,.15);color:var(--accent);border:1px solid rgba(249,115,22,.3);font-size:12px;font-weight:900;padding:4px 10px;border-radius:20px}
+.promo-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.promo-chip{font-size:10px;padding:3px 9px;border-radius:20px}
+.promo-chip.price{background:var(--s2);color:var(--text);border:1px solid var(--border)}
+.promo-chip.price-after{background:rgba(249,115,22,.12);color:var(--accent);border:1px solid rgba(249,115,22,.25)}
+.promo-chip.exp{background:rgba(240,64,64,.08);color:#f87171;border:1px solid rgba(240,64,64,.2)}
+.promo-chip.group{background:rgba(61,127,255,.08);color:#7eb4ff;border:1px solid rgba(61,127,255,.2)}
+.promo-expired-label{position:absolute;top:10px;left:10px;font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px;background:rgba(15,186,115,.12);color:var(--green);border:1px solid rgba(15,186,115,.25)}
+
+/* ─── LOADING SPINNER ─── */
+.tab-loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;gap:12px}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner-txt{font-size:12px;color:var(--sub)}
+
+/* ─── EMPTY ─── */
+.empty{text-align:center;padding:50px 20px;color:var(--sub)}
+.empty-ico{font-size:40px;margin-bottom:10px}
+.empty-txt{font-size:13px}
+
+/* ─── DOOR SELECTOR OVERLAY ─── */
+#door-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.65);backdrop-filter:blur(4px);display:none;align-items:flex-end}
+#door-overlay.open{display:flex}
+.door-sheet{background:var(--s1);border-radius:22px 22px 0 0;width:100%;padding:18px 16px 0;border-top:1px solid var(--border);animation:slideup .3s ease;max-height:75vh;display:flex;flex-direction:column}
+.door-sheet-header{flex-shrink:0;padding-bottom:12px}
+.door-opts-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:40px}
+.door-opts-scroll::-webkit-scrollbar{display:none}
+@keyframes slideup{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-handle{width:36px;height:3px;border-radius:2px;background:var(--muted);margin:0 auto 16px}
+.sheet-title{font-size:14px;font-weight:900;margin-bottom:14px}
+.door-opt{display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--r-sm);cursor:pointer;transition:background .15s;margin-bottom:5px}
+.door-opt:active{background:var(--s2)}
+.door-opt.sel{background:rgba(249,115,22,.1)}
+.door-opt-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;transition:all .2s}
+.door-opt.sel .door-opt-dot{background:var(--accent);border-color:var(--accent)}
+.door-opt-info{flex:1}
+.door-opt-name{font-size:13px;font-weight:700}
+.door-opt-ch{font-size:10px;color:var(--sub)}
+.door-opt-pct{font-size:11px;font-weight:700}
+
+/* ─── IMAGE MODAL ─── */
+#img-modal{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;padding:20px}
+#img-modal.open{display:flex}
+#img-modal img{max-width:100%;max-height:65vh;border-radius:var(--r);object-fit:contain;background:var(--s1)}
+.modal-sku-name{font-size:14px;font-weight:800;text-align:center;color:var(--text)}
+.modal-close{padding:10px 28px;border:none;border-radius:var(--r-sm);background:var(--s2);color:var(--sub);font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer}
+.modal-img-err{font-size:13px;color:var(--sub);text-align:center;padding:30px}
+
+/* ─── HELPERS ─── */
+.c-g{color:var(--green)}.c-y{color:var(--yellow)}.c-r{color:var(--red)}.c-a{color:var(--accent)}.c-b{color:var(--blue)}
+.fade-up{opacity:0;transform:translateY(12px);animation:fadeup .35s ease forwards}
+@keyframes fadeup{to{opacity:1;transform:translateY(0)}}
+.d1{animation-delay:.05s}.d2{animation-delay:.1s}.d3{animation-delay:.15s}.d4{animation-delay:.2s}.d5{animation-delay:.25s}
+.pb{height:80px}
+
+/* ─── AI ASSISTANT ─── */
+.ai-panel{display:flex;flex-direction:column;height:100%;padding:0}
+.ai-messages{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-height:0}
+.ai-msg{display:flex;flex-direction:column;gap:4px;animation:fadeup .3s ease forwards;opacity:0}
+.ai-msg.user{align-items:flex-end}
+.ai-msg.bot{align-items:flex-start}
+.ai-bubble{max-width:88%;padding:10px 13px;border-radius:16px;font-size:12.5px;line-height:1.7;word-break:break-word}
+.ai-msg.user .ai-bubble{background:linear-gradient(135deg,var(--accent),#c2410c);color:#fff;border-radius:16px 16px 4px 16px}
+.ai-msg.bot .ai-bubble{background:var(--s2);border:1px solid var(--border2);color:var(--text);border-radius:16px 16px 16px 4px}
+.ai-bubble ul{padding-right:16px;margin:4px 0}
+.ai-bubble li{margin-bottom:3px}
+.ai-bubble strong{color:var(--accent2)}
+.ai-msg-time{font-size:9px;color:var(--muted)}
+.ai-typing{display:flex;gap:5px;align-items:center;padding:10px 14px}
+.ai-typing-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:blink 1.2s ease-in-out infinite}
+.ai-typing-dot:nth-child(2){animation-delay:.2s}
+.ai-typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.ai-input-area{padding:8px 14px 10px;background:rgba(8,11,18,.95);backdrop-filter:blur(14px);border-top:1px solid var(--border);flex-shrink:0}
+.ai-quick-chips{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:7px}
+.ai-quick-chips::-webkit-scrollbar{display:none}
+.ai-quick-chip{flex-shrink:0;font-size:10px;font-weight:700;padding:5px 11px;border-radius:20px;background:var(--s2);border:1px solid var(--border2);color:var(--sub);cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s}
+.ai-quick-chip:active{transform:scale(.95);background:rgba(249,115,22,.12);border-color:var(--accent);color:var(--accent)}
+.ai-input-row{display:flex;gap:8px;align-items:flex-end}
+.ai-textarea{flex:1;background:var(--s1);border:1.5px solid var(--border);border-radius:12px;padding:9px 12px;font-family:'Cairo',sans-serif;font-size:12px;color:var(--text);outline:none;resize:none;min-height:38px;max-height:90px;line-height:1.5;overflow-y:auto}
+.ai-textarea:focus{border-color:var(--accent)}
+.ai-send-btn{width:38px;height:38px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent),#c2410c);color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 3px 12px rgba(249,115,22,.35)}
+.ai-send-btn:active{transform:scale(.93)}
+.ai-send-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.ai-welcome{text-align:center;padding:24px 16px 12px;display:flex;flex-direction:column;align-items:center;gap:8px}
+.ai-welcome-icon{font-size:36px;animation:pulse 2s ease-in-out infinite}
+.ai-welcome-title{font-size:14px;font-weight:900;color:var(--text)}
+.ai-welcome-sub{font-size:11px;color:var(--sub);line-height:1.6}
 </style>
 </head>
 <body>
 
-<!-- ════ FIREBASE SETUP SCREEN ════ -->
-<div id="setup-screen" class="screen active">
-  <div class="setup-box">
-    <div class="setup-logo">
-      <div class="logo">⚡ MIGHTY FOODS</div>
-      <div class="sub">Sales Portal Setup</div>
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-logo">🍊</div>
+  <div class="ld-title">Mighty Foods</div>
+  <div class="ld-sub">جاري تحميل بياناتك...</div>
+  <div class="ld-bar"><div class="ld-fill"></div></div>
+</div>
+
+<!-- DOOR SELECTOR OVERLAY -->
+<div id="door-overlay">
+  <div class="door-sheet">
+    <div class="door-sheet-header">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">اختر المحل</div>
     </div>
-    <div class="setup-title">إعداد Firebase</div>
-    <div class="setup-sub">أدخل بيانات مشروع Firebase الخاص بك. بعد الإعداد، كل البيانات ستُحفظ في Firestore Database.</div>
-
-    <div class="mfield"><label>API Key</label><input id="s-apiKey" placeholder="AIzaSy..." style="direction:ltr;font-family:monospace"></div>
-    <div class="mfield"><label>Auth Domain</label><input id="s-authDomain" placeholder="your-project.firebaseapp.com" style="direction:ltr;font-family:monospace"></div>
-    <div class="mfield"><label>Project ID</label><input id="s-projectId" placeholder="your-project-id" style="direction:ltr;font-family:monospace"></div>
-    <div class="mfield"><label>Storage Bucket</label><input id="s-storageBucket" placeholder="your-project.appspot.com" style="direction:ltr;font-family:monospace"></div>
-    <div class="mfield"><label>Messaging Sender ID</label><input id="s-messagingSenderId" placeholder="123456789" style="direction:ltr;font-family:monospace"></div>
-    <div class="mfield"><label>App ID</label><input id="s-appId" placeholder="1:123456789:web:abc..." style="direction:ltr;font-family:monospace"></div>
-
-    <div style="background:rgba(20,67,200,.1);border:1px solid var(--border2);border-radius:var(--rs);padding:13px;font-size:12px;color:var(--text2);margin-bottom:18px">
-      💡 <strong style="color:var(--text)">خطوات سريعة:</strong><br>
-      1. اذهب إلى <a href="https://console.firebase.google.com" target="_blank" style="color:var(--brand2)">console.firebase.google.com</a><br>
-      2. أنشئ مشروع جديد → أضف Web App<br>
-      3. فعّل Authentication (Email/Password) + Firestore Database<br>
-      4. الصق الـ config هنا واضغط اتصال
-    </div>
-
-    <button class="btn" onclick="initFirebase()">اتصال وإعداد قاعدة البيانات</button>
-    <div class="err-msg" id="setup-err"></div>
-
-    <div style="text-align:center;margin-top:16px">
-      <button class="btn-sm blue" onclick="useDemoMode()" style="font-size:13px;padding:10px 20px;border-radius:var(--rs)">
-        تجربة Demo (بدون Firebase)
-      </button>
+    <div class="door-opts-scroll">
+      <div id="door-opts"></div>
     </div>
   </div>
 </div>
 
-<!-- ════ LOGIN SCREEN ════ -->
-<div id="login-screen" class="screen">
-  <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,rgba(20,67,200,.18) 0%,transparent 60%),var(--bg)">
-    <div class="login-box">
-      <div class="login-logo">
-        <div class="logo">⚡ MIGHTY FOODS</div>
-        <div class="sub">Sales Portal</div>
-      </div>
-      <div class="login-title">تسجيل الدخول</div>
-      <div class="field"><label>البريد الإلكتروني</label><input type="email" id="l-email" placeholder="email@mightyfoods.com" style="direction:ltr"></div>
-      <div class="field"><label>كلمة المرور</label><input type="password" id="l-pass" placeholder="••••••••"></div>
-      <button class="btn" id="login-btn" onclick="doLogin()">دخول</button>
-      <div class="err-msg" id="login-err"></div>
-    </div>
-  </div>
+<!-- IMAGE MODAL -->
+<div id="img-modal">
+  <img id="modal-img" src="" alt="">
+  <div id="modal-name" class="modal-sku-name"></div>
+  <button class="modal-close" onclick="closeImgModal()">إغلاق</button>
 </div>
 
-<!-- ════ MAIN APP ════ -->
-<div id="app-screen" class="screen">
-
+<!-- APP -->
+<div id="app" style="display:none">
   <!-- TOP BAR -->
   <div class="topbar">
-    <div class="topbar-logo">⚡ MIGHTY FOODS</div>
-    <div class="topbar-right">
-      <div class="user-badge">
-        <div class="avatar" id="top-av">M</div>
-        <div><div class="uname" id="top-name">User</div><div class="urole" id="top-role">Rep</div></div>
-      </div>
-      <button class="btn-sm" onclick="logout()">خروج</button>
+    <div class="topbar-icon">🍊</div>
+    <div class="topbar-info">
+      <div class="topbar-name" id="tb-rep">...</div>
+      <div class="topbar-door" id="tb-door">جاري التحميل...</div>
     </div>
+    <div class="topbar-badge" id="tb-ch">-</div>
+    <button class="door-btn" onclick="openDoorSelector()">تغيير 🔽</button>
   </div>
 
-  <!-- NAV -->
-  <div class="nav">
-    <div class="ntab active" data-tab="dashboard" onclick="goTab('dashboard')">📊 الرئيسية</div>
-    <div class="ntab" data-tab="targets" onclick="goTab('targets')">🎯 الأهداف</div>
-    <div class="ntab" data-tab="msl" onclick="goTab('msl')">📋 MSL</div>
-    <div class="ntab" data-tab="visits" onclick="goTab('visits')">📍 الزيارات</div>
-    <div class="ntab" data-tab="zero" onclick="goTab('zero')">⚠️ Zero Sales</div>
-    <div class="ntab mgr-tab" id="tab-admin" data-tab="admin" onclick="goTab('admin')" style="display:none">⚙️ الإدارة</div>
-  </div>
+  <!-- SCROLLABLE BODY -->
+  <div id="scroll-body">
 
-  <!-- CONTENT -->
-  <div class="content">
-
-    <!-- ══ DASHBOARD ══ -->
-    <div id="page-dashboard" class="page active">
-      <div class="page-h">
-        <div><div class="page-title" id="dash-title">لوحة التحكم</div><div class="page-sub" id="dash-sub">اختر door لعرض تفاصيله</div></div>
-        <div class="actions">
-          <select class="fsel" id="dash-month" onchange="loadDashboard()">
-            <option value="">الشهر الحالي</option>
-          </select>
-          <button class="btn-sm blue" onclick="loadDashboard()">↻ تحديث</button>
-        </div>
-      </div>
-
-      <!-- Manager rep bar -->
-      <div class="rep-bar" id="mgr-rep-bar" style="display:none">
-        <label>المندوب:</label>
-        <div id="mgr-rep-btns" style="display:flex;gap:7px;flex-wrap:wrap"></div>
-      </div>
-
-      <!-- Door selector -->
-      <div class="door-panel">
-        <div class="door-panel-title">🚪 اختر الـ Door (العميل)</div>
-        <input class="door-search" id="door-search" placeholder="ابحث باسم العميل أو الكود..." oninput="filterDoors()">
-        <div class="door-grid" id="door-grid">
-          <div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text3)">جاري تحميل العملاء...</div>
-        </div>
-      </div>
-
-      <!-- KPIs -->
-      <div class="kpi-grid" id="dash-kpis">
-        <div class="kcard blue"><div class="klabel">المبيعات الفعلية</div><div class="kval" id="d-sales">—</div><div class="kmeta" id="d-sales-m">اختر Door أولاً</div></div>
-        <div class="kcard orange"><div class="klabel">الهدف الشهري</div><div class="kval" id="d-target">—</div><div class="kmeta" id="d-target-m">—</div></div>
-        <div class="kcard green"><div class="klabel">نسبة الإنجاز</div><div class="kval" id="d-ach">—%</div><div class="kmeta" id="d-ach-m">—</div></div>
-        <div class="kcard red"><div class="klabel">Zero Sales MSL</div><div class="kval" id="d-zero">—</div><div class="kmeta">SKU مفقود من الـ MSL</div></div>
-      </div>
-
-      <div class="two-col">
-        <!-- Achievement Ring -->
-        <div class="ring-wrap">
-          <svg width="110" height="110" class="ring-svg">
-            <circle class="ring-track" cx="55" cy="55" r="46"/>
-            <circle class="ring-fill" id="dash-ring" cx="55" cy="55" r="46" stroke="url(#rg)" stroke-dasharray="289.0" stroke-dashoffset="289.0"/>
-            <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#1443C8"/><stop offset="100%" stop-color="#FF6B00"/></linearGradient></defs>
-            <text x="55" y="55" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="Barlow Condensed,sans-serif" font-size="17" font-weight="700" transform="rotate(90,55,55)" id="ring-txt">0%</text>
-          </svg>
-          <div>
-            <div style="font-size:16px;font-weight:700;margin-bottom:5px">إنجاز الـ Door</div>
-            <div style="font-size:12px;color:var(--text2);margin-bottom:10px" id="ring-door-name">لم يتم اختيار Door</div>
-            <div style="font-size:13px;color:var(--text2)">الهدف: <span id="ring-t" style="color:var(--text);font-weight:700">—</span></div>
-            <div style="font-size:13px;color:var(--text2);margin-top:3px">المحقق: <span id="ring-a" style="color:var(--success);font-weight:700">—</span></div>
-            <div style="font-size:13px;color:var(--text2);margin-top:3px">الفجوة: <span id="ring-g" style="color:var(--danger);font-weight:700">—</span></div>
+    <!-- HERO CARD -->
+    <div class="hero-section">
+      <div class="hero-card">
+        <div class="hero-top">
+          <div class="hero-left">
+            <div class="hero-greeting">إجمالي كل المحلات</div>
+            <div class="hero-mtd-val c-g" id="hero-mtd">—</div>
+            <div class="hero-mtd-lbl">المحقق حتى الآن (MTD إجمالي)</div>
+          </div>
+          <div class="hero-ring-wrap">
+            <svg class="hero-ring-svg" width="88" height="88" viewBox="0 0 88 88">
+              <circle class="hero-ring-track" cx="44" cy="44" r="35"/>
+              <circle class="hero-ring-fill" id="hero-ring-fill" cx="44" cy="44" r="35"
+                      stroke="var(--accent)" stroke-dasharray="220" stroke-dashoffset="220"/>
+            </svg>
+            <div class="hero-ring-center">
+              <div class="hero-ring-pct c-a" id="hero-pct">0%</div>
+              <div class="hero-ring-lbl">إنجاز</div>
+            </div>
           </div>
         </div>
-
-        <!-- MSL Status for selected door -->
-        <div class="tbl-wrap" style="margin-bottom:0">
-          <div class="tbl-head"><div class="tbl-title">MSL الـ Door المحدد</div><span class="tbl-count" id="door-msl-count">—</span></div>
-          <div style="max-height:230px;overflow-y:auto">
-            <table>
-              <thead><tr><th>المنتج</th><th>الحالة</th><th>آخر بيع</th></tr></thead>
-              <tbody id="door-msl-body"><tr><td colspan="3" class="loading-row">اختر Door أولاً</td></tr></tbody>
-            </table>
-          </div>
+        <div class="hero-metrics" id="hero-metrics">
+          <!-- filled by JS -->
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-gap-row">
+          <span class="hero-gap-lbl">الفجوة المتبقية</span>
+          <span class="hero-gap-val c-r" id="hero-gap">—</span>
         </div>
       </div>
     </div>
 
-    <!-- ══ TARGETS ══ -->
-    <div id="page-targets" class="page" style="display:none">
-      <div class="page-h">
-        <div><div class="page-title">الأهداف</div><div class="page-sub">Target لكل Door لكل مندوب</div></div>
-        <div class="actions">
-          <select class="fsel" id="tgt-month" onchange="loadTargets()"><option value="">الشهر الحالي</option></select>
-          <button class="btn-sm blue" onclick="loadTargets()">↻ تحديث</button>
-        </div>
+    <!-- KPI GRID -->
+    <div class="kpi-grid">
+      <div class="kpi-card gap fade-up d1">
+        <div class="kpi-icon">🎯</div>
+        <div class="kpi-lbl">الفجوة</div>
+        <div class="kpi-val c-r" id="kpi-gap">—</div>
+        <div class="kpi-sub">لإتمام الهدف</div>
       </div>
-
-      <div class="rep-bar" id="tgt-rep-bar" style="display:none">
-        <label>المندوب:</label><div id="tgt-rep-btns" style="display:flex;gap:7px;flex-wrap:wrap"></div>
+      <div class="kpi-card time fade-up d2">
+        <div class="kpi-icon">⏱</div>
+        <div class="kpi-lbl">نسبة الوقت</div>
+        <div class="kpi-val c-y" id="kpi-time-pct">—</div>
+        <div class="kpi-sub">من الشهر انقضى</div>
       </div>
-
-      <div class="tbl-wrap">
-        <div class="tbl-head">
-          <div><div class="tbl-title">الأهداف لكل Door</div></div>
-          <div class="tbl-right">
-            <span class="tbl-count" id="tgt-count">0 هدف</span>
-            <input class="search" id="tgt-search" placeholder="بحث..." oninput="filterTargetsTable()">
-          </div>
-        </div>
-        <div style="overflow-x:auto">
-          <table>
-            <thead><tr><th>الـ Door</th><th>الكود</th><th>الـ Channel</th><th>الهدف</th><th>المحقق</th><th>نسبة الإنجاز</th><th>الفجوة</th><th>الحالة</th></tr></thead>
-            <tbody id="tgt-tbody"><tr><td colspan="8" class="loading-row">جاري التحميل...</td></tr></tbody>
-          </table>
-        </div>
+      <div class="kpi-card doors fade-up d3">
+        <div class="kpi-icon">🏪</div>
+        <div class="kpi-lbl">عدد المحلات</div>
+        <div class="kpi-val c-b" id="kpi-doors">—</div>
+        <div class="kpi-sub">في مسار اليوم</div>
+      </div>
+      <div class="kpi-card best fade-up d4">
+        <div class="kpi-icon">🏆</div>
+        <div class="kpi-lbl">أفضل محل</div>
+        <div class="kpi-val c-g" id="kpi-best" style="font-size:13px;margin-top:6px">—</div>
+        <div class="kpi-sub" id="kpi-best-pct">—</div>
       </div>
     </div>
 
-    <!-- ══ MSL ══ -->
-    <div id="page-msl" class="page" style="display:none">
-      <div class="page-h">
-        <div><div class="page-title">قائمة MSL</div><div class="page-sub">Must Stock List — لكل Door على حدة</div></div>
-        <div class="actions"><button class="btn-sm blue" onclick="loadMSL()">↻ تحديث</button></div>
-      </div>
-
-      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
-        <div class="kcard green"><div class="klabel">متوافر</div><div class="kval" id="msl-ok">—</div><div class="kmeta">SKU حاضر</div></div>
-        <div class="kcard red"><div class="klabel">غير متوافر</div><div class="kval" id="msl-miss">—</div><div class="kmeta">SKU مفقود</div></div>
-        <div class="kcard orange"><div class="klabel">Compliance</div><div class="kval" id="msl-pct">—%</div><div class="kmeta">نسبة الامتثال</div></div>
-      </div>
-
-      <div class="tbl-wrap">
-        <div class="tbl-head">
-          <div class="tbl-title">تفاصيل MSL</div>
-          <div class="tbl-right">
-            <select class="fsel" id="msl-door-filter" onchange="filterMSLTable()"><option value="">كل الـ Doors</option></select>
-            <select class="fsel" id="msl-status-filter" onchange="filterMSLTable()"><option value="">كل الحالات</option><option value="present">متوافر</option><option value="missing">مفقود</option></select>
-            <input class="search" id="msl-search" placeholder="بحث..." oninput="filterMSLTable()">
-          </div>
-        </div>
-        <div style="overflow-x:auto">
-          <table>
-            <thead><tr><th>الـ Door</th><th>Channel</th><th>كود SKU</th><th>اسم المنتج</th><th>الحالة</th><th>آخر بيع</th><th>ملاحظة</th></tr></thead>
-            <tbody id="msl-tbody"><tr><td colspan="7" class="loading-row">جاري التحميل...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
+    <!-- TABS -->
+    <div class="tabs-wrap">
+      <div class="tab active" id="tab-home" onclick="switchTab('home')">🏠 الرئيسية</div>
+      <div class="tab" id="tab-msl" onclick="switchTab('msl')">📋 طلب MSL</div>
+      <div class="tab" id="tab-hist" onclick="switchTab('hist')">📈 التاريخ</div>
+      <div class="tab" id="tab-zero" onclick="switchTab('zero')">🔴 الصفر <span class="tab-badge" id="zero-cnt" style="display:none">0</span></div>
+      <div class="tab" id="tab-promo" onclick="switchTab('promo')">🎁 العروض <span class="tab-badge" id="promo-cnt" style="display:none;background:var(--accent)">0</span></div>
+      <div class="tab" id="tab-ai" onclick="switchTab('ai')">🤖 مساعد ذكي</div>
     </div>
 
-    <!-- ══ VISITS ══ -->
-    <div id="page-visits" class="page" style="display:none">
-      <div class="page-h">
-        <div><div class="page-title">الزيارات</div><div class="page-sub">Check-in / Check-out</div></div>
-        <div class="actions">
-          <input type="date" class="fsel" id="visit-date" onchange="loadVisits()">
-          <button class="btn-sm blue" onclick="loadVisits()">↻ تحديث</button>
+    <!-- PANEL: HOME -->
+    <div class="panel active" id="panel-home">
+      <div class="section-title">محلاتك اليوم</div>
+      <div id="home-doors"></div>
+    </div>
+
+    <!-- PANEL: MSL -->
+    <div class="panel" id="panel-msl">
+      <div class="msl-controls">
+        <div class="search-wrap">
+          <span class="search-ico">🔍</span>
+          <input class="search-input" type="text" id="msl-search" placeholder="ابحث باسم المنتج أو الكود..." oninput="filterMSL()">
+        </div>
+        <div class="chips-row" id="cat-chips">
+          <div class="chip active" data-cat="الكل" onclick="filterCat(this)">الكل</div>
         </div>
       </div>
-
-      <div class="rep-bar" id="vis-rep-bar" style="display:none">
-        <label>المندوب:</label><div id="vis-rep-btns" style="display:flex;gap:7px;flex-wrap:wrap"></div>
-      </div>
-
-      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
-        <div class="kcard green"><div class="klabel">إجمالي الزيارات</div><div class="kval" id="v-total">—</div><div class="kmeta">اليوم</div></div>
-        <div class="kcard blue"><div class="klabel">متوسط المدة</div><div class="kval" id="v-avg">—</div><div class="kmeta">دقيقة</div></div>
-        <div class="kcard orange"><div class="klabel">Doors تمت زيارتها</div><div class="kval" id="v-doors">—</div><div class="kmeta">عميل مختلف</div></div>
-      </div>
-
-      <div class="tbl-wrap">
-        <div class="tbl-head">
-          <div class="tbl-title">سجل الزيارات</div>
-          <div class="tbl-right">
-            <input class="search" id="vis-search" placeholder="بحث عميل..." oninput="filterVisitsTable()">
-          </div>
+      <div id="msl-body"><div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل قائمة MSL...</div></div></div>
+      <div class="msl-summary" id="msl-summary" style="display:none">
+        <div class="sum-info">
+          <div class="sum-lbl">إجمالي الطلب</div>
+          <div class="sum-val" id="sum-val">0 كرتونة</div>
         </div>
-        <div style="overflow-x:auto">
-          <table>
-            <thead><tr><th>الوقت</th><th>الـ Door</th><th>الكود</th><th>Check-in</th><th>Check-out</th><th>المدة (د)</th><th>الحالة</th></tr></thead>
-            <tbody id="vis-tbody"><tr><td colspan="7" class="loading-row">جاري التحميل...</td></tr></tbody>
-          </table>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="export-btn" id="copy-btn" onclick="copyAsTable()" disabled style="background:linear-gradient(135deg,var(--blue),var(--blue2));box-shadow:0 3px 14px rgba(61,127,255,.3)">📋 نسخ</button>
+          <button class="export-btn" id="export-btn" onclick="exportOrder()" disabled>📤 Excel</button>
         </div>
       </div>
     </div>
 
-    <!-- ══ ZERO SALES ══ -->
-    <div id="page-zero" class="page" style="display:none">
-      <div class="page-h">
-        <div><div class="page-title">Zero Sales</div><div class="page-sub">منتجات MSL بدون مبيعات</div></div>
-        <div class="actions">
-          <select class="fsel" id="zero-period" onchange="loadZero()">
-            <option value="month">هذا الشهر</option>
-            <option value="week">هذا الأسبوع</option>
-          </select>
-          <button class="btn-sm blue" onclick="loadZero()">↻ تحديث</button>
-        </div>
-      </div>
-
-      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
-        <div class="kcard red"><div class="klabel">Zero Items</div><div class="kval" id="z-count">—</div><div class="kmeta">SKU بدون مبيعات</div></div>
-        <div class="kcard orange"><div class="klabel">Doors متأثرة</div><div class="kval" id="z-doors">—</div><div class="kmeta">—</div></div>
-        <div class="kcard blue"><div class="klabel">% من MSL</div><div class="kval" id="z-pct">—%</div><div class="kmeta">نسبة الـ Zero</div></div>
-      </div>
-
-      <div class="tbl-wrap">
-        <div class="tbl-head">
-          <div class="tbl-title">تفاصيل Zero Sales</div>
-          <div class="tbl-right">
-            <select class="fsel" id="z-door-filter" onchange="filterZeroTable()"><option value="">كل الـ Doors</option></select>
-            <input class="search" id="z-search" placeholder="بحث..." oninput="filterZeroTable()">
-          </div>
-        </div>
-        <div style="overflow-x:auto">
-          <table>
-            <thead><tr><th>الـ Door</th><th>Channel</th><th>كود SKU</th><th>اسم المنتج</th><th>آخر بيع</th><th>أيام بدون بيع</th><th>الأولوية</th></tr></thead>
-            <tbody id="z-tbody"><tr><td colspan="7" class="loading-row">جاري التحميل...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
+    <!-- PANEL: HISTORY -->
+    <div class="panel" id="panel-hist">
+      <div id="hist-body"><div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل السجل...</div></div></div>
     </div>
 
-    <!-- ══ ADMIN ══ -->
-    <div id="page-admin" class="page" style="display:none">
-      <div class="page-h">
-        <div><div class="page-title">لوحة الإدارة</div><div class="page-sub">إدارة البيانات الأساسية</div></div>
-      </div>
+    <!-- PANEL: ZERO -->
+    <div class="panel" id="panel-zero">
+      <div id="zero-body"><div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل قائمة الصفر...</div></div></div>
+    </div>
 
-      <div class="admin-grid">
-        <div class="admin-card" onclick="openModal('modal-user')">
-          <div class="admin-icon">👤</div>
-          <div class="admin-card-title">إضافة مستخدم</div>
-          <div class="admin-card-sub">إضافة مندوب جديد بإيميل وكلمة سر</div>
-        </div>
-        <div class="admin-card" onclick="openModal('modal-door')">
-          <div class="admin-icon">🚪</div>
-          <div class="admin-card-title">إضافة Door</div>
-          <div class="admin-card-sub">إضافة عميل / outlet جديد</div>
-        </div>
-        <div class="admin-card" onclick="openModal('modal-sku')">
-          <div class="admin-icon">📦</div>
-          <div class="admin-card-title">إضافة SKU</div>
-          <div class="admin-card-sub">إضافة منتج جديد</div>
-        </div>
-        <div class="admin-card" onclick="openModal('modal-target')">
-          <div class="admin-icon">🎯</div>
-          <div class="admin-card-title">تحديد Target</div>
-          <div class="admin-card-sub">Target لـ Door معين لمندوب معين</div>
-        </div>
-        <div class="admin-card" onclick="openModal('modal-msl')">
-          <div class="admin-icon">📋</div>
-          <div class="admin-card-title">تحديد MSL</div>
-          <div class="admin-card-sub">ربط SKU بـ Door</div>
-        </div>
-        <div class="admin-card" onclick="openModal('modal-sale')">
-          <div class="admin-icon">💰</div>
-          <div class="admin-card-title">إدخال مبيعات</div>
-          <div class="admin-card-sub">إدخال invoice لـ Door + SKU</div>
-        </div>
-        <div class="admin-card" onclick="openModal('modal-visit')">
-          <div class="admin-icon">📍</div>
-          <div class="admin-card-title">إدخال زيارة</div>
-          <div class="admin-card-sub">تسجيل check-in / check-out</div>
-        </div>
-        <div class="admin-card" onclick="openModal('modal-import')">
-          <div class="admin-icon">📁</div>
-          <div class="admin-card-title">استيراد Excel</div>
-          <div class="admin-card-sub">رفع بيانات مبيعات / targets / MSL</div>
+    <!-- PANEL: PROMO -->
+    <div class="panel" id="panel-promo">
+      <div id="promo-body"><div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل العروض...</div></div></div>
+    </div>
+
+    <!-- PANEL: AI ASSISTANT -->
+    <div class="panel" id="panel-ai" style="padding:0;display:flex;flex-direction:column;height:calc(100vh - 195px)">
+      <div class="ai-messages" id="ai-messages">
+        <div class="ai-welcome" id="ai-welcome">
+          <div class="ai-welcome-icon">🤖</div>
+          <div class="ai-welcome-title">مساعد Mighty Foods الذكي</div>
+          <div class="ai-welcome-sub">اسألني عن أداء مبيعاتك، منتجات الصفر،<br>كميات الطلب، والعروض النشطة</div>
         </div>
       </div>
-
-      <!-- Quick data tables -->
-      <div class="two-col">
-        <div class="tbl-wrap" style="margin-bottom:0">
-          <div class="tbl-head"><div class="tbl-title">الـ Doors</div><span class="tbl-count" id="admin-doors-count">—</span></div>
-          <div style="max-height:260px;overflow-y:auto">
-            <table><thead><tr><th>الاسم</th><th>الكود</th><th>Channel</th><th>المندوب</th></tr></thead>
-            <tbody id="admin-doors-body"><tr><td colspan="4" class="loading-row">جاري التحميل...</td></tr></tbody></table>
-          </div>
+      <div class="ai-input-area">
+        <div class="ai-quick-chips" id="ai-quick-chips">
+          <div class="ai-quick-chip" onclick="aiQuickSend('اعطني خطة الزيارة الكاملة لهذا المحل — ماذا أطلب بالكمية بالضبط، وما أتجاهله، وما أعمله في الصفر والعروض')">⚡ خطة الزيارة كاملة</div>
+          <div class="ai-quick-chip" onclick="aiQuickSend('قائمة الطلب النهائية: كل منتج وكميته بالضبط، مرتبة من الأهم للأقل أهمية')">📋 قائمة الطلب</div>
+          <div class="ai-quick-chip" onclick="aiQuickSend('منتجات الصفر: ما السبب المحتمل لكل منتج وخطوة واحدة أعملها دلوقتي لكل منتج؟')">🔴 علاج الصفر</div>
+          <div class="ai-quick-chip" onclick="aiQuickSend('العروض النشطة: كيف أستغلها لزيادة الطلب؟ وأي عرض الأولوية قبل ما ينتهي؟')">🎁 استغلال العروض</div>
+          <div class="ai-quick-chip" onclick="aiQuickSend('الفجوة عن الهدف: كم أطلب من كل محل باقي الشهر علشان أغلق الهدف؟')">🎯 إغلاق الهدف</div>
+          <div class="ai-quick-chip" onclick="aiQuickSend('راجع الطلب الحالي اللي أنا داخله — هل الكميات صح؟ في حاجة أزيد أو أنقص؟')">✅ مراجعة الطلب</div>
         </div>
-        <div class="tbl-wrap" style="margin-bottom:0">
-          <div class="tbl-head"><div class="tbl-title">المستخدمون</div><span class="tbl-count" id="admin-users-count">—</span></div>
-          <div style="max-height:260px;overflow-y:auto">
-            <table><thead><tr><th>الاسم</th><th>الإيميل</th><th>الدور</th></tr></thead>
-            <tbody id="admin-users-body"><tr><td colspan="3" class="loading-row">جاري التحميل...</td></tr></tbody></table>
-          </div>
+        <div class="ai-input-row">
+          <textarea class="ai-textarea" id="ai-input" placeholder="اكتب سؤالك هنا..." rows="1" oninput="aiAutoResize(this)" onkeydown="aiKeyDown(event)"></textarea>
+          <button class="ai-send-btn" id="ai-send-btn" onclick="aiSend()">➤</button>
         </div>
       </div>
     </div>
 
-  </div><!-- /content -->
-</div><!-- /app-screen -->
-
-<!-- ════ MODALS ════ -->
-
-<!-- Add User -->
-<div class="modal-ov" id="modal-user">
-  <div class="modal-box">
-    <div class="modal-title">👤 إضافة مستخدم جديد</div>
-    <div class="modal-sub">يُنشأ مستخدم في Firebase Auth + Firestore</div>
-    <div class="mfield"><label>الاسم</label><input id="mu-name" placeholder="أحمد محمود"></div>
-    <div class="mfield"><label>البريد الإلكتروني</label><input id="mu-email" type="email" placeholder="ahmed@mightyfoods.com" style="direction:ltr"></div>
-    <div class="mfield"><label>كلمة المرور</label><input id="mu-pass" type="password" placeholder="6+ حروف"></div>
-    <div class="mfield"><label>الدور</label>
-      <select id="mu-role"><option value="rep">مندوب مبيعات</option><option value="manager">مدير</option></select>
-    </div>
-    <div class="mfield"><label>الـ Doors المخصصة (اختياري)</label>
-      <select id="mu-doors" multiple style="height:100px"><option value="">سيتم تحديدها لاحقاً</option></select>
-      <div class="mhint">Ctrl+Click لاختيار أكثر من Door</div>
-    </div>
-    <div class="modal-acts">
-      <button class="btn-cancel" onclick="closeModal('modal-user')">إلغاء</button>
-      <button class="btn-save" onclick="addUser()">إضافة المستخدم</button>
-    </div>
-  </div>
-</div>
-
-<!-- Add Door -->
-<div class="modal-ov" id="modal-door">
-  <div class="modal-box">
-    <div class="modal-title">🚪 إضافة Door جديد</div>
-    <div class="modal-sub">عميل / outlet</div>
-    <div class="mfield"><label>اسم الـ Door</label><input id="md-name" placeholder="Carrefour - Maadi"></div>
-    <div class="mfield"><label>كود الـ Door</label><input id="md-code" placeholder="CAR-001" style="direction:ltr"></div>
-    <div class="mfield"><label>Channel</label>
-      <select id="md-channel">
-        <option>Modern Trade</option><option>General Trade</option><option>HoReCa</option><option>Pharmacy</option><option>Online</option>
-      </select>
-    </div>
-    <div class="mfield"><label>المنطقة / العنوان</label><input id="md-area" placeholder="القاهرة - المعادي"></div>
-    <div class="mfield"><label>المندوب المسؤول</label><select id="md-rep"><option value="">اختر مندوب...</option></select></div>
-    <div class="modal-acts">
-      <button class="btn-cancel" onclick="closeModal('modal-door')">إلغاء</button>
-      <button class="btn-save" onclick="addDoor()">إضافة الـ Door</button>
-    </div>
-  </div>
-</div>
-
-<!-- Add SKU -->
-<div class="modal-ov" id="modal-sku">
-  <div class="modal-box">
-    <div class="modal-title">📦 إضافة SKU</div>
-    <div class="modal-sub">منتج جديد</div>
-    <div class="mfield"><label>كود SKU</label><input id="ms-code" placeholder="MF-001" style="direction:ltr"></div>
-    <div class="mfield"><label>اسم المنتج</label><input id="ms-name" placeholder="Mighty Chips Classic"></div>
-    <div class="mfield"><label>الفئة / Brand</label><input id="ms-brand" placeholder="Chips"></div>
-    <div class="mfield"><label>سعر البيع (ج.م)</label><input id="ms-price" type="number" placeholder="0.00"></div>
-    <div class="modal-acts">
-      <button class="btn-cancel" onclick="closeModal('modal-sku')">إلغاء</button>
-      <button class="btn-save" onclick="addSKU()">إضافة المنتج</button>
-    </div>
-  </div>
-</div>
-
-<!-- Set Target -->
-<div class="modal-ov" id="modal-target">
-  <div class="modal-box">
-    <div class="modal-title">🎯 تحديد Target</div>
-    <div class="modal-sub">هدف لـ Door معين لمندوب معين في شهر محدد</div>
-    <div class="mfield"><label>المندوب</label><select id="mt-rep"><option value="">اختر...</option></select></div>
-    <div class="mfield"><label>الـ Door</label><select id="mt-door"><option value="">اختر...</option></select></div>
-    <div class="mfield"><label>الشهر</label><input id="mt-month" type="month"></div>
-    <div class="mfield"><label>الهدف (ج.م)</label><input id="mt-val" type="number" placeholder="50000"></div>
-    <div class="modal-acts">
-      <button class="btn-cancel" onclick="closeModal('modal-target')">إلغاء</button>
-      <button class="btn-save" onclick="setTarget()">حفظ الـ Target</button>
-    </div>
-  </div>
-</div>
-
-<!-- Set MSL -->
-<div class="modal-ov" id="modal-msl">
-  <div class="modal-box">
-    <div class="modal-title">📋 تحديد MSL</div>
-    <div class="modal-sub">ربط SKU بـ Door (المنتجات الإلزامية)</div>
-    <div class="mfield"><label>الـ Door</label><select id="mm-door"><option value="">اختر...</option></select></div>
-    <div class="mfield"><label>SKU</label><select id="mm-sku"><option value="">اختر...</option></select></div>
-    <div class="mfield"><label>الحالة الحالية</label>
-      <select id="mm-status"><option value="present">✓ متوافر</option><option value="missing">✗ مفقود</option></select>
-    </div>
-    <div class="mfield"><label>ملاحظة</label><input id="mm-note" placeholder="سبب الغياب..."></div>
-    <div class="modal-acts">
-      <button class="btn-cancel" onclick="closeModal('modal-msl')">إلغاء</button>
-      <button class="btn-save" onclick="setMSL()">حفظ MSL</button>
-    </div>
-  </div>
-</div>
-
-<!-- Enter Sale -->
-<div class="modal-ov" id="modal-sale">
-  <div class="modal-box">
-    <div class="modal-title">💰 إدخال مبيعات</div>
-    <div class="modal-sub">Invoice / أوردر لـ Door + SKU</div>
-    <div class="mfield"><label>المندوب</label><select id="ms2-rep"><option value="">اختر...</option></select></div>
-    <div class="mfield"><label>الـ Door</label><select id="ms2-door"><option value="">اختر...</option></select></div>
-    <div class="mfield"><label>SKU</label><select id="ms2-sku"><option value="">اختر...</option></select></div>
-    <div class="mfield"><label>رقم الفاتورة</label><input id="ms2-inv" placeholder="INV-2024-001" style="direction:ltr"></div>
-    <div class="mfield"><label>الكمية</label><input id="ms2-qty" type="number" placeholder="0"></div>
-    <div class="mfield"><label>القيمة (ج.م)</label><input id="ms2-val" type="number" placeholder="0.00"></div>
-    <div class="mfield"><label>التاريخ</label><input id="ms2-date" type="date"></div>
-    <div class="modal-acts">
-      <button class="btn-cancel" onclick="closeModal('modal-sale')">إلغاء</button>
-      <button class="btn-save" onclick="addSale()">حفظ الفاتورة</button>
-    </div>
-  </div>
-</div>
-
-<!-- Enter Visit -->
-<div class="modal-ov" id="modal-visit">
-  <div class="modal-box">
-    <div class="modal-title">📍 تسجيل زيارة</div>
-    <div class="modal-sub">Check-in / Check-out</div>
-    <div class="mfield"><label>المندوب</label><select id="mv-rep"><option value="">اختر...</option></select></div>
-    <div class="mfield"><label>الـ Door</label><select id="mv-door"><option value="">اختر...</option></select></div>
-    <div class="mfield"><label>التاريخ</label><input id="mv-date" type="date"></div>
-    <div class="mfield"><label>وقت الدخول</label><input id="mv-in" type="time"></div>
-    <div class="mfield"><label>وقت الخروج</label><input id="mv-out" type="time"></div>
-    <div class="mfield"><label>الحالة</label>
-      <select id="mv-status"><option value="completed">مكتملة</option><option value="in-progress">جارية</option><option value="skipped">لم تتم</option></select>
-    </div>
-    <div class="modal-acts">
-      <button class="btn-cancel" onclick="closeModal('modal-visit')">إلغاء</button>
-      <button class="btn-save" onclick="addVisit()">حفظ الزيارة</button>
-    </div>
-  </div>
-</div>
-
-<!-- Excel Import -->
-<div class="modal-ov" id="modal-import">
-  <div class="modal-box">
-    <div class="modal-title">📁 استيراد Excel</div>
-    <div class="modal-sub">ارفع ملف Excel وسيُستورد تلقائياً إلى Firebase</div>
-    <div class="mfield">
-      <label>نوع البيانات</label>
-      <select id="imp-type" onchange="updateImportTemplate()">
-        <option value="doors">عملاء (Doors)</option>
-        <option value="skus">منتجات (SKUs)</option>
-        <option value="targets">أهداف (Targets)</option>
-        <option value="msl">MSL</option>
-        <option value="sales">مبيعات (Sales Transactions)</option>
-        <option value="visits">زيارات (Visits)</option>
-      </select>
-    </div>
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:12px;font-size:12px;color:var(--text2);margin-bottom:14px" id="imp-template">
-      الأعمدة المطلوبة: rep_email, door_code, sku_code, qty, value, date, invoice_no
-    </div>
-    <div class="upload-box" id="upload-box">
-      <input type="file" accept=".xlsx,.xls,.csv" onchange="handleFileUpload(event)">
-      <div class="upload-icon">📂</div>
-      <div class="upload-text">اسحب الملف هنا أو اضغط للاختيار</div>
-      <div class="upload-sub">.xlsx / .xls / .csv</div>
-    </div>
-    <div id="import-preview" style="display:none">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;margin-bottom:8px">
-        <span style="font-size:13px;font-weight:700" id="preview-count">0 سطر للاستيراد</span>
-        <button class="btn-save" style="width:auto;padding:8px 18px;border-radius:8px" onclick="doImport()">استيراد الآن</button>
-      </div>
-      <div class="preview-table" id="preview-table-wrap"></div>
-    </div>
-    <div class="modal-acts" style="margin-top:14px">
-      <button class="btn-cancel" onclick="closeModal('modal-import')">إغلاق</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast-cont" id="toasts"></div>
+  </div><!-- /scroll-body -->
+</div><!-- /app -->
 
 <script>
-// ════════════════════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════════════════════
-let DB = null, AUTH = null;
-let currentUser = null, userProfile = null;
-let DEMO = false;
+// ═══════════════════════════════════════════════════════
+// TELEGRAM SETUP
+// ═══════════════════════════════════════════════════════
+const tg = window.Telegram?.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
 
-let allDoors = [], allSKUs = [], allUsers = [], allReps = [];
-let selectedDoor = null, selectedRep = null;
-let targetsData = [], mslData = [], salesData = [], visitsData = [], zeroData = [];
-let importRows = [], importType = 'sales';
+// ═══════════════════════════════════════════════════════
+// DEMO DATA
+// ═══════════════════════════════════════════════════════
+const DEMO = {
+  rep_id:'R001', rep_name:'أحمد محمد', monthly_target:120000, time_gone_target:85000, mtd_sales:78000,
+  doors:[
+    {door_id:'D001',door_name:'كارفور مدينتي',channel:'Modern Trade',account:'carrefour',target:25000,mtd:18000,time_gone:17700},
+    {door_id:'D002',door_name:'سبينيس التجمع',channel:'Modern Trade',account:'spinneys',target:20000,mtd:15500,time_gone:14200},
+    {door_id:'D003',door_name:'هايبر وان الشيخ زايد',channel:'Hypermarket',account:'hyperhero',target:30000,mtd:28000,time_gone:21300},
+    {door_id:'D004',door_name:'كارمارت الرحاب',channel:'Modern Trade',account:'carrefour',target:15000,mtd:9500,time_gone:10650},
+  ],
+  ep:{
+    msl:'https://vmi3102625.contaboserver.net/webhook/msl',
+    zero:'https://vmi3102625.contaboserver.net/webhook/zero-sales',
+    history:'https://vmi3102625.contaboserver.net/webhook/history'
+  }
+};
+const DEMO_MSL = {items:[
+  {sku_id:'103010802',sku_name:'بوبز ذرة فشار بطعم مالح للتحضير بالميكروويف 90 جرام',category:'Snacks',brand:'Popz',pack_size:15,stock_units:143843,last_order_date:'2026-03-01',last_order_qty:30,is_zero_sale:false,promo:null},
+  {sku_id:'105040201',sku_name:'تايم هاي هاي بسكويت بالكريمة مغطى بالكاكاو 10 جرام',category:'Snacks',brand:'Time',pack_size:48,stock_units:73657,last_order_date:'2026-02-15',last_order_qty:48,is_zero_sale:true,promo:{discount:0.1,price_before:13,price_after:8,expires:'2026-03-30'}},
+  {sku_id:'314120601',sku_name:'مياه معدنية طبيعية 600 مل',category:'Beverages',brand:'Natural',pack_size:12,stock_units:5200,last_order_date:'2026-03-10',last_order_qty:12,is_zero_sale:false,promo:null},
+  {sku_id:'420050201',sku_name:'عصير مانجو طبيعي 250 مل',category:'Beverages',brand:'Mango+',pack_size:24,stock_units:350,last_order_date:'2026-01-20',last_order_qty:24,is_zero_sale:true,promo:{discount:0.15,price_before:20,price_after:17,expires:'2026-03-25'}},
+  {sku_id:'208010107',sku_name:'شيبس مالح كلاسيك 80 جرام',category:'Snacks',brand:'Chipsy',pack_size:20,stock_units:0,last_order_date:'2026-03-05',last_order_qty:40,is_zero_sale:false,promo:null},
+  {sku_id:'435010202',sku_name:'حلوى جيلي بالفراولة 20 جرام',category:'Candy',brand:'Jelly+',pack_size:60,stock_units:12000,last_order_date:'2026-03-12',last_order_qty:60,is_zero_sale:false,promo:null},
+  {sku_id:'539224',sku_name:'زد كاندي تورنادو مصاصة بالفراولة مع اللبان',category:'Candy',brand:'ZD',pack_size:30,stock_units:2800,last_order_date:'2026-03-03',last_order_qty:30,is_zero_sale:false,promo:{discount:0.08,price_before:25,price_after:23,expires:'2026-03-28'}},
+  {sku_id:'53993533',sku_name:'زد كاندي جو بريكر تورنادو بلو راز مع اللبان',category:'Candy',brand:'ZD',pack_size:30,stock_units:0,last_order_date:'2026-01-10',last_order_qty:15,is_zero_sale:true,promo:null},
+]};
+const DEMO_HIST = {
+  top_items:[
+    {sku_id:'103010802',sku_name:'بوبز ذرة فشار مالح 90 جرام',avg_monthly:36,last_qty:30,last_date:'2026-03-01',total_qty:216},
+    {sku_id:'435010202',sku_name:'حلوى جيلي بالفراولة 20 جرام',avg_monthly:55,last_qty:60,last_date:'2026-03-12',total_qty:330},
+    {sku_id:'314120601',sku_name:'مياه معدنية 600 مل',avg_monthly:18,last_qty:12,last_date:'2026-03-10',total_qty:108},
+  ],
+  stopped_items:[
+    {sku_id:'420050201',sku_name:'عصير مانجو 250 مل',days_stopped:52,last_qty:24,last_date:'2026-01-20'},
+    {sku_id:'53993533',sku_name:'زد كاندي جو بريكر بلو راز',days_stopped:62,last_qty:15,last_date:'2026-01-10'},
+  ]
+};
+const DEMO_ZERO = {items:[
+  {sku_id:'420050201',sku_name:'عصير مانجو طبيعي 250 مل',category:'Beverages',audit_date:'2026-03-10'},
+  {sku_id:'105040201',sku_name:'تايم هاي هاي كاكاو 10 جرام',category:'Snacks',audit_date:'2026-03-10'},
+  {sku_id:'53993533',sku_name:'زد كاندي جو بريكر بلو راز',category:'Candy',audit_date:'2026-03-08'},
+]};
+const DEMO_PROMO = {items:[
+  {sku_id:'105040201',sku_name:'تايم هاي هاي بسكويت كاكاو 10 جرام',category:'Snacks',discount:0.1,price_before:13,price_after:8,customer_group:'breadfast',from:'2026-03-01',expires:'2026-03-30'},
+  {sku_id:'420050201',sku_name:'عصير مانجو طبيعي 250 مل',category:'Beverages',discount:0.15,price_before:20,price_after:17,customer_group:'carrefour',from:'2026-03-05',expires:'2026-03-25'},
+  {sku_id:'539224',sku_name:'زد كاندي تورنادو مصاصة بالفراولة',category:'Candy',discount:0.08,price_before:25,price_after:23,customer_group:'hyperhero',from:'2026-03-01',expires:'2026-03-28'},
+]};
 
-// ════════════════════════════════════════════════════════
-//  FIREBASE INIT
-// ════════════════════════════════════════════════════════
-function initFirebase() {
-  const cfg = {
-    apiKey: id('s-apiKey').value.trim(),
-    authDomain: id('s-authDomain').value.trim(),
-    projectId: id('s-projectId').value.trim(),
-    storageBucket: id('s-storageBucket').value.trim(),
-    messagingSenderId: id('s-messagingSenderId').value.trim(),
-    appId: id('s-appId').value.trim()
-  };
-  if (!cfg.apiKey || !cfg.projectId) { showErr('setup-err','أدخل API Key و Project ID على الأقل'); return; }
-  try {
-    if (!firebase.apps.length) firebase.initializeApp(cfg);
-    AUTH = firebase.auth();
-    DB   = firebase.firestore();
-    localStorage.setItem('mf_firebase_cfg', JSON.stringify(cfg));
-    showScreen('login-screen');
-    toast('✓ تم الاتصال بـ Firebase','success');
-    setupAuthListener();
-  } catch(e) { showErr('setup-err', e.message); }
-}
-
-function useDemoMode() {
-  DEMO = true;
-  loadDemoData();
-  showScreen('app-screen');
-  userProfile = { name:'Demo Manager', role:'manager', email:'demo@mf.com' };
-  currentUser = { email:'demo@mf.com' };
-  setUserUI();
-  goTab('dashboard');
-  toast('تعمل بوضع Demo — لا يوجد حفظ حقيقي','warning');
-}
-
-window.onload = () => {
-  const saved = localStorage.getItem('mf_firebase_cfg');
-  if (saved) {
-    try {
-      const cfg = JSON.parse(saved);
-      if (!firebase.apps.length) firebase.initializeApp(cfg);
-      AUTH = firebase.auth();
-      DB   = firebase.firestore();
-      showScreen('login-screen');
-      setupAuthListener();
-      Object.entries(cfg).forEach(([k,v]) => { const el = id('s-'+k); if(el) el.value = v; });
-    } catch(e) { showScreen('setup-screen'); }
-  } else { showScreen('setup-screen'); }
-  populateMonthFilters();
-  id('visit-date').value = todayStr();
-  id('ms2-date').value = todayStr();
-  id('mv-date').value  = todayStr();
-  id('mt-month').value = new Date().toISOString().slice(0,7);
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const S = {
+  rep:null, doors:[], door:null, ep:null,
+  cache:{},          // door_id → { msl, hist, zero, promo }
+  qty:{},            // sku_id → qty
+  activeTab:'home',
+  activeCat:'الكل',
+  mslItems:[],       // current door's MSL flat list
+  isDemo:false
 };
 
-function setupAuthListener() {
-  AUTH.onAuthStateChanged(async u => {
-    if (u) {
-      currentUser = u;
-      await loadUserProfile();
-      showScreen('app-screen');
-      setUserUI();
-      await loadMasterData();
-      goTab('dashboard');
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+window.addEventListener('load', async () => {
+  const p = new URLSearchParams(location.search);
+  const t = p.get('t'); // session token (Telegram user ID)
+  const d = p.get('d'); // legacy full payload
+
+  if (t) {
+    try {
+      // Show loader while fetching session
+      const baseUrl = 'https://vmi3102625.contaboserver.net/webhook/get-session';
+      const r = await fetch(`${baseUrl}?t=${encodeURIComponent(t)}`);
+      const payload = await r.json();
+      if (payload.error) throw new Error(payload.error);
+      S.rep = {id:payload.rep_id||'', name:payload.rep_name||'مندوب', target:Number(payload.monthly_target||0), timeGone:Number(payload.time_gone_target||0), mtd:Number(payload.mtd_sales||0)};
+      S.doors = payload.doors || [];
+      S.door = S.doors[0] || null;
+      S.ep = payload.ep || {};
+    } catch(e) {
+      console.warn('Session fetch failed, trying demo:', e);
+      loadDemo();
     }
-  });
+  } else if (d) {
+    try {
+      const payload = JSON.parse(decodeURIComponent(atob(d)));
+      S.rep = {id:payload.rep_id||'', name:payload.rep_name||'مندوب', target:Number(payload.monthly_target||0), timeGone:Number(payload.time_gone_target||0), mtd:Number(payload.mtd_sales||0)};
+      S.doors = payload.doors || [];
+      S.door = S.doors[0] || null;
+      S.ep = payload.ep || {};
+    } catch(e) { loadDemo(); }
+  } else { loadDemo(); }
+
+  setTimeout(startApp, 1400);
+});
+
+function loadDemo() {
+  S.isDemo = true;
+  S.rep = {id:DEMO.rep_id, name:DEMO.rep_name, target:DEMO.monthly_target, timeGone:DEMO.time_gone_target, mtd:DEMO.mtd_sales};
+  S.doors = DEMO.doors;
+  S.door = DEMO.doors[0];
+  S.ep = DEMO.ep;
 }
 
-// ════════════════════════════════════════════════════════
-//  AUTH
-// ════════════════════════════════════════════════════════
-async function doLogin() {
-  const email = id('l-email').value.trim();
-  const pass  = id('l-pass').value;
-  const btn   = id('login-btn');
-  id('login-err').style.display='none';
-  btn.disabled=true; btn.textContent='جاري الدخول...';
-  try {
-    await AUTH.signInWithEmailAndPassword(email, pass);
-  } catch(e) {
-    showErr('login-err', e.code==='auth/user-not-found'||e.code==='auth/wrong-password'?'بيانات غير صحيحة':e.message);
-  }
-  btn.disabled=false; btn.textContent='دخول';
+function startApp() {
+  document.getElementById('loader').classList.add('out');
+  document.getElementById('app').style.display = 'flex';
+  renderTopBar();
+  renderRing();
+  renderKPIs();
+  renderHome();
+  renderDoorOpts();
 }
 
-async function logout() {
-  if (!DEMO) await AUTH.signOut();
-  currentUser=null; userProfile=null;
-  showScreen('login-screen');
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+const fmt = n => {
+  if (!n && n !== 0) return '-';
+  n = Number(n);
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if (n >= 1000) return (n/1000).toFixed(1)+'K';
+  return Math.round(n).toLocaleString('en');
+};
+const pct = (a,b) => b ? Math.min(Math.round(a/b*100),100) : 0;
+const fmtDate = s => {
+  if (!s) return '-';
+  const d = new Date(s);
+  if (isNaN(d)) return s;
+  return `${d.getDate()}/${d.getMonth()+1}`;
+};
+const IMG_BASE = 'https://mightyfoodss-my.sharepoint.com/personal/abdelrahman_tawfik_mighty-foods_com/Documents/ImgSKu/';
+
+function doorData() { return S.door || {}; }
+
+// ═══════════════════════════════════════════════════════
+// TOP BAR
+// ═══════════════════════════════════════════════════════
+function renderTopBar() {
+  const r = S.rep, d = S.door;
+  document.getElementById('tb-rep').textContent = r?.name || 'مندوب';
+  document.getElementById('tb-door').textContent = d?.door_name || 'اختر محلاً';
+  document.getElementById('tb-ch').textContent = d?.channel || '-';
 }
 
-async function loadUserProfile() {
-  if (DEMO) return;
-  try {
-    const doc = await DB.collection('users').doc(currentUser.uid).get();
-    if (doc.exists) userProfile = doc.data();
-    else userProfile = { name: currentUser.email, role:'rep', email:currentUser.email };
-  } catch(e) { userProfile = { name:currentUser.email, role:'rep' }; }
-}
+// ═══════════════════════════════════════════════════════
+// HERO
+// ═══════════════════════════════════════════════════════
+function renderRing() {
+  // Always show REP-LEVEL totals (sum of all doors)
+  const target   = Number(S.rep?.target   || 0);
+  const timeGone = Number(S.rep?.timeGone || 0);
+  const mtd      = Number(S.rep?.mtd      || 0);
 
-function setUserUI() {
-  const p = userProfile || {};
-  id('top-name').textContent = p.name || p.email || 'User';
-  id('top-role').textContent = p.role==='manager'?'Manager':'Sales Rep';
-  id('top-av').textContent   = (p.name||'U').charAt(0);
-  if (p.role==='manager') {
-    id('tab-admin').style.display='flex';
-    id('mgr-rep-bar').style.display='flex';
-    id('tgt-rep-bar').style.display='flex';
-    id('vis-rep-bar').style.display='flex';
-  }
-}
-
-// ════════════════════════════════════════════════════════
-//  MASTER DATA
-// ════════════════════════════════════════════════════════
-async function loadMasterData() {
-  if (DEMO) { buildRepBars(); buildDoorGrid(); populateSelects(); return; }
-  try {
-    const [doorsSnap, skusSnap, usersSnap] = await Promise.all([
-      DB.collection('doors').get(),
-      DB.collection('skus').get(),
-      DB.collection('users').get()
-    ]);
-    allDoors = doorsSnap.docs.map(d=>({id:d.id,...d.data()}));
-    allSKUs  = skusSnap.docs.map(d=>({id:d.id,...d.data()}));
-    allUsers = usersSnap.docs.map(d=>({id:d.id,...d.data()}));
-    allReps  = allUsers.filter(u=>u.role==='rep');
-
-    // Filter doors for rep
-    if (userProfile?.role==='rep') {
-      allDoors = allDoors.filter(d=>d.repId===currentUser.uid || d.repEmail===currentUser.email);
-    }
-    buildRepBars(); buildDoorGrid(); populateSelects();
-    loadAdminTables();
-  } catch(e) { toast('خطأ في تحميل البيانات الأساسية','error'); }
-}
-
-// ════════════════════════════════════════════════════════
-//  DEMO DATA
-// ════════════════════════════════════════════════════════
-function loadDemoData() {
-  allReps = [
-    {id:'r1',name:'أحمد محمود',email:'ahmed@mf.com',role:'rep'},
-    {id:'r2',name:'سارة خالد',email:'sara@mf.com',role:'rep'},
-  ];
-  allUsers = [...allReps, {id:'m1',name:'Demo Manager',email:'demo@mf.com',role:'manager'}];
-  allDoors = [
-    {id:'d1',name:'Carrefour Maadi',code:'CAR-001',channel:'Modern Trade',area:'المعادي',repId:'r1'},
-    {id:'d2',name:'Spinneys Zamalek',code:'SPN-001',channel:'Modern Trade',area:'الزمالك',repId:'r1'},
-    {id:'d3',name:'Seoudi Heliopolis',code:'SEO-001',channel:'Modern Trade',area:'مصر الجديدة',repId:'r1'},
-    {id:'d4',name:'Hyper One 5th',code:'HYP-001',channel:'Modern Trade',area:'التجمع الخامس',repId:'r2'},
-    {id:'d5',name:'Metro Market',code:'MET-001',channel:'Modern Trade',area:'الجيزة',repId:'r2'},
-    {id:'d6',name:'Flamingo Market',code:'FLM-001',channel:'Modern Trade',area:'المهندسين',repId:'r2'},
-  ];
-  allSKUs = [
-    {id:'s1',code:'MF-001',name:'Mighty Chips Classic',brand:'Chips',price:7},
-    {id:'s2',code:'MF-002',name:'Kettle Chips Original',brand:'Chips',price:12},
-    {id:'s3',code:'MF-003',name:'TOYBOX Jelly Mix',brand:'Candy',price:5},
-    {id:'s4',code:'MF-004',name:'Hay Hay Cocoa Biscuit',brand:'Biscuit',price:9},
-    {id:'s5',code:'MF-005',name:'Mighty Crisp BBQ',brand:'Chips',price:8},
-    {id:'s6',code:'MF-006',name:'Trolli Gummies',brand:'Candy',price:15},
-    {id:'s7',code:'MF-007',name:'SLIM Gofrette',brand:'Wafer',price:6},
-  ];
-  targetsData = [
-    {doorId:'d1',repId:'r1',month:'2025-04',target:120000,actual:87500},
-    {doorId:'d2',repId:'r1',month:'2025-04',target:95000,actual:91000},
-    {doorId:'d3',repId:'r1',month:'2025-04',target:75000,actual:42000},
-    {doorId:'d4',repId:'r2',month:'2025-04',target:110000,actual:115000},
-    {doorId:'d5',repId:'r2',month:'2025-04',target:80000,actual:55000},
-    {doorId:'d6',repId:'r2',month:'2025-04',target:60000,actual:61000},
-  ];
-  mslData = [
-    {doorId:'d1',skuId:'s1',status:'present',lastSale:'2025-04-10'},{doorId:'d1',skuId:'s2',status:'missing',lastSale:'2025-03-15'},{doorId:'d1',skuId:'s3',status:'present',lastSale:'2025-04-09'},
-    {doorId:'d2',skuId:'s1',status:'present',lastSale:'2025-04-11'},{doorId:'d2',skuId:'s4',status:'missing',lastSale:'2025-03-20'},{doorId:'d2',skuId:'s5',status:'present',lastSale:'2025-04-08'},
-    {doorId:'d3',skuId:'s2',status:'present',lastSale:'2025-04-10'},{doorId:'d3',skuId:'s6',status:'missing',lastSale:'2025-04-01'},{doorId:'d3',skuId:'s7',status:'present',lastSale:'2025-04-09'},
-    {doorId:'d4',skuId:'s1',status:'present',lastSale:'2025-04-11'},{doorId:'d4',skuId:'s3',status:'present',lastSale:'2025-04-10'},{doorId:'d4',skuId:'s5',status:'present',lastSale:'2025-04-11'},
-    {doorId:'d5',skuId:'s2',status:'missing',lastSale:'2025-03-01'},{doorId:'d5',skuId:'s4',status:'present',lastSale:'2025-04-09'},{doorId:'d5',skuId:'s6',status:'missing',lastSale:'2025-03-10'},
-    {doorId:'d6',skuId:'s1',status:'present',lastSale:'2025-04-10'},{doorId:'d6',skuId:'s7',status:'present',lastSale:'2025-04-08'},
-  ];
-  visitsData = [
-    {repId:'r1',doorId:'d1',date:'2025-04-11',checkin:'09:15',checkout:'09:50',status:'completed'},
-    {repId:'r1',doorId:'d2',date:'2025-04-11',checkin:'10:30',checkout:'11:10',status:'completed'},
-    {repId:'r1',doorId:'d3',date:'2025-04-11',checkin:'11:50',checkout:'12:25',status:'completed'},
-    {repId:'r2',doorId:'d4',date:'2025-04-11',checkin:'09:00',checkout:'09:45',status:'completed'},
-    {repId:'r2',doorId:'d5',date:'2025-04-11',checkin:'10:15',checkout:null,status:'in-progress'},
-  ];
-}
-
-// ════════════════════════════════════════════════════════
-//  UI BUILDERS
-// ════════════════════════════════════════════════════════
-function buildRepBars() {
-  if (userProfile?.role !== 'manager') return;
-  ['mgr-rep-btns','tgt-rep-btns','vis-rep-btns'].forEach(bid => {
-    const el = id(bid); if(!el) return;
-    el.innerHTML = `<button class="rep-pill active" data-rep="all" onclick="selectRep('all','${bid}')">الكل</button>`;
-    allReps.forEach(r => {
-      el.innerHTML += `<button class="rep-pill" data-rep="${r.id}" onclick="selectRep('${r.id}','${bid}')">${r.name}</button>`;
-    });
-  });
-}
-
-function selectRep(repId, bid) {
-  selectedRep = repId==='all' ? null : repId;
-  document.querySelectorAll(`#${bid} .rep-pill`).forEach(b=>b.classList.toggle('active',b.dataset.rep===repId));
-  buildDoorGrid();
-  const curTab = document.querySelector('.ntab.active')?.dataset.tab;
-  if (curTab) loadTabData(curTab);
-}
-
-function buildDoorGrid() {
-  const doors = selectedRep ? allDoors.filter(d=>d.repId===selectedRep) : allDoors;
-  const grid = id('door-grid');
-  if (!doors.length) { grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text3)">لا توجد Doors</div>'; return; }
-  grid.innerHTML = doors.map(d=>`
-    <button class="door-btn ${selectedDoor?.id===d.id?'active':''}" onclick="selectDoor('${d.id}')">
-      ${d.name}
-      <span class="door-code">${d.code} · ${d.channel}</span>
-    </button>`).join('');
-}
-
-function filterDoors() {
-  const q = id('door-search').value.toLowerCase();
-  const doors = (selectedRep ? allDoors.filter(d=>d.repId===selectedRep) : allDoors)
-    .filter(d => d.name.toLowerCase().includes(q) || d.code.toLowerCase().includes(q));
-  const grid = id('door-grid');
-  grid.innerHTML = doors.map(d=>`
-    <button class="door-btn ${selectedDoor?.id===d.id?'active':''}" onclick="selectDoor('${d.id}')">
-      ${d.name}
-      <span class="door-code">${d.code} · ${d.channel}</span>
-    </button>`).join('') || '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text3)">لا نتائج</div>';
-}
-
-function selectDoor(doorId) {
-  selectedDoor = allDoors.find(d=>d.id===doorId);
-  document.querySelectorAll('.door-btn').forEach(b=>b.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-  loadDashboard();
-}
-
-function populateSelects() {
-  // Populate rep selects in modals
-  ['mu-doors','md-rep','mt-rep','ms2-rep','mv-rep'].forEach(sid => {
-    const el = id(sid); if(!el) return;
-    if (sid==='mu-doors') {
-      el.innerHTML = allDoors.map(d=>`<option value="${d.id}">${d.name} (${d.code})</option>`).join('');
-    } else {
-      el.innerHTML = '<option value="">اختر مندوب...</option>' + allReps.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
-    }
-  });
-  // Door selects
-  const dHtml = '<option value="">اختر Door...</option>' + allDoors.map(d=>`<option value="${d.id}">${d.name} (${d.code})</option>`).join('');
-  ['mt-door','mm-door','ms2-door','mv-door','msl-door-filter','z-door-filter'].forEach(sid=>{
-    const el=id(sid); if(el) el.innerHTML=(sid.includes('filter')?'<option value="">كل الـ Doors</option>':'')+allDoors.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
-  });
-  // SKU selects
-  const sHtml = '<option value="">اختر SKU...</option>' + allSKUs.map(s=>`<option value="${s.id}">${s.name} (${s.code})</option>`).join('');
-  ['mm-sku','ms2-sku'].forEach(sid=>{ const el=id(sid); if(el) el.innerHTML=sHtml; });
-}
-
-// ════════════════════════════════════════════════════════
-//  TABS
-// ════════════════════════════════════════════════════════
-function goTab(tab) {
-  document.querySelectorAll('.ntab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
-  document.querySelectorAll('.page').forEach(p=>p.style.display='none');
-  const pg = id('page-'+tab); if(pg) pg.style.display='block';
-  loadTabData(tab);
-}
-
-function loadTabData(tab) {
-  if (tab==='dashboard') loadDashboard();
-  else if (tab==='targets') loadTargets();
-  else if (tab==='msl') loadMSL();
-  else if (tab==='visits') loadVisits();
-  else if (tab==='zero') loadZero();
-  else if (tab==='admin') loadAdmin();
-}
-
-// ════════════════════════════════════════════════════════
-//  DASHBOARD
-// ════════════════════════════════════════════════════════
-async function loadDashboard() {
-  const month = id('dash-month').value || currentMonth();
-  let tgtEntry = null, mslItems = [];
-
-  if (selectedDoor) {
-    tgtEntry = targetsData.find(t=>t.doorId===selectedDoor.id && t.month===month);
-    if (!tgtEntry && !DEMO) {
-      try {
-        const snap = await DB.collection('targets')
-          .where('doorId','==',selectedDoor.id)
-          .where('month','==',month).get();
-        if (!snap.empty) { tgtEntry = snap.docs[0].data(); targetsData.push(tgtEntry); }
-      } catch(e){}
-    }
-    mslItems = mslData.filter(m=>m.doorId===selectedDoor.id);
-    if (!mslItems.length && !DEMO) {
-      try {
-        const snap = await DB.collection('msl').where('doorId','==',selectedDoor.id).get();
-        mslItems = snap.docs.map(d=>d.data());
-      } catch(e){}
-    }
-  }
-
-  const target  = tgtEntry?.target  || 0;
-  const actual  = tgtEntry?.actual  || 0;
-  const achPct  = target ? Math.round((actual/target)*100) : 0;
-  const gap     = Math.max(0,target-actual);
-
-  id('dash-title').textContent = selectedDoor ? selectedDoor.name : 'لوحة التحكم';
-  id('dash-sub').textContent   = selectedDoor ? `${selectedDoor.code} · ${selectedDoor.channel} · ${selectedDoor.area||''}` : 'اختر Door من القائمة أدناه';
-  id('d-sales').textContent    = fmt(actual);
-  id('d-target').textContent   = fmt(target);
-  id('d-ach').textContent      = achPct+'%';
-  id('d-ach-m').innerHTML      = `<span class="badge ${achPct>=100?'bs':achPct>=80?'bw':'bd'}">${achPct>=100?'✓ تجاوز':achPct>=80?'قريب':'تأخر'}</span>`;
-  id('d-zero').textContent     = mslItems.filter(m=>m.status==='missing').length;
-  id('d-sales-m').textContent  = `الهدف: ${fmt(target)}`;
-  id('d-target-m').textContent = selectedDoor ? selectedDoor.channel : '—';
+  const hasTarget = target > 0;
+  const p = hasTarget ? pct(mtd, target) : 0;
+  const color = p >= 100 ? 'var(--green)' : p >= 70 ? 'var(--accent)' : p >= 40 ? 'var(--yellow)' : 'var(--red)';
+  const noTargetColor = 'var(--sub)';
 
   // Ring
-  const circum=289.0;
-  id('dash-ring').style.strokeDashoffset = circum - Math.min(achPct/100,1)*circum;
-  id('ring-txt').textContent = achPct+'%';
-  id('ring-door-name').textContent = selectedDoor ? selectedDoor.name : 'لم يتم اختيار Door';
-  id('ring-t').textContent = fmt(target);
-  id('ring-a').textContent = fmt(actual);
-  id('ring-g').textContent = fmt(gap);
+  const circ = 220;
+  const fill = document.getElementById('hero-ring-fill');
+  fill.style.strokeDashoffset = hasTarget ? circ - (circ * p / 100) : circ;
+  fill.style.stroke = hasTarget ? color : noTargetColor;
 
-  // Door MSL table
-  id('door-msl-count').textContent = mslItems.length+' SKU';
-  id('door-msl-body').innerHTML = mslItems.length ? mslItems.map(m=>{
-    const sku = allSKUs.find(s=>s.id===m.skuId);
-    const daysAgo = m.lastSale ? daysSince(m.lastSale) : '—';
-    return `<tr>
-      <td class="td-b">${sku?.name||m.skuId}</td>
-      <td><span class="badge ${m.status==='present'?'bs':'bd'}">${m.status==='present'?'✓ متوافر':'✗ مفقود'}</span></td>
-      <td style="font-size:12px">${m.lastSale||'—'}</td>
-    </tr>`;
-  }).join('') : '<tr><td colspan="3" class="loading-row">اختر Door أولاً</td></tr>';
+  const pctEl = document.getElementById('hero-pct');
+  pctEl.textContent = hasTarget ? p + '%' : '—';
+  pctEl.style.color = hasTarget ? color : 'var(--sub)';
+
+  // MTD big number
+  const mtdEl = document.getElementById('hero-mtd');
+  mtdEl.textContent = mtd > 0 ? fmt(mtd) : '—';
+  mtdEl.style.color = hasTarget ? color : (mtd > 0 ? 'var(--text)' : 'var(--sub)');
+
+  // Gap
+  const gap = hasTarget ? Math.max(0, target - mtd) : null;
+  document.getElementById('hero-gap').textContent = gap !== null ? fmt(gap) : '—';
+
+  // Metric rows
+  const metricsEl = document.getElementById('hero-metrics');
+  if (!hasTarget) {
+    metricsEl.innerHTML = `<div class="hero-no-target">⚠️ لا يوجد هدف مُحدد لهذا المحل في الشيت</div>`;
+    return;
+  }
+
+  const rows = [
+    { label: 'الهدف الشهري', val: fmt(target), barPct: 100, color: 'var(--accent)' },
+    { label: 'هدف الوقت', val: fmt(timeGone), barPct: timeGone > 0 ? pct(timeGone, target) : 0, color: 'var(--yellow)' },
+    { label: 'المحقق (MTD)', val: fmt(mtd), barPct: p, color },
+  ];
+
+  metricsEl.innerHTML = rows.map(r => `
+    <div class="hm-row">
+      <div class="hm-left">
+        <span class="hm-label">${r.label}</span>
+        <div class="hm-bar-wrap"><div class="hm-bar-fill" style="width:${r.barPct}%;background:${r.color}"></div></div>
+      </div>
+      <span class="hm-val" style="color:${r.color}">${r.val}</span>
+    </div>
+  `).join('');
 }
 
-// ════════════════════════════════════════════════════════
-//  TARGETS
-// ════════════════════════════════════════════════════════
-async function loadTargets() {
-  const month = id('tgt-month').value || currentMonth();
-  let data = targetsData;
-
-  if (!DEMO) {
-    try {
-      let q = DB.collection('targets').where('month','==',month);
-      if (selectedRep) q = q.where('repId','==',selectedRep);
-      else if (userProfile?.role==='rep') q = q.where('repId','==',currentUser.uid);
-      const snap = await q.get();
-      data = snap.docs.map(d=>d.data());
-    } catch(e) {}
+// ═══════════════════════════════════════════════════════
+// KPIs
+// ═══════════════════════════════════════════════════════
+function renderKPIs() {
+  // Always use rep-level totals
+  const target   = Number(S.rep?.target   || 0);
+  const timeGone = Number(S.rep?.timeGone || 0);
+  const mtd      = Number(S.rep?.mtd      || 0);
+  const hasTarget = target > 0;
+  const gap = hasTarget ? Math.max(0, target - mtd) : null;
+  const timePct = hasTarget && timeGone > 0 ? pct(timeGone, target) : null;
+  document.getElementById('kpi-gap').textContent = gap !== null ? fmt(gap) : '—';
+  document.getElementById('kpi-time-pct').textContent = timePct !== null ? timePct + '%' : '—';
+  document.getElementById('kpi-doors').textContent = S.doors.length;
+  const best = [...S.doors]
+    .filter(x => Number(x.target||x.monthly_target||0) > 0)
+    .sort((a,b) => pct(Number(b.mtd||b.mtd_sales||0),Number(b.target||b.monthly_target||1)) - pct(Number(a.mtd||a.mtd_sales||0),Number(a.target||a.monthly_target||1)))[0];
+  if (best) {
+    const name = best.door_name.split('_')[0].replace(/[\s_].*/,'').slice(0,6);
+    document.getElementById('kpi-best').textContent = name;
+    document.getElementById('kpi-best-pct').textContent = pct(Number(best.mtd||best.mtd_sales||0), Number(best.target||best.monthly_target||1)) + '% إنجاز';
   } else {
-    data = selectedRep ? targetsData.filter(t=>t.repId===selectedRep) : targetsData;
+    document.getElementById('kpi-best').textContent = '—';
+    document.getElementById('kpi-best-pct').textContent = 'لا بيانات';
   }
-
-  id('tgt-count').textContent = data.length+' هدف';
-  renderTargetsTable(data);
 }
 
-function renderTargetsTable(data) {
-  id('tgt-tbody').innerHTML = data.map(t=>{
-    const door = allDoors.find(d=>d.id===t.doorId);
-    const pct  = t.target ? Math.round((t.actual/t.target)*100) : 0;
-    const gap  = Math.max(0,t.target-t.actual);
-    const c    = pct>=100?'g':pct>=80?'o':'r';
-    return `<tr>
-      <td class="td-b">${door?.name||t.doorId}</td>
-      <td><code style="font-size:11px;color:var(--text3)">${door?.code||'—'}</code></td>
-      <td><span class="badge bi">${door?.channel||'—'}</span></td>
-      <td class="td-b">${fmt(t.target)}</td>
-      <td style="color:var(--success)">${fmt(t.actual)}</td>
-      <td>
-        <div class="pbar-wrap">
-          <div class="pbar"><div class="pbar-fill ${c}" style="width:${Math.min(pct,100)}%"></div></div>
-          <span class="ppct" style="color:var(--${c==='g'?'success':c==='o'?'warning':'danger'})">${pct}%</span>
+// ═══════════════════════════════════════════════════════
+// HOME TAB — DOORS
+// ═══════════════════════════════════════════════════════
+function renderHome() {
+  const el = document.getElementById('home-doors');
+  el.innerHTML = S.doors.map((d,i) => {
+    const target = Number(d.target||d.monthly_target||0);
+    const mtd    = Number(d.mtd||d.mtd_sales||0);
+    const tg     = Number(d.time_gone||d.time_gone_target||0);
+    const hasT   = target > 0;
+    const p      = hasT ? pct(mtd, target) : 0;
+    const isCur  = d.door_id === S.door?.door_id;
+    const col    = hasT ? (p>=100?'var(--green)':p>=70?'var(--accent)':p>=40?'var(--yellow)':'var(--red)') : 'var(--muted)';
+    const achClass= hasT ? (p>=100?'ach-high':p>=70?'ach-mid':p>=40?'ach-warn':'ach-low') : '';
+    return `<div class="door-card ${achClass} fade-up ${isCur?'current':''} d${Math.min(i+1,5)}" onclick="selectDoor('${d.door_id}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div style="flex:1;min-width:0">
+          <div class="door-card-name">${d.door_name}</div>
+          <div class="door-card-ch">${d.channel}</div>
         </div>
-      </td>
-      <td style="color:var(--danger)">${fmt(gap)}</td>
-      <td><span class="badge ${pct>=100?'bs':pct>=80?'bw':'bd'}">${pct>=100?'✓ تجاوز':pct>=80?'قريب':'تأخر'}</span></td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="8" class="loading-row">لا توجد أهداف</td></tr>';
+        <div style="text-align:left;flex-shrink:0;padding-right:8px">
+          <div class="door-pct-badge" style="color:${col}">${hasT ? p+'%' : '—'}</div>
+          <div class="door-pct-sub">إنجاز</div>
+        </div>
+      </div>
+      ${hasT ? `
+      <div class="door-card-row">
+        <div class="door-card-nums">
+          <div class="door-num-item">MTD: <span>${fmt(mtd)}</span></div>
+          ${tg>0?`<div class="door-num-item">هدف الوقت: <span style="color:var(--yellow)">${fmt(tg)}</span></div>`:''}
+        </div>
+        <div class="door-num-item">الهدف: <span>${fmt(target)}</span></div>
+      </div>
+      <div class="door-prog"><div class="door-prog-fill" style="width:${p}%;background:${col}"></div></div>
+      ` : `<div class="door-no-target">لا يوجد هدف مُعيَّن — MTD: ${mtd>0?fmt(mtd):'—'}</div>`}
+    </div>`;
+  }).join('');
 }
 
-function filterTargetsTable() {
-  const q = id('tgt-search').value.toLowerCase();
-  const data = targetsData.filter(t=>{
-    const door=allDoors.find(d=>d.id===t.doorId);
-    return (door?.name||'').toLowerCase().includes(q)||(door?.code||'').toLowerCase().includes(q);
-  });
-  renderTargetsTable(data);
+// ═══════════════════════════════════════════════════════
+// DOOR SELECTOR
+// ═══════════════════════════════════════════════════════
+function renderDoorOpts() {
+  const el = document.getElementById('door-opts');
+  el.innerHTML = S.doors.map(d => {
+    const p = pct(Number(d.mtd||d.mtd_sales||0), Number(d.target||d.monthly_target||1));
+    const isSel = d.door_id === S.door?.door_id;
+    return `<div class="door-opt ${isSel?'sel':''}" onclick="selectDoor('${d.door_id}');closeDoorSelector()">
+      <div class="door-opt-dot"></div>
+      <div class="door-opt-info">
+        <div class="door-opt-name">${d.door_name}</div>
+        <div class="door-opt-ch">${d.channel}</div>
+      </div>
+      <div class="door-opt-pct" style="color:${pct(Number(d.mtd||d.mtd_sales||0),Number(d.target||d.monthly_target||1))>=100?'var(--green)':pct(Number(d.mtd||d.mtd_sales||0),Number(d.target||d.monthly_target||1))>=70?'var(--accent)':'var(--yellow)'}">${pct(Number(d.mtd||d.mtd_sales||0),Number(d.target||d.monthly_target||1))}%</div>
+    </div>`;
+  }).join('');
 }
 
-// ════════════════════════════════════════════════════════
-//  MSL
-// ════════════════════════════════════════════════════════
+function openDoorSelector() {
+  document.getElementById('door-overlay').classList.add('open');
+}
+function closeDoorSelector() {
+  document.getElementById('door-overlay').classList.remove('open');
+}
+document.getElementById('door-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('door-overlay')) closeDoorSelector();
+});
+
+function selectDoor(doorId) {
+  const d = S.doors.find(x => x.door_id === doorId);
+  if (!d) return;
+  S.door = d;
+  S.qty = {};
+  // Reset loaded flags for new door
+  delete S.cache[doorId];
+  renderTopBar();
+  renderRing();
+  renderKPIs();
+  renderHome();
+  renderDoorOpts();
+  // If on a lazy tab, reload it
+  if (S.activeTab === 'msl') { document.getElementById('msl-body').innerHTML = '<div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل قائمة MSL...</div></div>'; loadMSL(); }
+  else if (S.activeTab === 'hist') { document.getElementById('hist-body').innerHTML = '<div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل السجل...</div></div>'; loadHistory(); }
+  else if (S.activeTab === 'zero') { document.getElementById('zero-body').innerHTML = '<div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل قائمة الصفر...</div></div>'; loadZero(); }
+  else if (S.activeTab === 'promo') { document.getElementById('promo-body').innerHTML = '<div class="tab-loader"><div class="spinner"></div><div class="spinner-txt">جاري تحميل العروض...</div></div>'; loadPromo(); }
+}
+
+// ═══════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════
+function switchTab(name) {
+  S.activeTab = name;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+  document.getElementById('scroll-body').scrollTop = 0;
+
+  const doorId = S.door?.door_id;
+  if (!doorId) return;
+  const c = S.cache[doorId] || {};
+
+  if (name === 'msl' && !c.msl) loadMSL();
+  if (name === 'hist' && !c.hist) loadHistory();
+  if (name === 'zero' && !c.zero) loadZero();
+  if (name === 'promo' && !c.promo) loadPromo();
+
+  if (name === 'msl' && c.msl) renderMSL(c.msl);
+  if (name === 'hist' && c.hist) renderHistory(c.hist);
+  if (name === 'zero' && c.zero) renderZero(c.zero);
+  if (name === 'promo' && c.promo) renderPromo(c.promo);
+  // AI panel — just scroll to bottom
+  if (name === 'ai') setTimeout(aiScrollBottom, 50);
+}
+
+// ═══════════════════════════════════════════════════════
+// MSL — LOAD
+// ═══════════════════════════════════════════════════════
 async function loadMSL() {
-  let data = mslData;
-  if (!DEMO) {
-    try {
-      let q = DB.collection('msl');
-      if (userProfile?.role==='rep') q = q.where('repId','==',currentUser.uid);
-      const snap = await q.get();
-      data = snap.docs.map(d=>d.data());
-      mslData = data;
-    } catch(e){}
+  const doorId = S.door?.door_id;
+  if (!doorId) return;
+  if (S.isDemo) {
+    setTimeout(() => {
+      S.cache[doorId] = S.cache[doorId] || {};
+      S.cache[doorId].msl = DEMO_MSL.items;
+      renderMSL(DEMO_MSL.items);
+    }, 700);
+    return;
   }
-  id('msl-ok').textContent   = data.filter(m=>m.status==='present').length;
-  id('msl-miss').textContent = data.filter(m=>m.status==='missing').length;
-  id('msl-pct').textContent  = data.length ? Math.round(data.filter(m=>m.status==='present').length/data.length*100)+'%' : '—%';
-  filterMSLTable(data);
+  try {
+    const r = await fetch(`${S.ep.msl}?door_id=${encodeURIComponent(doorId)}`);
+    const data = await r.json();
+    S.cache[doorId] = S.cache[doorId] || {};
+    S.cache[doorId].msl = data.items || [];
+    renderMSL(data.items || []);
+  } catch(e) {
+    document.getElementById('msl-body').innerHTML = `<div class="empty"><div class="empty-ico">⚠️</div><div class="empty-txt">تعذر تحميل البيانات<br><small style="color:var(--sub)">${e.message}</small></div></div>`;
+  }
 }
 
-function filterMSLTable(base) {
-  const data = base || mslData;
-  const doorF = id('msl-door-filter').value;
-  const statF = id('msl-status-filter').value;
-  const q     = id('msl-search').value.toLowerCase();
-  const filtered = data.filter(m=>{
-    const sku=allSKUs.find(s=>s.id===m.skuId);
-    const door=allDoors.find(d=>d.id===m.doorId);
-    return (!doorF||m.doorId===doorF)&&(!statF||m.status===statF)&&
-      (!q||(sku?.name||'').toLowerCase().includes(q)||(door?.name||'').toLowerCase().includes(q));
+// ═══════════════════════════════════════════════════════
+// MSL — RENDER
+// ═══════════════════════════════════════════════════════
+function renderMSL(items) {
+  S.mslItems = items;
+  // Build category chips
+  const cats = ['الكل', ...new Set(items.map(x => x.category).filter(Boolean))];
+  document.getElementById('cat-chips').innerHTML = cats.map(c =>
+    `<div class="chip ${c===S.activeCat?'active':''}" data-cat="${c}" onclick="filterCat(this)">${c}</div>`
+  ).join('');
+  renderMSLTable(items);
+}
+
+function getFilteredItems() {
+  let items = S.mslItems || [];
+  const q = document.getElementById('msl-search')?.value?.trim().toLowerCase() || '';
+  if (S.activeCat !== 'الكل') items = items.filter(x => x.category === S.activeCat);
+  if (q) items = items.filter(x => (x.sku_name||'').toLowerCase().includes(q) || String(x.sku_id).includes(q));
+  return items;
+}
+
+function filterCat(el) {
+  S.activeCat = el.dataset.cat;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderMSLTable(getFilteredItems());
+}
+
+function filterMSL() { renderMSLTable(getFilteredItems()); }
+
+function stockBadge(stockUnits, packSize) {
+  const cases = packSize > 0 ? Math.floor(stockUnits / packSize) : 0;
+  if (stockUnits === 0 || cases === 0) return `<span class="stock-badge stk-zero">صفر</span>`;
+  if (cases > 20) return `<span class="stock-badge stk-high">${fmt(stockUnits)}</span>`;
+  if (cases > 5) return `<span class="stock-badge stk-mid">${fmt(stockUnits)}</span>`;
+  return `<span class="stock-badge stk-low">${fmt(stockUnits)}</span>`;
+}
+
+function renderMSLTable(items) {
+  const el = document.getElementById('msl-body');
+  if (!items || items.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-ico">📭</div><div class="empty-txt">لا توجد منتجات</div></div>';
+    document.getElementById('msl-summary').style.display = 'none';
+    return;
+  }
+
+  let html = `<div class="msl-tbl-wrap"><table class="msl-tbl">
+  <thead><tr>
+    <th>اسم المنتج</th>
+    <th class="cen">كرتونة</th>
+    <th class="cen">رصيد</th>
+    <th class="cen">آخر طلب</th>
+    <th class="cen">عرض</th>
+    <th class="cen">الطلب</th>
+    <th class="cen">📷</th>
+  </tr></thead><tbody>`;
+
+  items.forEach(item => {
+    const qty = S.qty[item.sku_id] || '';
+    const hasQty = qty > 0;
+    const isPromo = !!item.promo;
+    const rowCls = hasQty ? 'has-qty' : isPromo ? 'is-promo' : '';
+    const promoCell = item.promo
+      ? `<div class="promo-disc">${Math.round(item.promo.discount*100)}%</div><div class="promo-price">${item.promo.price_after} ج</div>`
+      : `<span style="color:var(--muted)">—</span>`;
+    const badges = [
+      item.is_zero_sale ? `<span class="badge badge-zero">🔴 صفر</span>` : '',
+      isPromo ? `<span class="badge badge-promo">🎁 عرض</span>` : '',
+      `<span class="badge badge-cat">${item.category||''}</span>`
+    ].filter(Boolean).join('');
+
+    html += `<tr class="${rowCls}">
+      <td class="td-name">
+        <div class="sku-name">${item.sku_name}</div>
+        <div class="sku-badges">${badges}</div>
+      </td>
+      <td class="td-case">${item.pack_size||'-'}</td>
+      <td class="td-stock">${stockBadge(item.stock_units||0, item.pack_size||1)}</td>
+      <td class="td-last"><div class="last-date">${fmtDate(item.last_order_date)}</div><div class="last-qty">${item.last_order_qty||'-'}</div></td>
+      <td class="td-promo">${promoCell}</td>
+      <td class="td-qty"><input class="qty-input ${hasQty?'filled':''}" type="number" min="0" value="${qty}" data-sku="${item.sku_id}" placeholder="0" oninput="onQtyChange(this)"></td>
+      <td class="td-img-btn"><div class="img-btn" onclick="showImage('${item.sku_id}','${(item.sku_name||'').replace(/'/g,"\\'")}')">📷</div></td>
+    </tr>`;
   });
-  id('msl-tbody').innerHTML = filtered.map(m=>{
-    const sku=allSKUs.find(s=>s.id===m.skuId);
-    const door=allDoors.find(d=>d.id===m.doorId);
-    return `<tr>
-      <td class="td-b">${door?.name||m.doorId}</td>
-      <td><span class="badge bi">${door?.channel||'—'}</span></td>
-      <td><code style="font-size:11px;color:var(--text3)">${sku?.code||m.skuId}</code></td>
-      <td class="td-b">${sku?.name||m.skuId}</td>
-      <td><span class="badge ${m.status==='present'?'bs':'bd'}">${m.status==='present'?'✓ متوافر':'✗ مفقود'}</span></td>
-      <td style="font-size:12px">${m.lastSale||'—'}</td>
-      <td style="font-size:12px;color:var(--text3)">${m.note||'—'}</td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="7" class="loading-row">لا توجد بيانات</td></tr>';
+
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+
+  // Show summary bar
+  document.getElementById('msl-summary').style.display = 'flex';
+  updateSummary();
 }
 
-// ════════════════════════════════════════════════════════
-//  VISITS
-// ════════════════════════════════════════════════════════
-async function loadVisits() {
-  const date = id('visit-date').value || todayStr();
-  let data = visitsData.filter(v=>v.date===date);
-  if (!DEMO) {
-    try {
-      let q = DB.collection('visits').where('date','==',date);
-      if (selectedRep) q=q.where('repId','==',selectedRep);
-      else if (userProfile?.role==='rep') q=q.where('repId','==',currentUser.uid);
-      const snap = await q.get();
-      data = snap.docs.map(d=>d.data());
-    } catch(e){}
-  } else if (selectedRep) {
-    data = data.filter(v=>v.repId===selectedRep);
+function onQtyChange(input) {
+  const skuId = input.dataset.sku;
+  const val = parseInt(input.value) || 0;
+  if (val > 0) { S.qty[skuId] = val; input.classList.add('filled'); }
+  else { delete S.qty[skuId]; input.classList.remove('filled'); }
+  const row = input.closest('tr');
+  if (row) row.classList.toggle('has-qty', val > 0);
+  updateSummary();
+}
+
+function updateSummary() {
+  const total = Object.values(S.qty).reduce((a,b) => a+Number(b), 0);
+  document.getElementById('sum-val').textContent = total > 0 ? `${total} كرتونة` : '0 كرتونة';
+  const btn = document.getElementById('export-btn');
+  const copyBtn = document.getElementById('copy-btn');
+  btn.disabled = total === 0;
+  if (copyBtn) copyBtn.disabled = total === 0;
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════
+function copyAsTable() {
+  const items = S.mslItems || [];
+  const ordered = items.filter(x => S.qty[x.sku_id] > 0);
+  if (!ordered.length) return;
+  const d = S.door;
+  const today = new Date();
+  const dateStr = `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`;
+
+  const header = ['SKU ID', 'اسم المنتج', 'الفئة', 'كرتونة/حبة', 'رصيد', 'آخر طلب', 'آخر كمية', 'الطلب', 'عرض', 'سعر العرض'].join('\t');
+  const rows = ordered.map(item => [
+    item.sku_id,
+    item.sku_name,
+    item.category||'',
+    item.pack_size||'',
+    item.stock_units||0,
+    fmtDate(item.last_order_date),
+    item.last_order_qty||0,
+    S.qty[item.sku_id]||0,
+    item.promo ? Math.round(item.promo.discount*100)+'%' : '',
+    item.promo ? item.promo.price_after+' ج' : ''
+  ].join('\t'));
+
+  const total = Object.values(S.qty).reduce((a,b)=>a+b,0);
+  const footer = `\t\t\t\t\t\t الإجمالي\t${total}\t\t`;
+  const text = [
+    `المحل: ${d?.door_name||'-'}\t\t\t\t\t\t\t التاريخ: ${dateStr}`,
+    header,
+    ...rows,
+    footer
+  ].join('\n');
+
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    const orig = btn.textContent;
+    btn.textContent = '✅ تم النسخ';
+    setTimeout(() => { btn.textContent = orig; }, 2000);
+  }).catch(() => {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✅ تم';
+    setTimeout(() => { btn.textContent = '📋 نسخ'; }, 2000);
+  });
+}
+
+function exportOrder() {
+  const items = S.mslItems || [];
+  const ordered = items.filter(x => S.qty[x.sku_id] > 0);
+  if (ordered.length === 0) return;
+  const d = S.door;
+  const today = new Date();
+  const dateStr = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`;
+
+  const rows = [
+    ['Mighty Foods — طلب MSL'],
+    [`المحل: ${d?.door_name||'-'}   |   التاريخ: ${dateStr}   |   المندوب: ${S.rep?.name||'-'}`],
+    [],
+    ['كود SKU','اسم المنتج','الفئة','كرتونة/حبة','رصيد الوحدات','آخر طلب','آخر كمية','الكمية المطلوبة (كرتونة)','عرض','سعر العرض']
+  ];
+
+  ordered.forEach(item => {
+    rows.push([
+      item.sku_id,
+      item.sku_name,
+      item.category||'',
+      item.pack_size||'',
+      item.stock_units||0,
+      fmtDate(item.last_order_date),
+      item.last_order_qty||0,
+      S.qty[item.sku_id]||0,
+      item.promo ? `${Math.round(item.promo.discount*100)}%` : '',
+      item.promo ? `${item.promo.price_after} ج` : ''
+    ]);
+  });
+  rows.push([]);
+  rows.push(['','','','','','','الإجمالي', Object.values(S.qty).reduce((a,b)=>a+b,0),'','']);
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:12},{wch:40},{wch:12},{wch:12},{wch:14},{wch:10},{wch:10},{wch:16},{wch:8},{wch:12}];
+  ws['!merges'] = [{s:{r:0,c:0},e:{r:0,c:9}}];
+  XLSX.utils.book_append_sheet(wb, ws, 'طلب MSL');
+  XLSX.writeFile(wb, `MSL_Order_${d?.door_id||'door'}_${dateStr}.xlsx`);
+}
+
+// ═══════════════════════════════════════════════════════
+// HISTORY — LOAD & RENDER
+// ═══════════════════════════════════════════════════════
+async function loadHistory() {
+  const doorId = S.door?.door_id;
+  if (!doorId) return;
+  if (S.isDemo) {
+    setTimeout(() => {
+      S.cache[doorId] = S.cache[doorId] || {};
+      S.cache[doorId].hist = DEMO_HIST;
+      if (S.activeTab === 'hist') renderHistory(DEMO_HIST);
+    }, 600);
+    return;
+  }
+  try {
+    const r = await fetch(`${S.ep.history}?door_id=${encodeURIComponent(doorId)}`);
+    const data = await r.json();
+    S.cache[doorId] = S.cache[doorId] || {};
+    S.cache[doorId].hist = data;
+    if (S.activeTab === 'hist') renderHistory(data);
+  } catch(e) {
+    document.getElementById('hist-body').innerHTML = `<div class="empty"><div class="empty-ico">⚠️</div><div class="empty-txt">تعذر تحميل السجل</div></div>`;
+  }
+}
+
+function renderHistory(data) {
+  const el = document.getElementById('hist-body');
+  let html = '';
+  const tops = data.top_items || [];
+  const stopped = data.stopped_items || [];
+
+  if (tops.length) {
+    html += `<div class="section-title">🏆 الأكثر مبيعاً</div>
+    <div style="background:rgba(15,186,115,.07);border:1px solid rgba(15,186,115,.15);border-radius:10px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--sub)">
+      استخدم هذه البيانات لإقناع المشتري بتاريخ الشراء المنتظم
+    </div>`;
+    tops.forEach((x,i) => {
+      html += `<div class="hist-card fade-up d${i+1}">
+        <div class="hist-dot hot"></div>
+        <div class="hist-main">
+          <div class="hist-name">${x.sku_name}</div>
+          <div class="hist-meta">متوسط شهري: <strong style="color:var(--green)">${x.avg_monthly} كرتونة</strong> · آخر طلب: ${fmtDate(x.last_date)}</div>
+        </div>
+        <div class="hist-right">
+          <div class="hist-qty c-g">${x.last_qty}</div>
+          <div class="hist-sub">آخر كمية</div>
+        </div>
+      </div>`;
+    });
   }
 
-  const done = data.filter(v=>v.status==='completed');
-  const durs = done.map(v=>{
-    if (!v.checkin||!v.checkout) return 0;
-    const [h1,m1]=v.checkin.split(':').map(Number);
-    const [h2,m2]=v.checkout.split(':').map(Number);
-    return (h2*60+m2)-(h1*60+m1);
-  }).filter(d=>d>0);
-  const avg = durs.length ? Math.round(durs.reduce((a,b)=>a+b,0)/durs.length) : 0;
+  if (stopped.length) {
+    html += `<div class="section-title" style="margin-top:16px">⏸ توقف عن الشراء</div>
+    <div style="background:rgba(240,64,64,.07);border:1px solid rgba(240,64,64,.15);border-radius:10px;padding:10px 13px;margin-bottom:12px;font-size:12px;color:var(--sub)">
+      منتجات كان المحل يشتريها وتوقف — فرصة لإعادة التفعيل
+    </div>`;
+    stopped.forEach((x,i) => {
+      html += `<div class="hist-card fade-up d${i+1}">
+        <div class="hist-dot stop"></div>
+        <div class="hist-main">
+          <div class="hist-name">${x.sku_name}</div>
+          <div class="hist-meta">متوقف منذ <strong style="color:var(--red)">${x.days_stopped} يوم</strong> · آخر كمية: ${x.last_qty} كرتونة</div>
+        </div>
+        <div class="hist-right">
+          <div class="hist-qty c-r">${x.days_stopped}</div>
+          <div class="hist-sub">يوم</div>
+        </div>
+      </div>`;
+    });
+  }
 
-  id('v-total').textContent = data.length;
-  id('v-avg').textContent   = avg;
-  id('v-doors').textContent = new Set(data.map(v=>v.doorId)).size;
-  renderVisitsTable(data);
+  if (!tops.length && !stopped.length) html = `<div class="empty"><div class="empty-ico">📊</div><div class="empty-txt">لا توجد بيانات مبيعات</div></div>`;
+  el.innerHTML = html;
 }
 
-function renderVisitsTable(data) {
-  id('vis-tbody').innerHTML = data.map(v=>{
-    const door=allDoors.find(d=>d.id===v.doorId);
-    const dur  = v.checkin&&v.checkout ? (()=>{ const [h1,m1]=v.checkin.split(':').map(Number);const [h2,m2]=v.checkout.split(':').map(Number);return (h2*60+m2)-(h1*60+m1); })() : null;
-    return `<tr>
-      <td class="td-b">${v.checkin||'—'}</td>
-      <td class="td-b">${door?.name||v.doorId}</td>
-      <td><code style="font-size:11px;color:var(--text3)">${door?.code||'—'}</code></td>
-      <td>${v.checkin||'—'}</td>
-      <td>${v.checkout||'—'}</td>
-      <td class="td-b">${dur!=null?dur:'—'}</td>
-      <td><span class="badge ${v.status==='completed'?'bs':v.status==='in-progress'?'bw':'bn'}">${v.status==='completed'?'✓ مكتملة':v.status==='in-progress'?'● جارية':'—'}</span></td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="7" class="loading-row">لا توجد زيارات</td></tr>';
-}
-
-function filterVisitsTable() {
-  const q=id('vis-search').value.toLowerCase();
-  renderVisitsTable(visitsData.filter(v=>{
-    const door=allDoors.find(d=>d.id===v.doorId);
-    return (door?.name||'').toLowerCase().includes(q);
-  }));
-}
-
-// ════════════════════════════════════════════════════════
-//  ZERO SALES
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// ZERO SALES — LOAD & RENDER
+// ═══════════════════════════════════════════════════════
 async function loadZero() {
-  const month = currentMonth();
-  // Zero = MSL items with status missing OR items in MSL but no sales in period
-  let data = mslData.filter(m=>m.status==='missing');
-  if (userProfile?.role==='rep' && !DEMO) data = data.filter(m=>{
-    const door=allDoors.find(d=>d.id===m.doorId);
-    return door?.repId===currentUser.uid;
-  });
-  if (selectedRep) data = data.filter(m=>{
-    const door=allDoors.find(d=>d.id===m.doorId);
-    return door?.repId===selectedRep;
-  });
-
-  id('z-count').textContent = data.length;
-  id('z-doors').textContent = new Set(data.map(m=>m.doorId)).size;
-  id('z-pct').textContent   = mslData.length ? Math.round(data.length/mslData.length*100)+'%' : '—%';
-  zeroData = data;
-  filterZeroTable(data);
-}
-
-function filterZeroTable(base) {
-  const data = base || zeroData;
-  const doorF=id('z-door-filter').value;
-  const q=id('z-search').value.toLowerCase();
-  const filtered=data.filter(m=>{
-    const sku=allSKUs.find(s=>s.id===m.skuId);
-    const door=allDoors.find(d=>d.id===m.doorId);
-    return (!doorF||m.doorId===doorF)&&(!q||(sku?.name||'').toLowerCase().includes(q)||(door?.name||'').toLowerCase().includes(q));
-  });
-  id('z-tbody').innerHTML = filtered.map(m=>{
-    const sku=allSKUs.find(s=>s.id===m.skuId);
-    const door=allDoors.find(d=>d.id===m.doorId);
-    const ds=m.lastSale?daysSince(m.lastSale):'—';
-    const pri=typeof ds==='number'?(ds>30?'high':ds>14?'medium':'low'):'high';
-    return `<tr>
-      <td class="td-b">${door?.name||m.doorId}</td>
-      <td><span class="badge bi">${door?.channel||'—'}</span></td>
-      <td><code style="font-size:11px;color:var(--text3)">${sku?.code||m.skuId}</code></td>
-      <td class="td-b">${sku?.name||m.skuId}</td>
-      <td>${m.lastSale||'—'}</td>
-      <td class="td-b" style="color:${pri==='high'?'var(--danger)':pri==='medium'?'var(--warning)':'var(--text2)'}">${ds} يوم</td>
-      <td><span class="badge ${pri==='high'?'bd':pri==='medium'?'bw':'bs'}">${pri==='high'?'🔴 عالية':pri==='medium'?'🟡 متوسطة':'🟢 منخفضة'}</span></td>
-    </tr>`;
-  }).join('') || '<tr><td colspan="7" class="loading-row">✅ لا توجد Zero Sales</td></tr>';
-}
-
-// ════════════════════════════════════════════════════════
-//  ADMIN
-// ════════════════════════════════════════════════════════
-function loadAdmin() {
-  loadAdminTables();
-}
-
-function loadAdminTables() {
-  // Doors table
-  id('admin-doors-count').textContent = allDoors.length+' Door';
-  id('admin-doors-body').innerHTML = allDoors.map(d=>{
-    const rep=allReps.find(r=>r.id===d.repId);
-    return `<tr><td class="td-b">${d.name}</td><td><code style="font-size:11px;color:var(--text3)">${d.code}</code></td><td><span class="badge bi">${d.channel}</span></td><td>${rep?.name||'—'}</td></tr>`;
-  }).join('') || '<tr><td colspan="4" class="loading-row">لا توجد Doors</td></tr>';
-
-  // Users table
-  id('admin-users-count').textContent = allUsers.length+' مستخدم';
-  id('admin-users-body').innerHTML = allUsers.map(u=>`<tr>
-    <td class="td-b">${u.name||'—'}</td>
-    <td style="font-size:12px;direction:ltr">${u.email}</td>
-    <td><span class="badge ${u.role==='manager'?'bw':'bi'}">${u.role==='manager'?'Manager':'Rep'}</span></td>
-  </tr>`).join('') || '<tr><td colspan="3" class="loading-row">لا توجد مستخدمين</td></tr>';
-}
-
-// ════════════════════════════════════════════════════════
-//  CRUD OPERATIONS
-// ════════════════════════════════════════════════════════
-async function addUser() {
-  const name = id('mu-name').value.trim();
-  const email= id('mu-email').value.trim();
-  const pass = id('mu-pass').value;
-  const role = id('mu-role').value;
-  if (!name||!email||!pass) { toast('أكمل جميع الحقول المطلوبة','error'); return; }
-  if (DEMO) { toast('Demo Mode: لا يتم الحفظ الحقيقي','warning'); closeModal('modal-user'); return; }
-  try {
-    const cred = await AUTH.createUserWithEmailAndPassword(email, pass);
-    await DB.collection('users').doc(cred.user.uid).set({ name, email, role, createdAt: new Date().toISOString() });
-    allUsers.push({id:cred.user.uid, name, email, role});
-    if (role==='rep') allReps.push({id:cred.user.uid, name, email, role});
-    buildRepBars(); populateSelects();
-    toast('✓ تم إضافة المستخدم','success'); closeModal('modal-user');
-  } catch(e) { toast(e.message,'error'); }
-}
-
-async function addDoor() {
-  const name=id('md-name').value.trim(), code=id('md-code').value.trim();
-  const channel=id('md-channel').value, area=id('md-area').value.trim();
-  const repId=id('md-rep').value;
-  if (!name||!code) { toast('أدخل الاسم والكود على الأقل','error'); return; }
-  const door = {name,code,channel,area,repId,createdAt:new Date().toISOString()};
-  if (DEMO) { door.id='d'+Date.now(); allDoors.push(door); buildDoorGrid(); populateSelects(); loadAdminTables(); toast('✓ تمت الإضافة (Demo)','success'); closeModal('modal-door'); return; }
-  try {
-    const ref = await DB.collection('doors').add(door);
-    door.id=ref.id; allDoors.push(door);
-    buildDoorGrid(); populateSelects(); loadAdminTables();
-    toast('✓ تمت إضافة الـ Door','success'); closeModal('modal-door');
-  } catch(e) { toast(e.message,'error'); }
-}
-
-async function addSKU() {
-  const code=id('ms-code').value.trim(), name=id('ms-name').value.trim();
-  const brand=id('ms-brand').value.trim(), price=parseFloat(id('ms-price').value)||0;
-  if (!code||!name) { toast('أدخل الكود والاسم','error'); return; }
-  const sku={code,name,brand,price,createdAt:new Date().toISOString()};
-  if (DEMO) { sku.id='s'+Date.now(); allSKUs.push(sku); populateSelects(); toast('✓ تمت الإضافة (Demo)','success'); closeModal('modal-sku'); return; }
-  try {
-    const ref=await DB.collection('skus').add(sku);
-    sku.id=ref.id; allSKUs.push(sku); populateSelects();
-    toast('✓ تمت إضافة المنتج','success'); closeModal('modal-sku');
-  } catch(e) { toast(e.message,'error'); }
-}
-
-async function setTarget() {
-  const repId=id('mt-rep').value, doorId=id('mt-door').value;
-  const month=id('mt-month').value, target=parseFloat(id('mt-val').value)||0;
-  if (!doorId||!month||!target) { toast('أكمل جميع الحقول','error'); return; }
-  const entry={repId,doorId,month,target,actual:0,createdAt:new Date().toISOString()};
-  if (DEMO) {
-    const idx=targetsData.findIndex(t=>t.doorId===doorId&&t.month===month&&t.repId===repId);
-    if (idx>=0) targetsData[idx]={...targetsData[idx],...entry}; else targetsData.push(entry);
-    toast('✓ تم حفظ الـ Target (Demo)','success'); closeModal('modal-target'); return;
+  const doorId = S.door?.door_id;
+  if (!doorId) return;
+  if (S.isDemo) {
+    setTimeout(() => {
+      S.cache[doorId] = S.cache[doorId] || {};
+      S.cache[doorId].zero = DEMO_ZERO;
+      if (S.activeTab === 'zero') renderZero(DEMO_ZERO);
+      updateZeroBadge(DEMO_ZERO.items?.length || 0);
+    }, 500);
+    return;
   }
   try {
-    const key=`${repId}_${doorId}_${month}`;
-    await DB.collection('targets').doc(key).set(entry);
-    const idx=targetsData.findIndex(t=>t.doorId===doorId&&t.month===month&&t.repId===repId);
-    if (idx>=0) targetsData[idx]=entry; else targetsData.push(entry);
-    toast('✓ تم حفظ الـ Target','success'); closeModal('modal-target');
-  } catch(e) { toast(e.message,'error'); }
+    const r = await fetch(`${S.ep.zero}?door_id=${encodeURIComponent(doorId)}`);
+    const data = await r.json();
+    S.cache[doorId] = S.cache[doorId] || {};
+    S.cache[doorId].zero = data;
+    if (S.activeTab === 'zero') renderZero(data);
+    updateZeroBadge(data.items?.length || 0);
+  } catch(e) {
+    document.getElementById('zero-body').innerHTML = `<div class="empty"><div class="empty-ico">⚠️</div><div class="empty-txt">تعذر تحميل البيانات</div></div>`;
+  }
 }
 
-async function setMSL() {
-  const doorId=id('mm-door').value, skuId=id('mm-sku').value;
-  const status=id('mm-status').value, note=id('mm-note').value.trim();
-  if (!doorId||!skuId) { toast('اختر Door وSKU','error'); return; }
-  const entry={doorId,skuId,status,note,lastSale:status==='present'?todayStr():'',updatedAt:new Date().toISOString()};
-  if (DEMO) {
-    const idx=mslData.findIndex(m=>m.doorId===doorId&&m.skuId===skuId);
-    if (idx>=0) mslData[idx]={...mslData[idx],...entry}; else mslData.push(entry);
-    toast('✓ تم حفظ MSL (Demo)','success'); closeModal('modal-msl'); return;
+function updateZeroBadge(n) {
+  const el = document.getElementById('zero-cnt');
+  if (n > 0) { el.textContent = n; el.style.display = 'inline'; }
+  else el.style.display = 'none';
+}
+
+function renderZero(data) {
+  const items = data.items || [];
+  const el = document.getElementById('zero-body');
+  if (!items.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-ico">✅</div><div class="empty-txt">ممتاز! لا توجد منتجات بصفر مبيعات</div></div>`;
+    return;
+  }
+  let html = `<div class="zero-summary"><div><div class="zero-num">${items.length}</div></div><div>منتج بصفر مبيعات في هذا المحل حسب آخر تدقيق — تأكد من التواجد والعرض</div></div>`;
+  // Group by category
+  const byCat = {};
+  items.forEach(x => { const c = x.category||'أخرى'; (byCat[c]=byCat[c]||[]).push(x); });
+  Object.entries(byCat).forEach(([cat, list]) => {
+    html += `<div class="section-title">${cat}</div>`;
+    list.forEach(x => {
+      html += `<div class="zero-card">
+        <div class="zero-name">${x.sku_name}</div>
+        <div class="zero-meta">آخر تدقيق: ${fmtDate(x.audit_date)} &nbsp;·&nbsp; كود: ${x.sku_id}</div>
+      </div>`;
+    });
+  });
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+// PROMO — LOAD & RENDER
+// ═══════════════════════════════════════════════════════
+async function loadPromo() {
+  const doorId = S.door?.door_id;
+  if (!doorId) return;
+  if (S.isDemo) {
+    setTimeout(() => {
+      S.cache[doorId] = S.cache[doorId] || {};
+      S.cache[doorId].promo = DEMO_PROMO;
+      if (S.activeTab === 'promo') renderPromo(DEMO_PROMO);
+      updatePromoBadge(DEMO_PROMO.items?.length || 0);
+    }, 600);
+    return;
   }
   try {
-    const key=`${doorId}_${skuId}`;
-    await DB.collection('msl').doc(key).set(entry);
-    const idx=mslData.findIndex(m=>m.doorId===doorId&&m.skuId===skuId);
-    if (idx>=0) mslData[idx]=entry; else mslData.push(entry);
-    toast('✓ تم حفظ MSL','success'); closeModal('modal-msl');
-  } catch(e) { toast(e.message,'error'); }
-}
-
-async function addSale() {
-  const repId=id('ms2-rep').value, doorId=id('ms2-door').value, skuId=id('ms2-sku').value;
-  const inv=id('ms2-inv').value.trim(), qty=parseFloat(id('ms2-qty').value)||0;
-  const val=parseFloat(id('ms2-val').value)||0, date=id('ms2-date').value;
-  if (!doorId||!skuId||!date||!val) { toast('أكمل الحقول المطلوبة','error'); return; }
-  const sale={repId,doorId,skuId,invoiceNo:inv,qty,value:val,date,month:date.slice(0,7),createdAt:new Date().toISOString()};
-  if (DEMO) {
-    salesData.push(sale);
-    const tIdx=targetsData.findIndex(t=>t.doorId===doorId&&t.month===sale.month&&t.repId===repId);
-    if (tIdx>=0) targetsData[tIdx].actual=(targetsData[tIdx].actual||0)+val;
-    toast('✓ تم حفظ المبيعات (Demo)','success'); closeModal('modal-sale'); return;
+    const r = await fetch(`${S.ep.history}?door_id=${encodeURIComponent(doorId)}&promo=1`);
+    const data = await r.json();
+    S.cache[doorId] = S.cache[doorId] || {};
+    S.cache[doorId].promo = data;
+    if (S.activeTab === 'promo') renderPromo(data);
+    updatePromoBadge(data.items?.length || 0);
+  } catch(e) {
+    document.getElementById('promo-body').innerHTML = `<div class="empty"><div class="empty-ico">⚠️</div><div class="empty-txt">تعذر تحميل العروض</div></div>`;
   }
-  try {
-    await DB.collection('sales').add(sale);
-    // Update actual in target
-    const key=`${repId}_${doorId}_${sale.month}`;
-    await DB.collection('targets').doc(key).update({ actual: firebase.firestore.FieldValue.increment(val) });
-    toast('✓ تم حفظ الفاتورة','success'); closeModal('modal-sale');
-  } catch(e) { toast(e.message,'error'); }
 }
 
-async function addVisit() {
-  const repId=id('mv-rep').value, doorId=id('mv-door').value;
-  const date=id('mv-date').value, checkin=id('mv-in').value, checkout=id('mv-out').value;
-  const status=id('mv-status').value;
-  if (!doorId||!date) { toast('اختر Door والتاريخ','error'); return; }
-  const visit={repId,doorId,date,checkin,checkout,status,createdAt:new Date().toISOString()};
-  if (DEMO) { visitsData.push(visit); toast('✓ تمت إضافة الزيارة (Demo)','success'); closeModal('modal-visit'); return; }
-  try {
-    await DB.collection('visits').add(visit);
-    visitsData.push(visit);
-    toast('✓ تمت إضافة الزيارة','success'); closeModal('modal-visit');
-  } catch(e) { toast(e.message,'error'); }
+function updatePromoBadge(n) {
+  const el = document.getElementById('promo-cnt');
+  if (n > 0) { el.textContent = n; el.style.display = 'inline'; }
+  else el.style.display = 'none';
 }
 
-// ════════════════════════════════════════════════════════
-//  EXCEL IMPORT
-// ════════════════════════════════════════════════════════
-const TEMPLATES = {
-  doors:   'name | code | channel | area | rep_email',
-  skus:    'code | name | brand | price',
-  sales:   'rep_email | door_code | sku_code | qty | value | date (YYYY-MM-DD) | invoice_no',
-  targets: 'rep_email | door_code | month (YYYY-MM) | target',
-  msl:     'door_code | sku_code | status (present/missing) | last_sale | note',
-  visits:  'rep_email | door_code | date | checkin (HH:MM) | checkout | status',
+function renderPromo(data) {
+  const items = data.items || [];
+  const el = document.getElementById('promo-body');
+  if (!items.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-ico">🎁</div><div class="empty-txt">لا توجد عروض نشطة لهذا المحل الآن</div></div>`;
+    return;
+  }
+  const today = new Date();
+  let html = '';
+  items.forEach((x,i) => {
+    const exp = new Date(x.expires);
+    const daysLeft = Math.ceil((exp - today) / 86400000);
+    const daysClass = daysLeft <= 3 ? 'c-r' : daysLeft <= 7 ? 'c-y' : 'c-g';
+    html += `<div class="promo-card fade-up d${Math.min(i+1,5)}">
+      <div class="promo-expired-label">🟢 نشط</div>
+      <div class="promo-head">
+        <div class="promo-name">${x.sku_name}</div>
+        <div class="promo-disc-badge">${Math.round(x.discount*100)}%</div>
+      </div>
+      <div class="promo-chips">
+        <span class="promo-chip price"><s style="opacity:.5">${x.price_before} ج</s></span>
+        <span class="promo-chip price-after">→ ${x.price_after} ج</span>
+        <span class="promo-chip group">🏷 ${x.customer_group||'الكل'}</span>
+        <span class="promo-chip exp ${daysClass}">⏰ ${daysLeft > 0 ? daysLeft+' يوم' : 'ينتهي اليوم'}</span>
+      </div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+// IMAGE VIEWER
+// ═══════════════════════════════════════════════════════
+function showImage(skuId, skuName) {
+  const modal = document.getElementById('img-modal');
+  const img = document.getElementById('modal-img');
+  const nameEl = document.getElementById('modal-name');
+  const url = `${IMG_BASE}${skuId}.Jpg`;
+  nameEl.textContent = skuName;
+  img.style.display = 'none';
+  img.onerror = () => {
+    img.style.display = 'none';
+    nameEl.insertAdjacentHTML('afterend','<div class="modal-img-err">⚠️ لا توجد صورة متاحة<br><small style="opacity:.6">'+url+'</small></div>');
+  };
+  img.onload = () => { img.style.display = 'block'; };
+  img.src = url;
+  modal.classList.add('open');
+}
+
+function closeImgModal() {
+  document.getElementById('img-modal').classList.remove('open');
+  document.getElementById('modal-img').src = '';
+  document.querySelectorAll('.modal-img-err').forEach(e => e.remove());
+}
+document.getElementById('img-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('img-modal')) closeImgModal();
+});
+
+// ═══════════════════════════════════════════════════════
+// PRELOAD ZERO & PROMO badges silently
+// ═══════════════════════════════════════════════════════
+function preloadBadges() {
+  if (!S.door) return;
+  const doorId = S.door.door_id;
+  const c = S.cache[doorId] || {};
+  if (!c.zero) loadZero();
+  if (!c.promo) loadPromo();
+}
+
+// after app starts, preload badges silently
+setTimeout(preloadBadges, 2000);
+
+// ═══════════════════════════════════════════════════════
+// AI ASSISTANT — POWERED BY CLAUDE
+// ═══════════════════════════════════════════════════════
+const AI = {
+  history: [],       // { role, content } for API
+  isLoading: false
 };
 
-function updateImportTemplate() {
-  importType = id('imp-type').value;
-  id('imp-template').textContent = 'الأعمدة المطلوبة: ' + TEMPLATES[importType];
-  id('import-preview').style.display='none';
+// ── Deep pre-analysis engine ──────────────────────────────
+function analyzeStock(item) {
+  const stock  = Number(item.stock_units || 0);
+  const pack   = Number(item.pack_size   || 1);
+  const lastQ  = Number(item.last_order_qty || 0);
+  const cases  = pack > 0 ? Math.floor(stock / pack) : 0;
+  const today  = new Date();
+  const lastD  = item.last_order_date ? new Date(item.last_order_date) : null;
+  const daysSinceLast = lastD ? Math.floor((today - lastD) / 86400000) : 999;
+
+  // Coverage: how many days does current stock cover vs average order cycle
+  // Assume monthly order cycle → avg daily consumption ≈ lastQ / 30
+  const dailyConsumption = lastQ > 0 ? lastQ / 30 : 0;
+  const coverageDays = dailyConsumption > 0 ? Math.floor(cases / (dailyConsumption / 30 * pack) * 30) : (cases > 0 ? 999 : 0);
+
+  let decision = 'ORDER';      // ORDER | SKIP | URGENT | REACTIVATE | MONITOR
+  let reason   = '';
+  let suggestedQty = 0;
+
+  if (stock === 0 || cases === 0) {
+    decision = 'URGENT';
+    reason   = 'رصيد صفر — المنتج غير متوفر على الرف';
+    suggestedQty = lastQ > 0 ? lastQ : pack;
+  } else if (item.is_zero_sale) {
+    decision = 'URGENT';
+    reason   = 'رصيد متوفر لكن مبيعات صفر — مشكلة عرض أو توزيع';
+    suggestedQty = 0; // no point ordering if not selling
+  } else if (daysSinceLast > 60) {
+    decision = 'REACTIVATE';
+    reason   = `توقف عن الشراء منذ ${daysSinceLast} يوم`;
+    suggestedQty = lastQ > 0 ? Math.ceil(lastQ * 0.75) : 0;
+  } else if (cases <= 5) {
+    decision = 'ORDER';
+    reason   = `رصيد منخفض جداً (${cases} كرتونة فقط)`;
+    suggestedQty = lastQ > 0 ? lastQ : pack;
+  } else if (cases <= 15 && daysSinceLast >= 14) {
+    decision = 'ORDER';
+    reason   = `رصيد يكفي ~${coverageDays < 999 ? coverageDays + ' يوم' : 'فترة قصيرة'} وآخر طلب منذ ${daysSinceLast} يوم`;
+    suggestedQty = lastQ > 0 ? lastQ : pack;
+  } else if (cases > 30) {
+    decision = 'SKIP';
+    reason   = `رصيد عالي (${cases} كرتونة) — لا داعي للطلب الآن`;
+    suggestedQty = 0;
+  } else {
+    decision = 'MONITOR';
+    reason   = `رصيد معقول (${cases} كرتونة) منذ ${daysSinceLast} يوم`;
+    suggestedQty = daysSinceLast >= 21 ? (lastQ > 0 ? Math.ceil(lastQ * 0.5) : 0) : 0;
+  }
+
+  // Boost quantity if active promo
+  if (item.promo && decision !== 'SKIP' && decision !== 'URGENT_ZERO_SALE') {
+    const promoBoost = Math.ceil((suggestedQty || lastQ || pack) * 1.3);
+    suggestedQty = promoBoost;
+    reason += ` + عرض ${Math.round(item.promo.discount * 100)}% نشط`;
+  }
+
+  return { decision, reason, suggestedQty, cases, daysSinceLast, coverageDays };
 }
 
-function handleFileUpload(e) {
-  const file=e.target.files[0]; if(!file) return;
-  const reader=new FileReader();
-  reader.onload = ev => {
-    const wb = XLSX.read(ev.target.result, {type:'array'});
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws, {defval:''});
-    importRows = rows;
-    showPreview(rows);
-  };
-  reader.readAsArrayBuffer(file);
-}
+// Build rich context from current S state
+function buildAIContext() {
+  const rep    = S.rep   || {};
+  const door   = S.door  || {};
+  const doorId = door.door_id;
+  const cache  = doorId ? (S.cache[doorId] || {}) : {};
+  const today  = new Date();
 
-function showPreview(rows) {
-  if (!rows.length) { toast('الملف فارغ','error'); return; }
-  id('preview-count').textContent = rows.length+' سطر للاستيراد';
-  const keys=Object.keys(rows[0]);
-  const preview = rows.slice(0,5);
-  id('preview-table-wrap').innerHTML = `
-    <table style="font-size:11px">
-      <thead><tr>${keys.map(k=>`<th>${k}</th>`).join('')}</tr></thead>
-      <tbody>${preview.map(r=>`<tr>${keys.map(k=>`<td style="max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r[k]}</td>`).join('')}</tr>`).join('')}</tbody>
-    </table>`;
-  id('import-preview').style.display='block';
-}
+  const mtdPct = rep.target > 0 ? Math.round(rep.mtd / rep.target * 100) : null;
+  const gap    = rep.target > 0 ? Math.max(0, rep.target - rep.mtd) : null;
+  const timePct = rep.target > 0 && rep.timeGone > 0 ? Math.round(rep.timeGone / rep.target * 100) : null;
+  const behindPace = timePct !== null && mtdPct !== null ? timePct - mtdPct : null;
 
-async function doImport() {
-  if (!importRows.length) return;
-  const type=id('imp-type').value;
-  let ok=0, err=0, skipped=0;
-  const skipReasons=[];
-  toast('جاري الاستيراد... ('+importRows.length+' سطر)','info');
+  // ── Pre-analyze every MSL item ──────────────────────────
+  let urgentItems    = [], orderItems  = [], reactivateItems = [];
+  let skipItems      = [], monitorItems = [];
 
-  if (DEMO) {
-    for (const row of importRows) {
-      try { processImportRow(row, type); ok++; } catch(e) { err++; }
+  if (cache.msl && cache.msl.length > 0) {
+    cache.msl.forEach(item => {
+      const a = analyzeStock(item);
+      item._analysis = a;
+      if      (a.decision === 'URGENT')     urgentItems.push(item);
+      else if (a.decision === 'REACTIVATE') reactivateItems.push(item);
+      else if (a.decision === 'ORDER')      orderItems.push(item);
+      else if (a.decision === 'SKIP')       skipItems.push(item);
+      else                                   monitorItems.push(item);
+    });
+  }
+
+  const totalSuggestedCases = [...urgentItems, ...orderItems, ...reactivateItems]
+    .reduce((s, x) => s + (x._analysis.suggestedQty || 0), 0);
+
+  // ── Build system prompt ─────────────────────────────────
+  let ctx = `أنت مساعد مبيعات لشركة Mighty Foods. مهمتك الوحيدة هي تحليل البيانات المُدخلة أدناه وإعطاء المندوب خطة تنفيذية.
+
+⛔ قواعد صارمة لا استثناء:
+- لا تذكر أي منتج غير موجود في قائمة MSL المُدرجة أدناه بالاسم الكامل وكود SKU.
+- لا تخترع أي خصم أو عرض. العروض الوحيدة هي ما في قسم "العروض النشطة" أدناه فقط.
+- لا تذكر أي رقم (سعر / كمية / خصم / رصيد) غير موجود في البيانات.
+- إذا سألك المندوب عن شيء غير موجود في البيانات أجب: "هذه المعلومة غير متوفرة في بياناتي الحالية".
+- الكميات المقترحة مبنية فقط على أرقام آخر طلب والرصيد الموجودة في البيانات أدناه.
+- لا تستخدم معرفتك العامة عن أي منتجات أو أسعار أو خصومات FMCG.
+- كل إجابة يجب أن تكون مبنية على رقم موجود فعلاً في البيانات أدناه.
+
+الأسلوب: عربي مباشر — أرقام من البيانات فقط — توصية واحدة واضحة لكل منتج.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 أداء المندوب
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+الاسم: ${rep.name || 'مندوب'}
+الهدف الشهري: ${rep.target > 0 ? rep.target.toLocaleString('en') + ' ج' : 'غير محدد'}
+هدف الوقت (pro-rated): ${rep.timeGone > 0 ? rep.timeGone.toLocaleString('en') + ' ج' : '-'} ${timePct !== null ? '(' + timePct + '% من الهدف)' : ''}
+المحقق (MTD): ${rep.mtd > 0 ? rep.mtd.toLocaleString('en') + ' ج' : '0 ج'} ${mtdPct !== null ? '— ' + mtdPct + '%' : ''}
+الفجوة عن الهدف: ${gap !== null ? gap.toLocaleString('en') + ' ج' : '-'}
+${behindPace !== null ? (behindPace > 5 ? '⚠️ متأخر عن وتيرة الهدف بـ ' + behindPace + ' نقطة' : behindPace < -5 ? '✅ متقدم عن وتيرة الهدف بـ ' + Math.abs(behindPace) + ' نقطة' : '✅ على وتيرة الهدف') : ''}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏪 المحل الحالي
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${door.door_name ? `الاسم: ${door.door_name}  |  القناة: ${door.channel || '-'}
+الهدف: ${Number(door.target || 0).toLocaleString('en')} ج  |  MTD: ${Number(door.mtd || 0).toLocaleString('en')} ج  |  إنجاز: ${door.target > 0 ? Math.round(Number(door.mtd||0)/Number(door.target)*100) + '%' : 'لا هدف'}` : 'لم يتم اختيار محل'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏬 كل المحلات (${S.doors.length})
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${S.doors.map(d => {
+  const t = Number(d.target || 0);
+  const m = Number(d.mtd   || 0);
+  const p = t > 0 ? Math.round(m / t * 100) : null;
+  const icon = p === null ? '⚪' : p >= 100 ? '🟢' : p >= 70 ? '🟠' : p >= 40 ? '🟡' : '🔴';
+  return `${icon} ${d.door_name} (${d.channel}): MTD=${m.toLocaleString('en')} ج / هدف=${t > 0 ? t.toLocaleString('en') + ' ج' : 'لا هدف'}${p !== null ? ' → ' + p + '%' : ''}`;
+}).join('\n')}`;
+
+  // ── MSL Deep Analysis ───────────────────────────────────
+  if (cache.msl && cache.msl.length > 0) {
+    ctx += `
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔬 تحليل قائمة MSL — نتائج جاهزة
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+إجمالي المنتجات: ${cache.msl.length}  |  الطلب المقترح الكلي: ${totalSuggestedCases} كرتونة`;
+
+    if (urgentItems.length > 0) {
+      ctx += `\n\n🚨 عاجل — اطلب فوراً (${urgentItems.length} منتج):\n`;
+      urgentItems.forEach(x => {
+        const a = x._analysis;
+        ctx += `  • ${x.sku_name}\n    السبب: ${a.reason}\n    الرصيد: ${a.cases} كرتونة | آخر طلب: ${x.last_order_qty || 0} ك منذ ${a.daysSinceLast} يوم\n    ✅ اطلب: ${a.suggestedQty > 0 ? a.suggestedQty + ' كرتونة' : 'لا تطلب (مشكلة عرض — اعرضه أولاً)'}\n`;
+      });
     }
-    toast(`✓ تم استيراد ${ok} سطر${err?' ('+err+' أخطاء)':''}`, err?'warning':'success');
-    closeModal('modal-import'); loadTabData('dashboard'); return;
+
+    if (orderItems.length > 0) {
+      ctx += `\n\n📦 اطلب الآن (${orderItems.length} منتج):\n`;
+      orderItems.forEach(x => {
+        const a = x._analysis;
+        ctx += `  • ${x.sku_name}\n    السبب: ${a.reason}\n    الرصيد: ${a.cases} ك | آخر طلب: ${x.last_order_qty || 0} ك منذ ${a.daysSinceLast} يوم${x.promo ? ' | 🎁 عرض ' + Math.round(x.promo.discount * 100) + '%' : ''}\n    ✅ اطلب: ${a.suggestedQty} كرتونة\n`;
+      });
+    }
+
+    if (reactivateItems.length > 0) {
+      ctx += `\n\n🔄 أعد تفعيل — توقف عن الشراء (${reactivateItems.length} منتج):\n`;
+      reactivateItems.forEach(x => {
+        const a = x._analysis;
+        ctx += `  • ${x.sku_name}\n    السبب: ${a.reason}\n    آخر كمية: ${x.last_order_qty || 0} ك\n    ✅ ابدأ بـ: ${a.suggestedQty > 0 ? a.suggestedQty + ' كرتونة' : 'اتفق على الطلب أولاً'}\n`;
+      });
+    }
+
+    if (skipItems.length > 0) {
+      ctx += `\n\n⏭ لا تطلب — رصيد كافٍ (${skipItems.length} منتج):\n`;
+      skipItems.forEach(x => {
+        const a = x._analysis;
+        ctx += `  • ${x.sku_name}: ${a.cases} كرتونة رصيد — ${a.reason}\n`;
+      });
+    }
+
+    if (monitorItems.length > 0) {
+      ctx += `\n\n👁 راقب (${monitorItems.length} منتج):\n`;
+      monitorItems.forEach(x => {
+        const a = x._analysis;
+        ctx += `  • ${x.sku_name}: ${a.cases} ك رصيد${a.suggestedQty > 0 ? ' — اطلب ' + a.suggestedQty + ' ك' : ' — لا طلب الآن'}\n`;
+      });
+    }
   }
 
-  // Firebase batch write (max 500 per batch)
-  const colName = type==='targets'?'targets':type==='msl'?'msl':type==='doors'?'doors':type==='visits'?'visits':'sales';
-  let batch = DB.batch();
-  let batchCount = 0;
-
-  for (const row of importRows) {
-    try {
-      const docData = buildDocFromRow(row, type);
-      if (docData) {
-        const col = DB.collection(colName);
-        const ref = docData.id ? col.doc(String(docData.id)) : col.doc();
-        batch.set(ref, docData.data, {merge:true});
-        ok++; batchCount++;
-        // Firestore batch limit = 500
-        if (batchCount===499) {
-          await batch.commit();
-          batch=DB.batch(); batchCount=0;
-        }
-      } else {
-        skipped++;
-        // Collect first 3 skip reasons for debugging
-        if (skipReasons.length<3) {
-          const keys=Object.keys(row).slice(0,3).map(k=>`${k}:${row[k]}`).join(', ');
-          skipReasons.push(keys);
-        }
-      }
-    } catch(e) { err++; console.error('Import row error:',e,row); }
+  // ── History ─────────────────────────────────────────────
+  if (cache.hist) {
+    const tops    = cache.hist.top_items    || [];
+    const stopped = cache.hist.stopped_items || [];
+    if (tops.length || stopped.length) {
+      ctx += `\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📈 تاريخ المبيعات\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
+      if (tops.length)    ctx += `\nالأكثر مبيعاً:\n${tops.map(x => `  • ${x.sku_name}: متوسط ${x.avg_monthly} ك/شهر | آخر طلب ${x.last_qty} ك (${x.last_date || ''})`).join('\n')}`;
+      if (stopped.length) ctx += `\nتوقفت:\n${stopped.map(x => `  • ${x.sku_name}: متوقف ${x.days_stopped} يوم | آخر كمية ${x.last_qty} ك`).join('\n')}`;
+    }
   }
+
+  // ── Zero Sales ──────────────────────────────────────────
+  if (cache.zero && cache.zero.items && cache.zero.items.length) {
+    ctx += `\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🔴 مشكلة صفر مبيعات (${cache.zero.items.length} منتج)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    ctx += cache.zero.items.map(x => `  • ${x.sku_name} (${x.category || '-'}) — آخر تدقيق: ${x.audit_date || '-'}`).join('\n');
+    ctx += `\nالإجراء المطلوب: تحقق من وضع المنتج على الرف، وضوح السعر، الصلاحية، ومكان العرض.`;
+  }
+
+  // ── Active Promos ───────────────────────────────────────
+  if (cache.promo && cache.promo.items && cache.promo.items.length) {
+    ctx += `\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🎁 العروض النشطة\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    ctx += cache.promo.items.map(x => {
+      const daysLeft = Math.ceil((new Date(x.expires) - today) / 86400000);
+      const urgency = daysLeft <= 3 ? '🚨 ينتهي قريباً!' : daysLeft <= 7 ? '⚠️ أسبوع متبقي' : '✅';
+      return `  • ${x.sku_name}: خصم ${Math.round(x.discount * 100)}% | من ${x.price_before} → ${x.price_after} ج | ${daysLeft} يوم متبقي ${urgency} | للعميل: ${x.customer_group || 'الكل'}`;
+    }).join('\n');
+  }
+
+  // ── Strict data fence ──────────────────────────────────────
+  const mslSkuList = (cache.msl || []).map(x => `[${x.sku_id}] ${x.sku_name}`).join('\n');
+  const promoSkuList = (cache.promo && cache.promo.items || []).map(x =>
+    `[${x.sku_id}] ${x.sku_name} — خصم ${Math.round((x.discount||0)*100)}% — ينتهي ${x.expires||'-'}`
+  ).join('\n');
+
+  ctx += `
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 قائمة المنتجات الرسمية — اذكر فقط ما فيها
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${mslSkuList || 'لا توجد بيانات MSL'}
+
+📌 العروض الرسمية — اذكر فقط ما فيها
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${promoSkuList || 'لا توجد عروض نشطة'}
+
+⛔ أي منتج أو خصم غير مذكور في القائمتين أعلاه = لا وجود له = لا تذكره إطلاقاً.`;
+
+  // ── Current pending order ───────────────────────────────
+  const orderedItems = Object.entries(S.qty).filter(([, q]) => q > 0);
+  if (orderedItems.length > 0) {
+    const totalQty = Object.values(S.qty).reduce((a, b) => a + b, 0);
+    ctx += `\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🛒 الطلب الحالي (${orderedItems.length} منتج — ${totalQty} كرتونة)\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+    ctx += orderedItems.map(([skuId, qty]) => {
+      const item  = (cache.msl || []).find(x => String(x.sku_id) === String(skuId));
+      const anal  = item?._analysis;
+      const diff  = anal ? qty - (anal.suggestedQty || 0) : 0;
+      const note  = anal ? (diff > 0 ? ` ⚠️ زيادة ${diff}` : diff < 0 ? ` ⬆ ممكن تزيد ${Math.abs(diff)}` : ' ✅ مثالي') : '';
+      return `  • ${item ? item.sku_name : skuId}: ${qty} كرتونة${note}`;
+    }).join('\n');
+  }
+
+  return ctx;
+}
+
+function aiScrollBottom() {
+  const el = document.getElementById('ai-messages');
+  if (el) el.scrollTop = el.scrollHeight;
+}
+
+function aiTime() {
+  const now = new Date();
+  return `${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+}
+
+function aiAddMessage(role, text) {
+  const welcome = document.getElementById('ai-welcome');
+  if (welcome) welcome.remove();
+
+  const el = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = `ai-msg ${role}`;
+  div.innerHTML = `
+    <div class="ai-bubble">${role === 'bot' ? mdToHtml(text) : escapeHtml(text)}</div>
+    <div class="ai-msg-time">${aiTime()}</div>
+  `;
+  el.appendChild(div);
+  aiScrollBottom();
+  return div;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function mdToHtml(text) {
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/^[-•]\s(.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>[\s\S]+?<\/li>)/g,'<ul>$1</ul>')
+    .replace(/<\/ul>\s*<ul>/g,'')
+    .replace(/\n{2,}/g,'</p><p>')
+    .replace(/\n/g,'<br>')
+    .replace(/^(.)/,'<p>$1').replace(/(.)$/, '$1</p>');
+}
+
+function aiShowTyping() {
+  const el = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.id = 'ai-typing';
+  div.className = 'ai-msg bot';
+  div.innerHTML = `<div class="ai-bubble"><div class="ai-typing"><div class="ai-typing-dot"></div><div class="ai-typing-dot"></div><div class="ai-typing-dot"></div></div></div>`;
+  el.appendChild(div);
+  aiScrollBottom();
+}
+
+function aiRemoveTyping() {
+  const el = document.getElementById('ai-typing');
+  if (el) el.remove();
+}
+
+function aiAutoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 90) + 'px';
+}
+
+function aiKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    aiSend();
+  }
+}
+
+function aiQuickSend(text) {
+  const input = document.getElementById('ai-input');
+  input.value = text;
+  aiSend();
+}
+
+async function aiSend() {
+  if (AI.isLoading) return;
+  const input = document.getElementById('ai-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('ai-send-btn').disabled = true;
+  AI.isLoading = true;
+
+  // Add user message to UI
+  aiAddMessage('user', text);
+
+  // Add to history
+  AI.history.push({ role: 'user', content: text });
+
+  // Show typing indicator
+  aiShowTyping();
 
   try {
-    if (batchCount>0) await batch.commit();
-    let msg=`✓ تم استيراد ${ok} سطر`;
-    if (skipped>0) msg+=` | تجاهل ${skipped}`;
-    if (err>0) msg+=` | أخطاء ${err}`;
-    toast(msg, skipped>0||err>0?'warning':'success');
-    if (skipped>0 && skipReasons.length>0) {
-      setTimeout(()=>toast('تجاهل بسبب: '+skipReasons[0],'warning'),600);
-    }
-    await loadMasterData();
-    closeModal('modal-import');
-  } catch(e) { toast('خطأ Firebase: '+e.message,'error'); console.error(e); }
-}
+    const systemPrompt = buildAIContext();
+    const AI_WEBHOOK = 'https://vmi3102625.contaboserver.net/webhook/ai-assistant';
 
-function buildDocFromRow(row, type) {
-  switch(type) {
-    case 'targets': {
-      const door=allDoors.find(d=>String(d.code)===String(row.door_code));
-      const rep=allUsers.find(r=>r.email===row.rep_email);
-      if (!door) return null; // door must exist
-      const repId=rep?.id||row.rep_email||'';
-      const id2=`${repId}_${door.id}_${row.month}`;
-      return {id:id2, data:{repId,doorId:door.id,month:String(row.month),target:parseFloat(row.target)||0,actual:0}};
-    }
-    case 'msl': {
-      const door=allDoors.find(d=>String(d.code)===String(row.door_code));
-      const sku=allSKUs.find(s=>String(s.code)===String(row.sku_code));
-      if (!door||!sku) return null;
-      return {id:`${door.id}_${sku.id}`,data:{doorId:door.id,skuId:sku.id,status:row.status||'missing',lastSale:row.last_sale||'',note:row.note||''}};
-    }
-    case 'sales': {
-      const door=allDoors.find(d=>String(d.code)===String(row.door_code));
-      const sku=allSKUs.find(s=>String(s.code)===String(row.sku_code));
-      const rep=allUsers.find(r=>r.email===row.rep_email);
-      if (!door||!sku) return null;
-      return {id:null,data:{doorId:door.id,skuId:sku.id,repId:rep?.id||'',qty:parseFloat(row.qty)||0,value:parseFloat(row.value)||0,date:String(row.date||''),month:String(row.date||'').slice(0,7),invoiceNo:String(row.invoice_no||'')}};
-    }
-    case 'skus': {
-      const code=String(row.code||'').trim();
-      if (!code||!row.name) return null;
-      return {id:code, data:{
-        code:code,
-        name:String(row.name||'').trim(),
-        brand:String(row.brand||'').trim(),
-        price:parseFloat(row.price)||0
-      }};
-    }
-    case 'doors': {
-      // rep match by email — optional, door still imports even if rep not found
-      const rep=allUsers.find(r=>r.email===String(row.rep_email||'').trim());
-      const code=String(row.code||'').trim();
-      if (!code||!row.name) return null;
-      return {id:code, data:{
-        name:String(row.name||'').trim(),
-        code:code,
-        channel:String(row.channel||'Modern Trade').trim(),
-        area:String(row.area||'').trim(),
-        repId:rep?.id||'',
-        repEmail:String(row.rep_email||'').trim()
-      }};
-    }
-    case 'visits': {
-      const door=allDoors.find(d=>String(d.code)===String(row.door_code));
-      const rep=allUsers.find(r=>r.email===row.rep_email);
-      if (!door) return null;
-      return {id:null,data:{doorId:door.id,repId:rep?.id||'',date:String(row.date||''),checkin:String(row.checkin||''),checkout:String(row.checkout||''),status:String(row.status||'completed')}};
-    }
-    default: return null;
+    const response = await fetch(AI_WEBHOOK, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: systemPrompt,
+        messages: AI.history.map(m => ({ role: m.role, content: m.content }))
+      })
+    });
+
+    const data = await response.json();
+    const reply = data.reply || 'عذراً، لم أتمكن من الإجابة. حاول مرة أخرى.';
+
+    aiRemoveTyping();
+    aiAddMessage('bot', reply);
+
+    // Keep history (max last 10 turns)
+    AI.history.push({ role: 'assistant', content: reply });
+    if (AI.history.length > 20) AI.history = AI.history.slice(-20);
+
+  } catch (err) {
+    aiRemoveTyping();
+    aiAddMessage('bot', '⚠️ تعذر الاتصال بالمساعد. تحقق من الاتصال وحاول مجدداً.');
+    AI.history.pop(); // remove failed user message from history
   }
+
+  AI.isLoading = false;
+  document.getElementById('ai-send-btn').disabled = false;
+  aiScrollBottom();
 }
 
-function processImportRow(row, type) {
-  switch(type) {
-    case 'targets': {
-      const door=allDoors.find(d=>d.code===row.door_code);
-      const rep=allReps.find(r=>r.email===row.rep_email);
-      if (door&&rep) {
-        const idx=targetsData.findIndex(t=>t.doorId===door.id&&t.month===row.month&&t.repId===rep.id);
-        const entry={repId:rep.id,doorId:door.id,month:row.month,target:parseFloat(row.target)||0,actual:0};
-        if (idx>=0) targetsData[idx]=entry; else targetsData.push(entry);
-      }
-      break;
-    }
-    case 'msl': {
-      const door=allDoors.find(d=>d.code===row.door_code);
-      const sku=allSKUs.find(s=>s.code===row.sku_code);
-      if (door&&sku) {
-        const idx=mslData.findIndex(m=>m.doorId===door.id&&m.skuId===sku.id);
-        const entry={doorId:door.id,skuId:sku.id,status:row.status||'missing',lastSale:row.last_sale||''};
-        if (idx>=0) mslData[idx]=entry; else mslData.push(entry);
-      }
-      break;
-    }
-  }
-}
-
-// ════════════════════════════════════════════════════════
-//  MONTH FILTERS
-// ════════════════════════════════════════════════════════
-function populateMonthFilters() {
-  const now=new Date();
-  ['dash-month','tgt-month'].forEach(sid=>{
-    const el=id(sid); if(!el) return;
-    el.innerHTML='<option value="">الشهر الحالي</option>';
-    for(let i=1;i<=6;i++){
-      const d=new Date(now.getFullYear(),now.getMonth()-i,1);
-      const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-      el.innerHTML+=`<option value="${val}">${d.toLocaleDateString('ar-EG',{month:'long',year:'numeric'})}</option>`;
-    }
-  });
-}
-
-// ════════════════════════════════════════════════════════
-//  MODAL
-// ════════════════════════════════════════════════════════
-function openModal(mid) {
-  id(mid).classList.add('open');
-  // Pre-fill today's date
-  const md=id(mid);
-  md.querySelectorAll('input[type=date]').forEach(el=>{ if(!el.value) el.value=todayStr(); });
-}
-function closeModal(mid) { id(mid).classList.remove('open'); }
-document.querySelectorAll('.modal-ov').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }));
-document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&id('l-email')) doLogin(); });
-
-// ════════════════════════════════════════════════════════
-//  UTILS
-// ════════════════════════════════════════════════════════
-function id(x){ return document.getElementById(x); }
-function showScreen(s){ document.querySelectorAll('.screen').forEach(x=>x.style.display='none'); const el=id(s); if(el){el.style.display='block'; el.classList.add('active');} }
-function showErr(eid,msg){ const el=id(eid); if(el){el.textContent=msg;el.style.display='block';} }
-function fmt(n){ if(!n) return '0'; if(n>=1000000) return (n/1000000).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(1)+'K'; return n.toLocaleString(); }
-function currentMonth(){ return new Date().toISOString().slice(0,7); }
-function todayStr(){ return new Date().toISOString().split('T')[0]; }
-function daysSince(dateStr){ if(!dateStr) return '—'; const d=new Date(dateStr); const now=new Date(); return Math.floor((now-d)/(1000*60*60*24)); }
-function toast(msg,type='info'){
-  const c=id('toasts'), t=document.createElement('div');
-  t.className='toast';
-  t.style.borderColor=type==='success'?'rgba(0,196,122,.4)':type==='error'?'rgba(255,59,92,.4)':type==='warning'?'rgba(255,184,0,.4)':'var(--border2)';
-  t.style.color=type==='success'?'var(--success)':type==='error'?'var(--danger)':type==='warning'?'var(--warning)':'var(--text)';
-  t.textContent=msg; c.appendChild(t);
-  setTimeout(()=>t.remove(),3500);
-}
 </script>
 </body>
 </html>
