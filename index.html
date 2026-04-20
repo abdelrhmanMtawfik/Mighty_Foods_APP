@@ -585,9 +585,7 @@ window.addEventListener('load', async () => {
       const payload = JSON.parse(decodeURIComponent(atob(d)));
       S.rep = {id:payload.rep_id||'', name:payload.rep_name||'مندوب', target:Number(payload.monthly_target||0), timeGone:Number(payload.time_gone_target||0), mtd:Number(payload.mtd_sales||0)};
       S.doors = payload.doors || [];
-      // Pick the specific door from URL param, fallback to first
-      const doorParam = p.get('door');
-      S.door = (doorParam && S.doors.find(x => x.door_id === doorParam)) || S.doors[0] || null;
+      S.door = S.doors[0] || null;
       S.ep = payload.ep || {};
     } catch(e) { loadDemo(); }
   } else { loadDemo(); }
