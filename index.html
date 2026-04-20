@@ -453,11 +453,20 @@ const ACCOUNT_COLORS = {
   'macro': '#1A1A2E', 'fatah': '#F7941D', 'bashaer': '#9B59B6'
 };
 
-function buildCustomerLink(door, repId) {
+function buildCustomerLink(door) {
+  const r = S.rep;
   const payload = {
-    rep_id: repId,
-    door_id: door.door_id,
-    t: Date.now()
+    rep_id:           r.rep_id,
+    rep_name:         r.rep_name,
+    monthly_target:   r.monthly_target,
+    time_gone_target: r.time_gone_target,
+    mtd_sales:        r.mtd_sales,
+    doors:            S.doors,
+    ep: {
+      msl:     'https://vmi3102625.contaboserver.net/webhook/msl',
+      zero:    'https://vmi3102625.contaboserver.net/webhook/zero-sales',
+      history: 'https://vmi3102625.contaboserver.net/webhook/history'
+    }
   };
   const encoded = btoa(encodeURIComponent(JSON.stringify(payload)));
   return `${BASE_APP_URL}?d=${encoded}&door=${door.door_id}`;
@@ -550,7 +559,7 @@ function renderCustomers() {
     const ac  = p !== null ? achClass(p) : 'ach-warn';
     const color = p !== null ? achColor(p) : 'var(--yellow)';
     const icon = CHANNEL_ICONS[d.channel] || '🏪';
-    const link = buildCustomerLink(d, S.rep.rep_id);
+    const link = buildCustomerLink(d);
 
     return `
     <div class="cust-card ${ac} fade-up" style="animation-delay:${i*0.07}s">
