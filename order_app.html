@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mighty Foods — طلبيات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --bg:#080b12; --s1:#10141f; --s2:#171d2e; --s3:#1c2438;
+  --border:#1e2840; --border2:#263050;
+  --accent:#f97316; --accent2:#fb923c;
+  --blue:#3d7fff; --green:#0fba73; --yellow:#f7c948; --red:#f04040;
+  --text:#eaf0ff; --sub:#5e6e8a; --muted:#3a4a66;
+  --r:14px; --r-sm:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--text)}
+
+/* ─── LOADER ─── */
+#loader{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .5s}
+#loader.out{opacity:0;pointer-events:none}
+.ld-logo{width:72px;height:72px;border-radius:22px;background:linear-gradient(135deg,var(--accent),#c2410c);display:flex;align-items:center;justify-content:center;font-size:34px;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 30px rgba(249,115,22,.4)}50%{box-shadow:0 0 70px rgba(249,115,22,.75)}}
+.ld-title{font-size:20px;font-weight:900}
+.ld-msg{font-size:11px;color:var(--sub);min-height:16px;transition:all .3s}
+.ld-bar{width:180px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:4px}
+.ld-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;transition:width .4s ease}
+
+/* ─── APP LAYOUT ─── */
+#app{height:100vh;display:none;flex-direction:column}
+
+/* ─── TOP BAR ─── */
+.topbar{flex-shrink:0;padding:10px 14px;background:rgba(8,11,18,.95);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.tb-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#c2410c);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.tb-info{flex:1;min-width:0}
+.tb-title{font-size:13px;font-weight:900}
+.tb-sub{font-size:10px;color:var(--sub)}
+.refresh-btn{padding:6px 12px;border:1px solid var(--border2);border-radius:20px;background:var(--s2);font-size:10px;font-weight:700;color:var(--sub);cursor:pointer;font-family:'Cairo',sans-serif;transition:all .2s;flex-shrink:0}
+.refresh-btn:active{transform:scale(.95)}
+.refresh-btn.spinning{color:var(--accent);border-color:var(--accent);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── FILTERS ─── */
+.filters-wrap{flex-shrink:0;padding:10px 14px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.filter-row{display:flex;gap:6px;align-items:center}
+.filter-label{font-size:10px;color:var(--sub);font-weight:700;white-space:nowrap;min-width:40px}
+.filter-chips{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;flex:1}
+.filter-chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;transition:all .2s;background:var(--s2);border:1px solid var(--border);color:var(--sub);font-family:'Cairo',sans-serif;white-space:nowrap}
+.chip.active{background:rgba(249,115,22,.12);border-color:var(--accent);color:var(--accent)}
+.chip:active{transform:scale(.95)}
+
+/* ─── SELECTED DOOR BANNER ─── */
+.door-banner{flex-shrink:0;padding:8px 14px;background:linear-gradient(135deg,rgba(249,115,22,.1),rgba(249,115,22,.05));border-bottom:1px solid rgba(249,115,22,.2);display:none;align-items:center;justify-content:space-between}
+.door-banner.show{display:flex}
+.door-banner-name{font-size:13px;font-weight:800;color:var(--accent)}
+.door-banner-ch{font-size:10px;color:var(--sub)}
+.door-banner-count{font-size:11px;font-weight:700;color:var(--sub)}
+
+/* ─── SCROLL BODY ─── */
+#scroll-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#scroll-body::-webkit-scrollbar{display:none}
+
+/* ─── DOOR SELECT SCREEN ─── */
+#door-screen{padding:14px}
+.screen-title{font-size:10px;font-weight:800;color:var(--sub);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.door-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.door-tile{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px 12px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.door-tile:active{transform:scale(.97)}
+.door-tile.sel{border-color:var(--accent);background:rgba(249,115,22,.08)}
+.door-tile::before{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;border-radius:0 0 var(--r) var(--r)}
+.door-tile.mt::before{background:var(--blue)}
+.door-tile.hm::before{background:var(--green)}
+.door-tile.sm::before{background:var(--yellow)}
+.door-tile.ws::before{background:var(--accent)}
+.door-tile-name{font-size:12px;font-weight:800;line-height:1.4;margin-bottom:4px}
+.door-tile-ch{font-size:9px;color:var(--sub);font-weight:600}
+.door-tile-acc{font-size:9px;color:var(--muted);margin-top:2px}
+
+/* ─── MSL SCREEN ─── */
+#msl-screen{padding:0 14px 120px;display:none}
+.msl-search-wrap{position:sticky;top:0;z-index:10;background:var(--bg);padding:10px 0 6px}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--s1);border:1.5px solid var(--border);border-radius:var(--r-sm);padding:8px 12px;transition:border-color .2s}
+.search-box:focus-within{border-color:var(--accent)}
+.search-box input{flex:1;background:transparent;border:none;outline:none;font-family:'Cairo',sans-serif;font-size:12px;color:var(--text);direction:rtl}
+.search-box input::placeholder{color:var(--muted)}
+.cat-chips{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding:4px 0 8px}
+.cat-chips::-webkit-scrollbar{display:none}
+
+/* ─── ITEM CARD ─── */
+.item-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:border-color .2s}
+.item-card.has-qty{border-color:rgba(15,186,115,.35);background:rgba(15,186,115,.04)}
+.item-card.is-promo{border-color:rgba(249,115,22,.25)}
+.item-info{flex:1;min-width:0}
+.item-name{font-size:12px;font-weight:700;line-height:1.5;margin-bottom:4px}
+.item-badges{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:5px}
+.badge{font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px}
+.badge-cat{background:var(--s2);color:var(--sub);border:1px solid var(--border)}
+.badge-promo{background:rgba(249,115,22,.15);color:var(--accent);border:1px solid rgba(249,115,22,.3)}
+.badge-zero{background:rgba(240,64,64,.12);color:var(--red);border:1px solid rgba(240,64,64,.25)}
+.item-meta{display:flex;gap:8px;align-items:center}
+.stock-badge{font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px}
+.stk-high{background:rgba(15,186,115,.14);color:var(--green);border:1px solid rgba(15,186,115,.25)}
+.stk-mid{background:rgba(247,201,72,.13);color:var(--yellow);border:1px solid rgba(247,201,72,.25)}
+.stk-low{background:rgba(240,64,64,.12);color:var(--red);border:1px solid rgba(240,64,64,.22)}
+.stk-zero{background:rgba(255,255,255,.04);color:var(--muted);border:1px solid var(--border)}
+.item-pack{font-size:9px;color:var(--muted)}
+.item-last{font-size:9px;color:var(--sub)}
+.qty-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0}
+.qty-input{width:58px;background:var(--s2);border:1.5px solid var(--border);border-radius:8px;padding:6px 4px;text-align:center;font-family:'Cairo',sans-serif;font-size:14px;font-weight:900;color:var(--text);outline:none;-moz-appearance:textfield}
+.qty-input::-webkit-inner-spin-button,.qty-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.qty-input:focus{border-color:var(--accent)}
+.qty-input.filled{border-color:var(--green);background:rgba(15,186,115,.08);color:var(--green)}
+.qty-label{font-size:8px;color:var(--muted);font-weight:600}
+
+/* ─── SUMMARY BAR ─── */
+.summary-bar{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(8,11,18,.97);backdrop-filter:blur(18px);border-top:1px solid var(--border2);padding:10px 14px;display:none;flex-direction:column;gap:8px}
+.summary-bar.show{display:flex}
+.sum-row{display:flex;align-items:center;gap:10px}
+.sum-info{flex:1}
+.sum-lbl{font-size:10px;color:var(--sub)}
+.sum-val{font-size:18px;font-weight:900;color:var(--green);line-height:1}
+.sum-detail{font-size:10px;color:var(--sub);margin-top:2px}
+.btns-row{display:flex;gap:8px}
+.export-btn{flex:1;padding:11px;border:none;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--green),#0d9e62);color:#fff;font-family:'Cairo',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:all .2s;box-shadow:0 3px 14px rgba(15,186,115,.3)}
+.export-btn:active{transform:scale(.97)}
+.export-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.clear-btn{padding:11px 16px;border:1px solid var(--border2);border-radius:var(--r-sm);background:var(--s2);color:var(--sub);font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer}
+.clear-btn:active{transform:scale(.97)}
+
+/* ─── EMPTY / ERROR ─── */
+.empty{text-align:center;padding:60px 20px;color:var(--sub)}
+.empty-ico{font-size:44px;margin-bottom:12px}
+.empty-txt{font-size:13px}
+.err-box{margin:16px;background:rgba(240,64,64,.07);border:1px solid rgba(240,64,64,.2);border-radius:var(--r-sm);padding:14px;text-align:center}
+.err-txt{font-size:12px;color:var(--red);margin-bottom:10px}
+.retry-btn{padding:8px 20px;border:1px solid var(--red);border-radius:20px;background:transparent;color:var(--red);font-family:'Cairo',sans-serif;font-size:11px;font-weight:700;cursor:pointer}
+
+/* ─── TOAST ─── */
+#toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s1);border:1px solid var(--border2);border-radius:20px;padding:8px 18px;font-size:12px;font-weight:700;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.fade-up{opacity:0;transform:translateY(10px);animation:fadeup .3s ease forwards}
+@keyframes fadeup{to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="ld-logo">🍔</div>
+  <div class="ld-title">Mighty Foods</div>
+  <div class="ld-msg" id="ld-msg">جاري تحميل البيانات...</div>
+  <div class="ld-bar"><div class="ld-fill" id="ld-fill"></div></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="tb-logo">🍔</div>
+    <div class="tb-info">
+      <div class="tb-title">Mighty Foods Orders</div>
+      <div class="tb-sub" id="tb-updated">—</div>
+    </div>
+    <button class="refresh-btn" id="refresh-btn" onclick="refreshData()">🔄 تحديث</button>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters-wrap">
+    <div class="filter-row">
+      <div class="filter-label">الحساب</div>
+      <div class="filter-chips" id="account-chips"></div>
+    </div>
+    <div class="filter-row">
+      <div class="filter-label">الفرع</div>
+      <div class="filter-chips" id="door-chips"></div>
+    </div>
+  </div>
+
+  <!-- DOOR BANNER -->
+  <div class="door-banner" id="door-banner">
+    <div>
+      <div class="door-banner-name" id="banner-name">—</div>
+      <div class="door-banner-ch" id="banner-ch">—</div>
+    </div>
+    <div class="door-banner-count" id="banner-count">—</div>
+  </div>
+
+  <!-- SCROLL BODY -->
+  <div id="scroll-body">
+
+    <!-- DOOR SELECT SCREEN -->
+    <div id="door-screen">
+      <div class="screen-title">اختر الفرع</div>
+      <div class="door-grid" id="door-grid"></div>
+    </div>
+
+    <!-- MSL SCREEN -->
+    <div id="msl-screen">
+      <div class="msl-search-wrap">
+        <div class="search-box">
+          <span>🔍</span>
+          <input type="text" id="msl-search" placeholder="ابحث باسم المنتج أو الكود..." oninput="filterItems()">
+        </div>
+        <div class="cat-chips" id="cat-chips"></div>
+      </div>
+      <div id="items-body"></div>
+    </div>
+
+  </div><!-- /scroll-body -->
+
+  <!-- SUMMARY BAR -->
+  <div class="summary-bar" id="summary-bar">
+    <div class="sum-row">
+      <div class="sum-info">
+        <div class="sum-lbl">إجمالي الطلب</div>
+        <div class="sum-val" id="sum-cases">0 كرتونة</div>
+        <div class="sum-detail" id="sum-items">0 صنف</div>
+      </div>
+      <button class="clear-btn" onclick="clearOrder()">مسح 🗑</button>
+      <button class="export-btn" id="export-btn" onclick="exportOrder()" disabled>📤 تصدير Excel</button>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbybQ3fUGoj7ecjdT3sAPP64d8YgLC7nLVwTgKDET43aR3vMPqU36M_qdEy2cPnVxtPIRw/exec';
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const D = { skuMap:{}, custMap:{}, mslByDoor:{}, stockMap:{}, promoMap:{} };
+const S = { account:'all', door:null, cat:'الكل', qty:{}, items:[], search:'' };
+
+// ═══════════════════════════════════════════════════════
+// APPS SCRIPT FETCH
+// ═══════════════════════════════════════════════════════
+function setProgress(pct, msg) {
+  document.getElementById('ld-fill').style.width = pct + '%';
+  document.getElementById('ld-msg').textContent = msg;
+}
+
+async function loadAllData() {
+  setProgress(20, 'جاري تحميل البيانات...');
+  const r = await fetch(`${SCRIPT_URL}?action=all`);
+  if (!r.ok) throw new Error('فشل الاتصال: ' + r.status);
+  setProgress(70, 'جاري معالجة البيانات...');
+  const data = await r.json();
+  if (data.error) throw new Error(data.error);
+
+  D.skuMap    = data.skuMap    || {};
+  D.custMap   = data.custMap   || {};
+  D.mslByDoor = data.mslByDoor || {};
+  D.stockMap  = data.stockMap  || {};
+  D.promoMap  = data.promoMap  || {};
+
+  setProgress(100, 'اكتمل التحميل ✅');
+  document.getElementById('tb-updated').textContent =
+    'آخر تحديث: ' + new Date(data.updatedAt||Date.now()).toLocaleTimeString('ar-EG');
+  return true;
+}
+
+async function refreshStock() {
+  const r = await fetch(`${SCRIPT_URL}?action=stock`);
+  if (!r.ok) return;
+  const data = await r.json();
+  if (data.stockMap) {
+    D.stockMap = data.stockMap;
+    if (S.door) buildItems(S.door);
+    showToast('✅ تم تحديث المخزون');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER FILTERS
+// ═══════════════════════════════════════════════════════
+function renderFilters() {
+  // Accounts
+  const accounts = [...new Set(Object.values(D.custMap).map(c => c.account).filter(Boolean))].sort();
+  const accEl = document.getElementById('account-chips');
+  accEl.innerHTML = `<div class="chip active" data-acc="all" onclick="selectAccount('all',this)">الكل</div>` +
+    accounts.map(a => `<div class="chip" data-acc="${a}" onclick="selectAccount('${a}',this)">${a}</div>`).join('');
+
+  renderDoorChips();
+}
+
+function selectAccount(acc, el) {
+  S.account = acc;
+  S.door = null;
+  document.querySelectorAll('#account-chips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderDoorChips();
+  showDoorScreen();
+}
+
+function renderDoorChips() {
+  const doors = Object.entries(D.custMap)
+    .filter(([id, c]) => S.account === 'all' || c.account === S.account)
+    .sort((a,b) => a[1].name.localeCompare(b[1].name,'ar'));
+
+  const el = document.getElementById('door-chips');
+  el.innerHTML = doors.map(([id,c]) =>
+    `<div class="chip${S.door===id?' active':''}" onclick="selectDoor('${id}')">${c.name}</div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// DOOR SELECTION
+// ═══════════════════════════════════════════════════════
+function renderDoorGrid() {
+  const doors = Object.entries(D.custMap)
+    .filter(([id,c]) => S.account==='all' || c.account===S.account)
+    .sort((a,b) => a[1].name.localeCompare(b[1].name,'ar'));
+
+  const chMap = {'Modern Trade':'mt','Hypermarket':'hm','Supermarket':'sm','Wholesale':'ws'};
+  const el = document.getElementById('door-grid');
+  if (!doors.length) {
+    el.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-ico">🏪</div><div class="empty-txt">لا توجد فروع</div></div>';
+    return;
+  }
+  el.innerHTML = doors.map(([id,c],i) => `
+    <div class="door-tile ${chMap[c.channel]||'mt'} fade-up${S.door===id?' sel':''}"
+         style="animation-delay:${i*0.04}s"
+         onclick="selectDoor('${id}')">
+      <div class="door-tile-name">${c.name}</div>
+      <div class="door-tile-ch">${c.channel||'—'}</div>
+      <div class="door-tile-acc">${c.account||'—'}</div>
+    </div>`).join('');
+}
+
+function selectDoor(doorId) {
+  S.door = doorId;
+  S.search = '';
+  S.cat = 'الكل';
+  document.getElementById('msl-search').value = '';
+
+  // Update door chips
+  document.querySelectorAll('#door-chips .chip').forEach(c => {
+    c.classList.toggle('active', c.onclick?.toString().includes(`'${doorId}'`));
+  });
+
+  // Update banner
+  const cust = D.custMap[doorId] || {};
+  document.getElementById('banner-name').textContent = cust.name || doorId;
+  document.getElementById('banner-ch').textContent = `${cust.channel||''} • ${cust.account||''}`;
+  document.getElementById('door-banner').classList.add('show');
+
+  buildItems(doorId);
+  showMSLScreen();
+}
+
+// ═══════════════════════════════════════════════════════
+// BUILD ITEMS
+// ═══════════════════════════════════════════════════════
+function stockClass(units, pack) {
+  const cases = pack > 0 ? Math.floor(units/pack) : 0;
+  if (units === 0)  return {cls:'stk-zero', label:'صفر'};
+  if (cases <= 5)   return {cls:'stk-low',  label:cases+'ك'};
+  if (cases <= 20)  return {cls:'stk-mid',  label:cases+'ك'};
+  return              {cls:'stk-high', label:cases+'ك'};
+}
+
+function buildItems(doorId) {
+  const mslRows = D.mslByDoor[doorId] || [];
+  const cust = D.custMap[doorId] || {};
+
+  S.items = mslRows.map(m => {
+    const sku   = D.skuMap[m.sku_id] || {};
+    const stock = D.stockMap[m.sku_id] || 0;
+    const promo = D.promoMap[m.sku_id];
+    const hasPromo = promo && (!promo.group || promo.group === cust.account);
+    return {
+      sku_id:    m.sku_id,
+      name:      sku.name || m.sku_id,
+      category:  sku.category || 'أخرى',
+      brand:     sku.brand || '',
+      pack:      sku.pack || 1,
+      stock,
+      last_qty:  m.last_qty,
+      last_date: m.last_date,
+      promo:     hasPromo ? promo : null
+    };
+  }).sort((a,b) => a.category.localeCompare(b.category,'ar') || a.name.localeCompare(b.name,'ar'));
+
+  // Categories
+  const cats = ['الكل', ...new Set(S.items.map(i => i.category))];
+  document.getElementById('cat-chips').innerHTML = cats.map(c =>
+    `<div class="chip${c===S.cat?' active':''}" onclick="selectCat('${c}',this)">${c}</div>`
+  ).join('');
+
+  const count = mslRows.length;
+  document.getElementById('banner-count').textContent = count + ' صنف';
+
+  renderItems();
+}
+
+function selectCat(cat, el) {
+  S.cat = cat;
+  document.querySelectorAll('#cat-chips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderItems();
+}
+
+function filterItems() {
+  S.search = document.getElementById('msl-search').value.trim().toLowerCase();
+  renderItems();
+}
+
+function renderItems() {
+  let items = S.items;
+  if (S.cat !== 'الكل') items = items.filter(i => i.category === S.cat);
+  if (S.search) items = items.filter(i =>
+    i.name.toLowerCase().includes(S.search) ||
+    i.sku_id.includes(S.search)
+  );
+
+  const el = document.getElementById('items-body');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-ico">📦</div><div class="empty-txt">لا توجد أصناف</div></div>';
+    return;
+  }
+
+  el.innerHTML = items.map((item,i) => {
+    const qty = S.qty[item.sku_id] || '';
+    const stk = stockClass(item.stock, item.pack);
+    const hasQty = qty > 0;
+    const fmtDate = d => { if(!d) return '—'; const dt=new Date(d); return isNaN(dt)?d:`${dt.getDate()}/${dt.getMonth()+1}`; };
+
+    return `
+    <div class="item-card${hasQty?' has-qty':''}${item.promo?' is-promo':''} fade-up" style="animation-delay:${Math.min(i,.15)*0.05}s">
+      <div class="item-info">
+        <div class="item-name">${item.name}</div>
+        <div class="item-badges">
+          <span class="badge badge-cat">${item.category}</span>
+          ${item.promo ? `<span class="badge badge-promo">خصم ${Math.round(item.promo.discount*100)}%</span>` : ''}
+          ${item.stock===0 ? `<span class="badge badge-zero">صفر مخزون</span>` : ''}
+        </div>
+        <div class="item-meta">
+          <span class="stock-badge ${stk.cls}">${stk.label}</span>
+          <span class="item-pack">الكرتونة: ${item.pack} قطعة</span>
+          <span class="item-last">آخر طلب: ${item.last_qty||0}ك · ${fmtDate(item.last_date)}</span>
+        </div>
+      </div>
+      <div class="qty-wrap">
+        <div class="qty-label">كرتونة</div>
+        <input class="qty-input${hasQty?' filled':''}" type="number" min="0"
+               value="${qty}" placeholder="0"
+               data-sku="${item.sku_id}"
+               oninput="setQty('${item.sku_id}',this)"
+               onfocus="this.select()">
+      </div>
+    </div>`;
+  }).join('');
+
+  updateSummary();
+}
+
+// ═══════════════════════════════════════════════════════
+// QTY & SUMMARY
+// ═══════════════════════════════════════════════════════
+function setQty(skuId, input) {
+  const val = parseInt(input.value) || 0;
+  if (val > 0) {
+    S.qty[skuId] = val;
+    input.classList.add('filled');
+  } else {
+    delete S.qty[skuId];
+    input.classList.remove('filled');
+  }
+  // Update card class
+  const card = input.closest('.item-card');
+  if (card) card.classList.toggle('has-qty', val > 0);
+  updateSummary();
+}
+
+function updateSummary() {
+  const keys = Object.keys(S.qty).filter(k => S.qty[k] > 0);
+  const total = keys.reduce((s,k) => s + S.qty[k], 0);
+  document.getElementById('sum-cases').textContent = total + ' كرتونة';
+  document.getElementById('sum-items').textContent = keys.length + ' صنف';
+  const bar = document.getElementById('summary-bar');
+  const btn = document.getElementById('export-btn');
+  bar.classList.toggle('show', keys.length > 0 && S.door);
+  btn.disabled = keys.length === 0;
+}
+
+function clearOrder() {
+  S.qty = {};
+  document.querySelectorAll('.qty-input').forEach(i => { i.value=''; i.classList.remove('filled'); });
+  document.querySelectorAll('.item-card').forEach(c => c.classList.remove('has-qty'));
+  updateSummary();
+  showToast('تم مسح الطلب 🗑');
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT EXCEL
+// ═══════════════════════════════════════════════════════
+function exportOrder() {
+  const cust = D.custMap[S.door] || {};
+  const now = new Date();
+  const dateStr = `${now.getDate()}-${now.getMonth()+1}-${now.getFullYear()}`;
+  const timeStr = `${now.getHours()}-${now.getMinutes()}`;
+  const fileName = `${cust.name||S.door}_${dateStr}_${timeStr}.xlsx`;
+
+  const rows = [
+    ['كود المنتج','اسم المنتج','الفئة','حجم الكرتونة','المخزون (وحدة)','آخر طلب (ك)','الكمية المطلوبة (ك)']
+  ];
+
+  Object.entries(S.qty).filter(([,q])=>q>0).forEach(([skuId, qty]) => {
+    const sku  = D.skuMap[skuId] || {};
+    const item = S.items.find(i => i.sku_id === skuId) || {};
+    rows.push([
+      skuId,
+      sku.name || skuId,
+      sku.category || '',
+      sku.pack || '',
+      D.stockMap[skuId] || 0,
+      item.last_qty || 0,
+      qty
+    ]);
+  });
+
+  // Summary row
+  const totalCases = Object.values(S.qty).reduce((s,v)=>s+v,0);
+  rows.push([]);
+  rows.push(['','','','','','إجمالي الكراتين:', totalCases]);
+  rows.push(['','','','','','الفرع:', cust.name||S.door]);
+  rows.push(['','','','','','التاريخ:', `${now.toLocaleDateString('ar-EG')} ${now.toLocaleTimeString('ar-EG')}`]);
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  // Column widths
+  ws['!cols'] = [
+    {wch:14},{wch:45},{wch:15},{wch:14},{wch:16},{wch:14},{wch:18}
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, 'طلبية');
+  XLSX.writeFile(wb, fileName);
+  showToast('✅ تم تصدير الطلبية');
+}
+
+// ═══════════════════════════════════════════════════════
+// SCREENS
+// ═══════════════════════════════════════════════════════
+function showDoorScreen() {
+  document.getElementById('door-screen').style.display = 'block';
+  document.getElementById('msl-screen').style.display = 'none';
+  document.getElementById('door-banner').classList.remove('show');
+  document.getElementById('summary-bar').classList.remove('show');
+  renderDoorGrid();
+}
+
+function showMSLScreen() {
+  document.getElementById('door-screen').style.display = 'none';
+  document.getElementById('msl-screen').style.display = 'block';
+  document.getElementById('scroll-body').scrollTop = 0;
+}
+
+// ═══════════════════════════════════════════════════════
+// REFRESH
+// ═══════════════════════════════════════════════════════
+async function refreshData() {
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spinning');
+  btn.textContent = '🔄';
+  try {
+    // Refresh stock only (fast) — full refresh needs Apps Script cache clear
+    await refreshStock();
+    showToast('✅ تم تحديث المخزون');
+  } catch(e) {
+    showToast('❌ فشل التحديث: ' + e.message);
+  }
+  btn.classList.remove('spinning');
+  btn.textContent = '🔄 تحديث';
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+window.addEventListener('load', async () => {
+  try {
+    await loadAllData();
+    document.getElementById('loader').classList.add('out');
+    document.getElementById('app').style.display = 'flex';
+    renderFilters();
+    renderDoorGrid();
+
+    // Auto-refresh MSL daily
+    setInterval(() => {
+      const now = new Date();
+      if (now.getHours() === 8 && now.getMinutes() < 5) refreshData();
+    }, 5 * 60 * 1000);
+
+  } catch(e) {
+    document.getElementById('ld-msg').textContent = '❌ ' + e.message;
+    document.getElementById('ld-msg').style.color = '#f04040';
+    console.error(e);
+  }
+});
+</script>
+</body>
+</html>
